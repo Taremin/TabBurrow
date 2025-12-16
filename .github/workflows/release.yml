@@ -49,14 +49,14 @@ jobs:
       - name: ZIPファイルを作成
         run: |
           cd dist
-          zip -r ../compacttab-${{ steps.get_version.outputs.version }}.zip .
+          zip -r ../tabburrow-${{ steps.get_version.outputs.version }}.zip .
 
       - name: リリースを作成
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
-          name: CompactTab ${{ steps.get_version.outputs.version }}
-          files: compacttab-${{ steps.get_version.outputs.version }}.zip
+          name: TabBurrow ${{ steps.get_version.outputs.version }}
+          files: tabburrow-${{ steps.get_version.outputs.version }}.zip
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(steps.get_version.outputs.version, '-') }}
