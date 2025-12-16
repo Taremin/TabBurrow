@@ -1,0 +1,132 @@
+/**
+ * TabBurrow - IndexedDBスキーマ定義
+ * 本体とテストの両方から参照される共通定義
+ */
+
+// ======================
+// 定数定義
+// ======================
+
+/** データベース名 */
+export const DB_NAME = 'TabBurrowDB';
+
+/** データベースバージョン */
+export const DB_VERSION = 1;
+
+/** タブストア名 */
+export const TABS_STORE_NAME = 'tabs';
+
+/** カスタムグループストア名 */
+export const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
+
+// ======================
+// 型定義
+// ======================
+
+/** グループタイプ */
+export type GroupType = 'domain' | 'custom';
+
+/**
+ * 保存するタブの型定義
+ */
+export interface SavedTab {
+  id: string;           // ユニークID (crypto.randomUUID())
+  url: string;          // タブのURL
+  title: string;        // ページタイトル
+  domain: string;       // ドメイン（後方互換性のため保持）
+  group: string;        // グループ名（ドメインまたはカスタムグループ名）
+  groupType: GroupType; // グループタイプ
+  favIconUrl: string;   // ファビコンURL
+  screenshot: Blob;     // 512x512スクリーンショット (JPEG)
+  lastAccessed: number; // 最終アクセス日時（タブから取得）
+  savedAt: number;      // 保存日時（タイムスタンプ）
+}
+
+/**
+ * カスタムグループのメタデータ
+ */
+export interface CustomGroupMeta {
+  name: string;       // グループ名（主キー）
+  createdAt: number;  // 作成日時
+  updatedAt: number;  // 更新日時
+}
+
+// ======================
+// インデックス定義
+// ======================
+
+/**
+ * タブストアのインデックス定義
+ * バージョン1で作成されるインデックス
+ */
+export const TABS_INDEXES_V1 = [
+  { name: 'domain', keyPath: 'domain', unique: false },
+  { name: 'savedAt', keyPath: 'savedAt', unique: false },
+  { name: 'url', keyPath: 'url', unique: false },
+  { name: 'title', keyPath: 'title', unique: false },
+] as const;
+
+/**
+ * タブストアのインデックス定義
+ * バージョン2で追加されるインデックス
+ */
+export const TABS_INDEXES_V2 = [
+  { name: 'group', keyPath: 'group', unique: false },
+  { name: 'groupType', keyPath: 'groupType', unique: false },
+] as const;
+
+/**
+ * カスタムグループストアのインデックス定義
+ */
+export const CUSTOM_GROUPS_INDEXES = [
+  { name: 'createdAt', keyPath: 'createdAt', unique: false },
+] as const;
+
+/**
+ * テスト用のタブデータを作成するヘルパー
+ * SavedTab型に準拠したデータを生成
+ */
+export function createTabData(overrides: {
+  url: string;
+  title: string;
+  domain?: string;
+  group?: string;
+  groupType?: GroupType;
+  favIconUrl?: string;
+  screenshot?: Blob;
+  lastAccessed?: number;
+  savedAt?: number;
+}): SavedTab {
+  const domain = overrides.domain || extractDomain(overrides.url);
+  
+  return {
+    id: generateId(),
+    url: overrides.url,
+    title: overrides.title,
+    domain: domain,
+    group: overrides.group || domain,
+    groupType: overrides.groupType || 'domain',
+    favIconUrl: overrides.favIconUrl || '',
+    screenshot: overrides.screenshot || new Blob([]),
+    lastAccessed: overrides.lastAccessed || Date.now(),
+    savedAt: overrides.savedAt || Date.now(),
+  };
+}
+
+/**
+ * URLからドメインを抽出
+ */
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * ユニークIDを生成
+ */
+function generateId(): string {
+  return Date.now().toString() + Math.random().toString(36).slice(2);
+}

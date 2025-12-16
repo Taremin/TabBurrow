@@ -1,0 +1,62 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'      # v0.0.1のような形式のタグ
+      - 'v[0-9]*.[0-9]*.[0-9]*-*'    # v0.0.1-RC1のようなプレリリースタグ
+  workflow_dispatch:  # 手動実行を有効化
+    inputs:
+      version:
+        description: 'リリースバージョン（例: v0.0.1）'
+        required: true
+        type: string
+
+permissions:
+  contents: write  # リリース作成に必要
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.jsをセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: ビルドを実行
+        run: npm run build
+
+      - name: バージョンを取得
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.ref_name }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "バージョン: $VERSION"
+
+      - name: ZIPファイルを作成
+        run: |
+          cd dist
+          zip -r ../compacttab-${{ steps.get_version.outputs.version }}.zip .
+
+      - name: リリースを作成
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: CompactTab ${{ steps.get_version.outputs.version }}
+          files: compacttab-${{ steps.get_version.outputs.version }}.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(steps.get_version.outputs.version, '-') }}

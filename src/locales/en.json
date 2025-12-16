@@ -1,0 +1,296 @@
+{
+    "common": {
+        "settings": "Settings",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "tabs": "tabs",
+        "tabCount": "{count} tabs"
+    },
+    "settings": {
+        "title": "TabBurrow - Settings",
+        "headerTitle": "Settings",
+        "tabManagerLink": "Tab Manager",
+        "updateButton": "Update Settings",
+        "saveSuccess": "✓ Settings saved",
+        "saveError": "✗ Failed to save",
+        "importSuccess": "✓ Settings imported",
+        "language": {
+            "title": "Language",
+            "description": "Select display language.",
+            "label": "Display Language",
+            "auto": "Auto (Browser Language)",
+            "ja": "日本語",
+            "en": "English"
+        },
+        "appearance": {
+            "title": "Appearance",
+            "description": "Select theme.",
+            "label": "Theme",
+            "system": "System Default",
+            "dark": "Dark Mode",
+            "light": "Light Mode"
+        },
+        "autoClose": {
+            "title": "Auto Close",
+            "description": "Automatically save and close inactive tabs after a specified time.",
+            "enableLabel": "Enable auto close",
+            "secondsLabel": "Inactive time (seconds)",
+            "seconds": "sec",
+            "hint": "Specify between 30 and 86400 seconds (24 hours). Default is 300 seconds (5 minutes).",
+            "rulesTitle": "Auto Close Rules",
+            "rulesDescription": "Customize auto close behavior based on rules.",
+            "addRule": "Add Rule",
+            "editRule": "Edit Rule",
+            "noRules": "No rules",
+            "ruleOrder": "Rule Evaluation Order",
+            "ruleOrderAsc": "Top to bottom",
+            "ruleOrderDesc": "Bottom to top",
+            "targetType": {
+                "label": "Target",
+                "domain": "Domain",
+                "url": "URL",
+                "fullUrl": "Full URL",
+                "title": "Title"
+            },
+            "action": {
+                "label": "Action",
+                "exclude": "Exclude (don't save)",
+                "saveToGroup": "Save to Group",
+                "saveOnly": "Save Only (don't close)",
+                "close": "Discard (close without saving)",
+                "pin": "Pin Tab"
+            },
+            "dialog": {
+                "name": "Rule Name",
+                "pattern": "Pattern (Regex)",
+                "patternHint": "Escape special characters (like .) with \\.",
+                "selectGroup": "Select Group",
+                "save": "Save",
+                "cancel": "Cancel"
+            }
+        },
+        "sort": {
+            "title": "Sort Order",
+            "description": "Configure the display order in the tab manager.",
+            "groupLabel": "Group Order",
+            "itemLabel": "Tab Order",
+            "countDesc": "Tab Count (Most)",
+            "countAsc": "Tab Count (Least)",
+            "domainAsc": "Domain (A-Z)",
+            "domainDesc": "Domain (Z-A)",
+            "updatedDesc": "Last Updated (Newest)",
+            "updatedAsc": "Last Updated (Oldest)",
+            "savedDesc": "Saved Date (Newest)",
+            "savedAsc": "Saved Date (Oldest)",
+            "titleAsc": "Title (A-Z)",
+            "titleDesc": "Title (Z-A)",
+            "accessedDesc": "Last Accessed (Newest)",
+            "accessedAsc": "Last Accessed (Oldest)"
+        },
+        "restore": {
+            "title": "Tab Restore",
+            "description": "Configure how tabs are opened when using \"Open All\" or \"Open Group\".",
+            "modeLabel": "Restore Mode",
+            "normal": "Normal (load immediately)",
+            "lazy": "Lazy Suspend (suspend after loading)",
+            "immediate": "Fast Suspend (suspend after minimal loading)",
+            "intervalLabel": "Interval",
+            "intervalMs": "ms",
+            "intervalHint": "Delay between opening multiple tabs (0-1000 ms). Default is 100 ms."
+        },
+        "dataManagement": {
+            "title": "Data Management",
+            "tabData": "Tab Data",
+            "tabDataDescription": "Backup and restore saved tabs.",
+            "exportTabs": "Export Tabs",
+            "importTabs": "Import Tabs",
+            "settingsData": "Settings",
+            "settingsDataDescription": "Backup and restore settings.",
+            "exportSettings": "Export Settings",
+            "importSettings": "Import Settings",
+            "showJsonButton": "Show JSON",
+            "pasteJsonButton": "Paste JSON",
+            "showTextButton": "Show as Text",
+            "pasteTextButton": "Paste Text",
+            "exportDialogTitle": "Export {target}",
+            "importDialogTitle": "Import {target}",
+            "copyToClipboard": "Copy to Clipboard",
+            "copied": "Copied!",
+            "importButton": "Import",
+            "importing": "Importing...",
+            "invalidJson": "Invalid JSON format",
+            "emptyJson": "Please enter text",
+            "pasteJsonPlaceholder": "Paste JSON here...",
+            "pasteTextPlaceholder": "Paste JSON, URL list, or Markdown here...",
+            "formatLabel": "Format",
+            "formatJson": "JSON (full data)",
+            "formatUrlList": "URL List (one per line)",
+            "formatMarkdown": "Markdown (link format)",
+            "detectedFormat": "Detected format"
+        },
+        "importDialog": {
+            "title": "Select Import Mode",
+            "message": "Choose how to import.",
+            "mergeTitle": "Merge",
+            "mergeDescription": "Combine with existing tabs. Duplicate URLs will be skipped.",
+            "overwriteTitle": "Overwrite",
+            "overwriteDescription": "Delete all existing tabs before importing.",
+            "cancelButton": "Cancel",
+            "confirmButton": "Start Import",
+            "successMessage": "Import complete: {imported} added, {skipped} skipped"
+        }
+    },
+    "tabManager": {
+        "title": "TabBurrow - Saved Tabs",
+        "storageCalculating": "Storage: Calculating...",
+        "storageUsage": "Storage: {used} / {quota} ({percent}%)",
+        "storageUsageNoQuota": "Storage: {used}",
+        "header": {
+            "settingsButton": "Settings",
+            "openAllButton": "Open All",
+            "deleteAllButton": "Delete All"
+        },
+        "search": {
+            "placeholder": "Search by URL or title..."
+        },
+        "sort": {
+            "groupLabel": "Group Order:",
+            "itemLabel": "Tab Order:",
+            "countDesc": "Tab Count (Most)",
+            "countAsc": "Tab Count (Least)",
+            "domainAsc": "Domain (A-Z)",
+            "domainDesc": "Domain (Z-A)",
+            "updatedDesc": "Last Updated (Newest)",
+            "updatedAsc": "Last Updated (Oldest)",
+            "savedDesc": "Saved Date (Newest)",
+            "savedAsc": "Saved Date (Oldest)",
+            "titleAsc": "Title (A-Z)",
+            "titleDesc": "Title (Z-A)",
+            "accessedDesc": "Last Accessed (Newest)",
+            "accessedAsc": "Last Accessed (Oldest)"
+        },
+        "empty": {
+            "title": "No saved tabs",
+            "message": "Click the extension icon to save tabs."
+        },
+        "noResults": {
+            "message": "No results found"
+        },
+        "tabCard": {
+            "lastAccessed": "Last Accessed: {datetime}",
+            "saved": "Saved: {datetime}",
+            "deleteButton": "Delete",
+            "moveToGroup": "Move to Group",
+            "removeFromGroup": "Remove from Group"
+        },
+        "group": {
+            "openButton": "Open Group",
+            "deleteButton": "Delete Group"
+        },
+        "confirmDialog": {
+            "deleteGroupTitle": "Delete Group",
+            "deleteGroupMessage": "Delete all {count} tabs from \"{domain}\"?",
+            "deleteAllTitle": "Delete All",
+            "deleteAllMessage": "Delete all {count} saved tabs? This action cannot be undone."
+        },
+        "dateFilter": {
+            "toggleButton": "Date Filter",
+            "startDate": "Start",
+            "endDate": "End",
+            "presets": {
+                "today": "Today",
+                "week": "Week",
+                "month": "Month",
+                "threeMonths": "3 Months",
+                "all": "All"
+            },
+            "clearFilter": "Clear"
+        },
+        "viewMode": {
+            "grouped": "Grouped",
+            "flat": "Flat",
+            "toggleButton": "Toggle View"
+        },
+        "customGroup": {
+            "sectionTitle": "Custom Groups",
+            "edit": "Edit Name",
+            "delete": "Delete Group",
+            "rename": "Rename Group",
+            "renameDialogTitle": "Enter group name",
+            "deleteConfirmTitle": "Delete Custom Group",
+            "deleteConfirmMessage": "Delete group \"{name}\"? Tabs will be moved back to domain groups."
+        },
+        "selection": {
+            "toggleButton": "Select",
+            "selectAll": "Select All",
+            "deselectAll": "Deselect All",
+            "selectGroup": "Select Group",
+            "deselectGroup": "Deselect Group",
+            "selectedCount": "{count} selected",
+            "bulkDelete": "Delete Selected",
+            "bulkMoveToGroup": "Move to Group",
+            "bulkRemoveFromGroup": "Remove from Group",
+            "confirmDeleteTitle": "Delete Selected Tabs",
+            "confirmDeleteMessage": "Delete {count} tabs? This action cannot be undone."
+        },
+        "groupFilter": {
+            "placeholder": "Filter with regex...",
+            "invalidPattern": "Invalid regex"
+        }
+    },
+    "contextMenu": {
+        "openManager": "Open Tab Manager",
+        "saveToCustomGroup": "Save to Custom Group",
+        "newGroup": "New Group..."
+    },
+    "manifest": {
+        "description": "Save and manage browser tabs",
+        "actionTitle": "Save Tabs"
+    },
+    "linkCheck": {
+        "title": "Link Check",
+        "button": "Link Check",
+        "progress": "Progress",
+        "alive": "OK",
+        "dead": "Dead",
+        "warning": "Warning",
+        "remaining": "Remaining",
+        "timeout": "Timeout",
+        "networkError": "Network Error",
+        "checking": "Checking...",
+        "complete": "Check Complete",
+        "cancelled": "Cancelled",
+        "noTabs": "No tabs to check",
+        "filterAll": "Show All",
+        "filterDead": "Dead Links Only",
+        "filterWarning": "Warnings Only",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "deleteSelected": "Delete Selected",
+        "moveToGroup": "Move to Group",
+        "cancel": "Cancel",
+        "close": "Close",
+        "statusCode": "Status",
+        "confirmDeleteTitle": "Delete Selected Tabs",
+        "confirmDeleteMessage": "Delete {count} tabs?",
+        "settings": {
+            "title": "Link Check Settings",
+            "timeout": "Timeout",
+            "timeoutUnit": "sec",
+            "concurrency": "Concurrent Requests",
+            "domainConcurrency": "Per-Domain Concurrency",
+            "domainDelay": "Domain Delay",
+            "domainDelayUnit": "ms",
+            "rules": "Status Code Actions",
+            "rulesHint": "Specific codes (404) take priority over ranges (4xx)",
+            "addRule": "Add Rule",
+            "condition": "Condition",
+            "action": "Action",
+            "actionAlive": "OK",
+            "actionDead": "Dead",
+            "actionWarning": "Warning",
+            "actionIgnore": "Ignore"
+        }
+    }
+}

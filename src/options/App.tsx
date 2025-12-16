@@ -1,0 +1,204 @@
+/**
+ * TabBurrow - 設定画面メインコンポーネント
+ */
+
+import { useState, useCallback } from 'react';
+import browser from '../browserApi.js';
+import { useTranslation } from '../common/i18nContext.js';
+import { useSettings } from './hooks/useSettings.js';
+import { SettingsSection } from './components/SettingsSection.js';
+import { LanguageSettings } from './components/LanguageSettings.js';
+import { AppearanceSettings } from './components/AppearanceSettings.js';
+import { SortSettings } from './components/SortSettings.js';
+import { AutoCloseSettings } from './components/AutoCloseSettings.js';
+import { RestoreSettings } from './components/RestoreSettings.js';
+import { LinkCheckSettings } from './components/LinkCheckSettings.js';
+import { DataManagement } from './components/DataManagement.js';
+
+export function App() {
+  const { t } = useTranslation();
+  const {
+    settings,
+    savedSettings,
+    hasChanges,
+    isLoading,
+    saveStatus,
+    updateSetting,
+    save,
+    reload,
+  } = useSettings();
+
+  // フォーム送信
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    await save();
+  }, [save]);
+
+  // 読み込み中
+  if (isLoading) {
+    return null;
+  }
+
+  // ステータスメッセージ
+  const getStatusMessage = () => {
+    switch (saveStatus) {
+      case 'success':
+        return t('settings.saveSuccess');
+      case 'error':
+        return t('settings.saveError');
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <div className="container">
+      {/* ヘッダー */}
+      <header className="header">
+        <div className="header-left">
+          <h1 className="logo">
+            <span className="logo-icon">⚙️</span>
+            <span>{t('settings.headerTitle')}</span>
+          </h1>
+        </div>
+        <div className="header-right">
+          <a href="tabs.html" className="btn btn-secondary">
+            <span>📋</span>
+            <span>{t('settings.tabManagerLink')}</span>
+          </a>
+        </div>
+      </header>
+
+      {/* メインコンテンツ */}
+      <main className="main">
+        <form id="settingsForm" className="settings-form" onSubmit={handleSubmit}>
+          {/* 言語設定 */}
+          <SettingsSection
+            icon="🌐"
+            title={t('settings.language.title')}
+            description={t('settings.language.description')}
+          >
+            <LanguageSettings
+              value={settings.locale}
+              savedValue={savedSettings.locale}
+              onChange={(value) => updateSetting('locale', value)}
+            />
+          </SettingsSection>
+
+          {/* 外観設定 */}
+          <SettingsSection
+            icon="🎨"
+            title={t('settings.appearance.title')}
+            description={t('settings.appearance.description')}
+          >
+            <AppearanceSettings
+              value={settings.theme}
+              savedValue={savedSettings.theme}
+              onChange={(value) => updateSetting('theme', value)}
+            />
+          </SettingsSection>
+
+          {/* ソート順設定 */}
+          <SettingsSection
+            icon="🔢"
+            title={t('settings.sort.title')}
+            description={t('settings.sort.description')}
+          >
+            <SortSettings
+              groupSort={settings.groupSort}
+              itemSort={settings.itemSort}
+              savedGroupSort={savedSettings.groupSort}
+              savedItemSort={savedSettings.itemSort}
+              onGroupSortChange={(value) => updateSetting('groupSort', value)}
+              onItemSortChange={(value) => updateSetting('itemSort', value)}
+            />
+          </SettingsSection>
+
+          {/* 自動クローズ設定 */}
+          <SettingsSection
+            icon="⏰"
+            title={t('settings.autoClose.title')}
+            description={t('settings.autoClose.description')}
+          >
+            <AutoCloseSettings
+              enabled={settings.autoCloseEnabled}
+              seconds={settings.autoCloseSeconds}
+              rules={settings.autoCloseRules}
+              ruleOrder={settings.autoCloseRuleOrder}
+              savedEnabled={savedSettings.autoCloseEnabled}
+              savedSeconds={savedSettings.autoCloseSeconds}
+              onEnabledChange={(value) => updateSetting('autoCloseEnabled', value)}
+              onSecondsChange={(value) => updateSetting('autoCloseSeconds', value)}
+              onRulesChange={(value) => updateSetting('autoCloseRules', value)}
+              onRuleOrderChange={(value) => updateSetting('autoCloseRuleOrder', value)}
+            />
+          </SettingsSection>
+
+          {/* タブ復元設定 */}
+          <SettingsSection
+            icon="📂"
+            title={t('settings.restore.title')}
+            description={t('settings.restore.description')}
+          >
+            <RestoreSettings
+              mode={settings.restoreMode}
+              intervalMs={settings.restoreIntervalMs}
+              savedMode={savedSettings.restoreMode}
+              savedIntervalMs={savedSettings.restoreIntervalMs}
+              onModeChange={(value) => updateSetting('restoreMode', value)}
+              onIntervalChange={(value) => updateSetting('restoreIntervalMs', value)}
+            />
+          </SettingsSection>
+
+          {/* リンクチェック設定 */}
+          <SettingsSection
+            icon="🔗"
+            title={t('linkCheck.settings.title')}
+            description={t('linkCheck.settings.rulesHint')}
+          >
+            <LinkCheckSettings
+              rules={settings.linkCheckRules}
+              timeoutMs={settings.linkCheckTimeoutMs}
+              concurrency={settings.linkCheckConcurrency}
+              domainConcurrency={settings.linkCheckDomainConcurrency}
+              domainDelayMs={settings.linkCheckDomainDelayMs}
+              onRulesChange={(value) => updateSetting('linkCheckRules', value)}
+              onTimeoutChange={(value) => updateSetting('linkCheckTimeoutMs', value)}
+              onConcurrencyChange={(value) => updateSetting('linkCheckConcurrency', value)}
+              onDomainConcurrencyChange={(value) => updateSetting('linkCheckDomainConcurrency', value)}
+              onDomainDelayChange={(value) => updateSetting('linkCheckDomainDelayMs', value)}
+            />
+          </SettingsSection>
+
+          {/* 保存ボタンはフッターに移動 */}
+        </form>
+
+        {/* データ管理セクション */}
+        <DataManagement onSettingsImported={reload} />
+      </main>
+
+      {/* フッター (Fixed) */}
+      <div className="fixed-footer">
+        <div className="fixed-footer-content">
+          <div className="footer-left">
+            <span className="version-info">TabBurrow v{browser.runtime.getManifest().version}</span>
+          </div>
+          <div className="footer-right">
+            <span className={`save-status ${saveStatus === 'error' ? 'error' : ''}`}>
+              {getStatusMessage()}
+            </span>
+            <button
+              type="submit"
+              form="settingsForm"
+              className="btn btn-primary"
+              disabled={!hasChanges || saveStatus === 'saving'}
+            >
+              <span>💾</span>
+              <span>{t('settings.updateButton')}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,302 @@
+/**
+ * TabBurrow - 仮想スクロールタブリストコンポーネント
+ * react-virtuosoのGroupedVirtuosoを使用
+ */
+
+import { useMemo, useCallback } from 'react';
+import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso';
+import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, GroupFilter } from './types';
+import { TabCard } from './TabCard';
+import { GroupHeader } from './GroupHeader';
+
+interface TabListProps {
+  tabs: SavedTab[];
+  customGroups: CustomGroupMeta[];
+  viewMode: ViewMode;
+  groupSort: GroupSortType;
+  itemSort: ItemSortType;
+  onDeleteTab: (id: string) => void;
+  onDeleteGroup: (groupName: string, groupType: 'domain' | 'custom') => void;
+  onOpenGroup: (groupName: string) => void;
+  onOpenTab: (url: string) => void;
+  onRenameGroup?: (oldName: string, newName: string) => void;
+  onMoveToGroup: (tabId: string, groupName: string) => void;
+  onRemoveFromGroup: (tabId: string) => void;
+  // 選択モード関連
+  isSelectionMode: boolean;
+  selectedTabIds: Set<string>;
+  onToggleSelection: (id: string) => void;
+  onSelectGroup: (tabIds: string[]) => void;
+  onDeselectGroup: (tabIds: string[]) => void;
+  // グループ内フィルタ
+  groupFilters: GroupFilter;
+  onGroupFilterChange: (groupName: string, pattern: string) => void;
+}
+
+/**
+ * タブをグループ別に分類（カスタムグループ + ドメイングループ）
+ */
+function groupTabs(tabs: SavedTab[]): { customGroups: Map<string, SavedTab[]>; domainGroups: Map<string, SavedTab[]> } {
+  const customGroups = new Map<string, SavedTab[]>();
+  const domainGroups = new Map<string, SavedTab[]>();
+  
+  for (const tab of tabs) {
+    if (tab.groupType === 'custom') {
+      const existing = customGroups.get(tab.group) || [];
+      existing.push(tab);
+      customGroups.set(tab.group, existing);
+    } else {
+      // groupType が 'domain' または未定義の場合
+      const groupKey = tab.group || tab.domain;
+      const existing = domainGroups.get(groupKey) || [];
+      existing.push(tab);
+      domainGroups.set(groupKey, existing);
+    }
+  }
+  
+  return { customGroups, domainGroups };
+}
+
+/**
+ * グループ内のタブをソート
+ */
+function sortTabsInGroup(tabs: SavedTab[], sortType: ItemSortType): SavedTab[] {
+  const sorted = [...tabs];
+  
+  switch (sortType) {
+    case 'saved-desc':
+      sorted.sort((a, b) => b.savedAt - a.savedAt);
+      break;
+    case 'saved-asc':
+      sorted.sort((a, b) => a.savedAt - b.savedAt);
+      break;
+    case 'title-asc':
+      sorted.sort((a, b) => a.title.localeCompare(b.title, 'ja'));
+      break;
+    case 'title-desc':
+      sorted.sort((a, b) => b.title.localeCompare(a.title, 'ja'));
+      break;
+    case 'accessed-desc':
+      sorted.sort((a, b) => b.lastAccessed - a.lastAccessed);
+      break;
+    case 'accessed-asc':
+      sorted.sort((a, b) => a.lastAccessed - b.lastAccessed);
+      break;
+  }
+  
+  return sorted;
+}
+
+/**
+ * グループをソート
+ */
+function sortGroups(
+  grouped: Map<string, SavedTab[]>,
+  sortType: GroupSortType
+): [string, SavedTab[]][] {
+  const entries = [...grouped.entries()];
+  
+  switch (sortType) {
+    case 'count-desc':
+      entries.sort((a, b) => b[1].length - a[1].length);
+      break;
+    case 'count-asc':
+      entries.sort((a, b) => a[1].length - b[1].length);
+      break;
+    case 'domain-asc':
+      entries.sort((a, b) => a[0].localeCompare(b[0], 'ja'));
+      break;
+    case 'domain-desc':
+      entries.sort((a, b) => b[0].localeCompare(a[0], 'ja'));
+      break;
+    case 'updated-desc':
+      entries.sort((a, b) => {
+        const latestA = Math.max(...a[1].map(t => t.savedAt));
+        const latestB = Math.max(...b[1].map(t => t.savedAt));
+        return latestB - latestA;
+      });
+      break;
+    case 'updated-asc':
+      entries.sort((a, b) => {
+        const latestA = Math.max(...a[1].map(t => t.savedAt));
+        const latestB = Math.max(...b[1].map(t => t.savedAt));
+        return latestA - latestB;
+      });
+      break;
+  }
+  
+  return entries;
+}
+
+/**
+ * 正規表現でタブをフィルタ
+ */
+function filterTabsByRegex(tabs: SavedTab[], pattern: string): SavedTab[] {
+  if (!pattern.trim()) return tabs;
+  
+  try {
+    const regex = new RegExp(pattern, 'i');
+    return tabs.filter(tab => 
+      regex.test(tab.title) || regex.test(tab.url)
+    );
+  } catch {
+    // 無効な正規表現の場合はフィルタなし
+    return tabs;
+  }
+}
+
+/**
+ * 仮想スクロールタブリスト
+ * - カスタムグループを上部に表示
+ * - ドメイングループを下部に表示
+ */
+export function TabList({
+  tabs,
+  customGroups,
+  viewMode,
+  groupSort,
+  itemSort,
+  onDeleteTab,
+  onDeleteGroup,
+  onOpenGroup,
+  onOpenTab,
+  onRenameGroup,
+  onMoveToGroup,
+  onRemoveFromGroup,
+  isSelectionMode,
+  selectedTabIds,
+  onToggleSelection,
+  onSelectGroup,
+  onDeselectGroup,
+  groupFilters,
+  onGroupFilterChange,
+}: TabListProps) {
+  // グループ化とソート（フィルタ適用）
+  const { groups, groupCounts, flatTabs } = useMemo(() => {
+    const { customGroups: cGroups, domainGroups } = groupTabs(tabs);
+    
+    // カスタムグループをソート
+    const sortedCustomGroups = sortGroups(cGroups, groupSort);
+    // ドメイングループをソート
+    const sortedDomainGroups = sortGroups(domainGroups, groupSort);
+    
+    const groups: TabGroup[] = [];
+    const groupCounts: number[] = [];
+    const flatTabs: SavedTab[] = [];
+    
+    // カスタムグループを先に追加
+    for (const [name, groupTabList] of sortedCustomGroups) {
+      const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
+      // グループフィルタを適用
+      const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
+      groups.push({ name, groupType: 'custom', tabs: filteredTabs });
+      groupCounts.push(filteredTabs.length);
+      flatTabs.push(...filteredTabs);
+    }
+    
+    // ドメイングループを追加
+    for (const [name, groupTabList] of sortedDomainGroups) {
+      const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
+      // グループフィルタを適用
+      const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
+      groups.push({ name, groupType: 'domain', tabs: filteredTabs });
+      groupCounts.push(filteredTabs.length);
+      flatTabs.push(...filteredTabs);
+    }
+    
+    return { groups, groupCounts, flatTabs };
+  }, [tabs, groupSort, itemSort, groupFilters]);
+
+  // グループヘッダーのレンダリング
+  const groupContent = useCallback((index: number) => {
+    const group = groups[index];
+    const groupTabIds = group.tabs.map(t => t.id);
+    return (
+      <GroupHeader
+        name={group.name}
+        groupType={group.groupType}
+        tabCount={group.tabs.length}
+        onDeleteGroup={onDeleteGroup}
+        onOpenGroup={onOpenGroup}
+        onRenameGroup={onRenameGroup}
+        filterPattern={groupFilters[group.name] || ''}
+        onFilterChange={(pattern: string) => onGroupFilterChange(group.name, pattern)}
+        isSelectionMode={isSelectionMode}
+        groupTabIds={groupTabIds}
+        selectedTabIds={selectedTabIds}
+        onSelectGroup={onSelectGroup}
+        onDeselectGroup={onDeselectGroup}
+      />
+    );
+  }, [groups, onDeleteGroup, onOpenGroup, onRenameGroup, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup]);
+
+  // タブカードのレンダリング
+  const itemContent = useCallback((index: number) => {
+    const tab = flatTabs[index];
+    return (
+      <TabCard
+        key={tab.id}
+        tab={tab}
+        customGroups={customGroups}
+        onDelete={onDeleteTab}
+        onOpen={onOpenTab}
+        onMoveToGroup={onMoveToGroup}
+        onRemoveFromGroup={onRemoveFromGroup}
+        isSelectionMode={isSelectionMode}
+        isSelected={selectedTabIds.has(tab.id)}
+        onToggleSelection={onToggleSelection}
+      />
+    );
+  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection]);
+
+  if (tabs.length === 0) {
+    return null;
+  }
+
+  // フラット表示用のソート済みタブリスト
+  const sortedFlatTabs = useMemo(() => {
+    return sortTabsInGroup([...tabs], itemSort);
+  }, [tabs, itemSort]);
+
+  // フラット表示用のアイテムレンダリング
+  const flatItemContent = useCallback((index: number) => {
+    const tab = sortedFlatTabs[index];
+    return (
+      <TabCard
+        key={tab.id}
+        tab={tab}
+        customGroups={customGroups}
+        onDelete={onDeleteTab}
+        onOpen={onOpenTab}
+        onMoveToGroup={onMoveToGroup}
+        onRemoveFromGroup={onRemoveFromGroup}
+        isSelectionMode={isSelectionMode}
+        isSelected={selectedTabIds.has(tab.id)}
+        onToggleSelection={onToggleSelection}
+      />
+    );
+  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection]);
+
+  return (
+    <div className="tab-groups" style={{ height: 'calc(100vh - 180px)' }}>
+      {viewMode === 'flat' ? (
+        <Virtuoso
+          key="flat-view"
+          totalCount={sortedFlatTabs.length}
+          itemContent={flatItemContent}
+          style={{ height: '100%' }}
+          overscan={200}
+        />
+      ) : (
+        <GroupedVirtuoso
+          key="grouped-view"
+          groupCounts={groupCounts}
+          groupContent={groupContent}
+          itemContent={itemContent}
+          style={{ height: '100%' }}
+          overscan={200}
+        />
+      )}
+    </div>
+  );
+}

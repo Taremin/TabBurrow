@@ -1,0 +1,53 @@
+{
+  "name": "tabburrow",
+  "version": "1.0.0",
+  "description": "タブを保存して管理するブラウザ拡張機能",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "node esbuild.config.mjs",
+    "build:chrome": "node esbuild.config.mjs --chrome",
+    "build:firefox": "node esbuild.config.mjs --firefox",
+    "watch": "node esbuild.config.mjs --watch --chrome",
+    "watch:firefox": "node esbuild.config.mjs --watch --firefox",
+    "typecheck": "tsc --noEmit",
+    "i18n:check": "npx tsx scripts/check-i18n.ts",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:chrome": "playwright test --project=chromium",
+    "e2e:headed": "playwright test --headed",
+    "e2e:debug": "playwright test --debug"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-virtuoso": "^4.12.0",
+    "webextension-polyfill": "^0.12.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/webextension-polyfill": "^0.12.4",
+    "esbuild": "^0.24.0",
+    "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.0.11",
+    "rimraf": "^6.1.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "keywords": [
+    "browser-extension",
+    "tab-manager",
+    "chrome-extension",
+    "firefox-extension"
+  ],
+  "license": "MIT"
+}

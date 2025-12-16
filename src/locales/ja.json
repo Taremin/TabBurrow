@@ -1,0 +1,296 @@
+{
+    "common": {
+        "settings": "設定",
+        "save": "保存",
+        "cancel": "キャンセル",
+        "delete": "削除",
+        "tabs": "タブ",
+        "tabCount": "{count} タブ"
+    },
+    "settings": {
+        "title": "TabBurrow - 設定",
+        "headerTitle": "設定",
+        "tabManagerLink": "タブ管理画面",
+        "updateButton": "設定を更新",
+        "saveSuccess": "✓ 設定を保存しました",
+        "saveError": "✗ 保存に失敗しました",
+        "importSuccess": "✓ 設定をインポートしました",
+        "language": {
+            "title": "言語",
+            "description": "表示言語を選択します。",
+            "label": "表示言語",
+            "auto": "自動（ブラウザ言語に従う）",
+            "ja": "日本語",
+            "en": "English"
+        },
+        "appearance": {
+            "title": "外観",
+            "description": "テーマを選択します。",
+            "label": "テーマ",
+            "system": "システム設定に従う",
+            "dark": "ダークモード",
+            "light": "ライトモード"
+        },
+        "autoClose": {
+            "title": "自動クローズ",
+            "description": "一定時間非アクティブなタブを自動的に保存して閉じます。",
+            "enableLabel": "自動クローズを有効にする",
+            "secondsLabel": "非アクティブ時間（秒）",
+            "seconds": "秒",
+            "hint": "30秒〜86400秒（24時間）の範囲で指定できます。デフォルトは300秒（5分）です。",
+            "rulesTitle": "自動クローズルール",
+            "rulesDescription": "ルールに基づいて自動クローズの動作をカスタマイズします。",
+            "addRule": "ルールを追加",
+            "editRule": "ルールを編集",
+            "noRules": "ルールがありません",
+            "ruleOrder": "ルール評価順",
+            "ruleOrderAsc": "上から順に",
+            "ruleOrderDesc": "下から順に",
+            "targetType": {
+                "label": "対象",
+                "domain": "ドメイン",
+                "url": "URL",
+                "fullUrl": "完全URL",
+                "title": "タイトル"
+            },
+            "action": {
+                "label": "動作",
+                "exclude": "除外（保存しない）",
+                "saveToGroup": "グループに保存",
+                "saveOnly": "保存のみ（閉じない）",
+                "close": "破棄（保存せず閉じる）",
+                "pin": "固定タブ化"
+            },
+            "dialog": {
+                "name": "ルール名",
+                "pattern": "パターン（正規表現）",
+                "patternHint": "特殊文字（.など）は \\ でエスケープしてください。",
+                "selectGroup": "グループを選択",
+                "save": "保存",
+                "cancel": "キャンセル"
+            }
+        },
+        "sort": {
+            "title": "ソート順",
+            "description": "タブ管理画面での表示順を設定します。",
+            "groupLabel": "グループ順",
+            "itemLabel": "タブ順",
+            "countDesc": "タブ数（多い順）",
+            "countAsc": "タブ数（少ない順）",
+            "domainAsc": "ドメイン名（A-Z）",
+            "domainDesc": "ドメイン名（Z-A）",
+            "updatedDesc": "最終更新（新しい順）",
+            "updatedAsc": "最終更新（古い順）",
+            "savedDesc": "保存日時（新しい順）",
+            "savedAsc": "保存日時（古い順）",
+            "titleAsc": "タイトル（A-Z）",
+            "titleDesc": "タイトル（Z-A）",
+            "accessedDesc": "最終アクセス（新しい順）",
+            "accessedAsc": "最終アクセス（古い順）"
+        },
+        "restore": {
+            "title": "タブ復元",
+            "description": "「すべて開く」「グループを開く」でタブを開く際の動作を設定します。",
+            "modeLabel": "復元モード",
+            "normal": "通常（すぐに読み込む）",
+            "lazy": "遅延サスペンド（読み込み後にサスペンド）",
+            "immediate": "高速サスペンド（最低限の読み込み後にサスペンド）",
+            "intervalLabel": "インターバル",
+            "intervalMs": "ミリ秒",
+            "intervalHint": "複数タブを開く際の間隔（0-1000ミリ秒）。デフォルトは100ミリ秒です。"
+        },
+        "dataManagement": {
+            "title": "データ管理",
+            "tabData": "タブデータ",
+            "tabDataDescription": "保存されたタブのバックアップと復元を行えます。",
+            "exportTabs": "タブをエクスポート",
+            "importTabs": "タブをインポート",
+            "settingsData": "設定",
+            "settingsDataDescription": "設定のバックアップと復元を行えます。",
+            "exportSettings": "設定をエクスポート",
+            "importSettings": "設定をインポート",
+            "showJsonButton": "JSONを表示",
+            "pasteJsonButton": "JSONを貼り付け",
+            "showTextButton": "テキストで表示",
+            "pasteTextButton": "テキストを貼り付け",
+            "exportDialogTitle": "{target}をエクスポート",
+            "importDialogTitle": "{target}をインポート",
+            "copyToClipboard": "クリップボードにコピー",
+            "copied": "コピーしました！",
+            "importButton": "インポート",
+            "importing": "インポート中...",
+            "invalidJson": "無効なJSON形式です",
+            "emptyJson": "テキストを入力してください",
+            "pasteJsonPlaceholder": "ここにJSONを貼り付けてください...",
+            "pasteTextPlaceholder": "JSON、URLリスト、またはMarkdownを貼り付けてください...",
+            "formatLabel": "フォーマット",
+            "formatJson": "JSON（完全なデータ）",
+            "formatUrlList": "URLリスト（1行1URL）",
+            "formatMarkdown": "Markdown（リンク形式）",
+            "detectedFormat": "検出されたフォーマット"
+        },
+        "importDialog": {
+            "title": "インポートモードを選択",
+            "message": "インポート方法を選択してください。",
+            "mergeTitle": "マージ",
+            "mergeDescription": "既存のタブと統合します。重複URLはスキップされます。",
+            "overwriteTitle": "上書き",
+            "overwriteDescription": "既存のタブをすべて削除してからインポートします。",
+            "cancelButton": "キャンセル",
+            "confirmButton": "インポート開始",
+            "successMessage": "インポート完了: {imported}件追加、{skipped}件スキップ"
+        }
+    },
+    "tabManager": {
+        "title": "TabBurrow - 保存されたタブ",
+        "storageCalculating": "ストレージ使用量: 計算中...",
+        "storageUsage": "ストレージ使用量: {used} / {quota} ({percent}%)",
+        "storageUsageNoQuota": "ストレージ使用量: {used}",
+        "header": {
+            "settingsButton": "設定",
+            "openAllButton": "すべて開く",
+            "deleteAllButton": "全て削除"
+        },
+        "search": {
+            "placeholder": "URL・タイトルで検索..."
+        },
+        "sort": {
+            "groupLabel": "グループ順:",
+            "itemLabel": "タブ順:",
+            "countDesc": "タブ数（多い順）",
+            "countAsc": "タブ数（少ない順）",
+            "domainAsc": "ドメイン名（A-Z）",
+            "domainDesc": "ドメイン名（Z-A）",
+            "updatedDesc": "最終更新（新しい順）",
+            "updatedAsc": "最終更新（古い順）",
+            "savedDesc": "保存日時（新しい順）",
+            "savedAsc": "保存日時（古い順）",
+            "titleAsc": "タイトル（A-Z）",
+            "titleDesc": "タイトル（Z-A）",
+            "accessedDesc": "最終アクセス（新しい順）",
+            "accessedAsc": "最終アクセス（古い順）"
+        },
+        "empty": {
+            "title": "保存されたタブはありません",
+            "message": "拡張機能アイコンをクリックして、タブを保存してください。"
+        },
+        "noResults": {
+            "message": "検索結果が見つかりません"
+        },
+        "tabCard": {
+            "lastAccessed": "最終アクセス: {datetime}",
+            "saved": "保存: {datetime}",
+            "deleteButton": "削除",
+            "moveToGroup": "グループに移動",
+            "removeFromGroup": "グループから削除"
+        },
+        "group": {
+            "openButton": "グループを開く",
+            "deleteButton": "グループ削除"
+        },
+        "confirmDialog": {
+            "deleteGroupTitle": "グループを削除",
+            "deleteGroupMessage": "「{domain}」の {count} 個のタブをすべて削除しますか？",
+            "deleteAllTitle": "すべて削除",
+            "deleteAllMessage": "保存されている {count} 個のタブをすべて削除しますか？この操作は取り消せません。"
+        },
+        "dateFilter": {
+            "toggleButton": "日時フィルタ",
+            "startDate": "開始日",
+            "endDate": "終了日",
+            "presets": {
+                "today": "今日",
+                "week": "1週間",
+                "month": "1ヶ月",
+                "threeMonths": "3ヶ月",
+                "all": "すべて"
+            },
+            "clearFilter": "クリア"
+        },
+        "viewMode": {
+            "grouped": "グループ表示",
+            "flat": "フラット表示",
+            "toggleButton": "表示切替"
+        },
+        "customGroup": {
+            "sectionTitle": "カスタムグループ",
+            "edit": "名前を編集",
+            "delete": "グループを削除",
+            "rename": "グループ名を変更",
+            "renameDialogTitle": "グループ名を入力",
+            "deleteConfirmTitle": "カスタムグループを削除",
+            "deleteConfirmMessage": "「{name}」グループを削除しますか？タブはドメイングループに戻ります。"
+        },
+        "selection": {
+            "toggleButton": "選択",
+            "selectAll": "全選択",
+            "deselectAll": "選択解除",
+            "selectGroup": "グループを選択",
+            "deselectGroup": "グループを選択解除",
+            "selectedCount": "{count}件選択中",
+            "bulkDelete": "一括削除",
+            "bulkMoveToGroup": "グループに移動",
+            "bulkRemoveFromGroup": "グループから外す",
+            "confirmDeleteTitle": "選択したタブを削除",
+            "confirmDeleteMessage": "{count}件のタブを削除しますか？この操作は取り消せません。"
+        },
+        "groupFilter": {
+            "placeholder": "正規表現で絞り込み...",
+            "invalidPattern": "無効な正規表現"
+        }
+    },
+    "contextMenu": {
+        "openManager": "タブ管理画面を開く",
+        "saveToCustomGroup": "カスタムグループに保存",
+        "newGroup": "新規グループ..."
+    },
+    "manifest": {
+        "description": "タブを保存して管理する拡張機能",
+        "actionTitle": "タブを保存"
+    },
+    "linkCheck": {
+        "title": "リンクチェック",
+        "button": "リンクチェック",
+        "progress": "進捗",
+        "alive": "正常",
+        "dead": "リンク切れ",
+        "warning": "警告",
+        "remaining": "残り",
+        "timeout": "タイムアウト",
+        "networkError": "ネットワークエラー",
+        "checking": "チェック中...",
+        "complete": "チェック完了",
+        "cancelled": "キャンセルしました",
+        "noTabs": "チェック対象のタブがありません",
+        "filterAll": "全て表示",
+        "filterDead": "リンク切れのみ",
+        "filterWarning": "警告のみ",
+        "selectAll": "全選択",
+        "deselectAll": "選択解除",
+        "deleteSelected": "選択を削除",
+        "moveToGroup": "グループに移動",
+        "cancel": "キャンセル",
+        "close": "閉じる",
+        "statusCode": "ステータス",
+        "confirmDeleteTitle": "選択したタブを削除",
+        "confirmDeleteMessage": "{count}件のタブを削除しますか？",
+        "settings": {
+            "title": "リンクチェック設定",
+            "timeout": "タイムアウト",
+            "timeoutUnit": "秒",
+            "concurrency": "同時リクエスト数",
+            "domainConcurrency": "ドメイン別同時リクエスト",
+            "domainDelay": "ドメイン間ディレイ",
+            "domainDelayUnit": "ミリ秒",
+            "rules": "ステータスコード別アクション",
+            "rulesHint": "個別指定（404等）は範囲指定（4xx等）より優先されます",
+            "addRule": "ルール追加",
+            "condition": "条件",
+            "action": "アクション",
+            "actionAlive": "正常",
+            "actionDead": "リンク切れ",
+            "actionWarning": "警告",
+            "actionIgnore": "無視"
+        }
+    }
+}

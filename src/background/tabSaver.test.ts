@@ -1,0 +1,121 @@
+/**
+ * tabSaver.ts のユニットテスト
+ * 純粋関数をテスト（Chrome API依存部分は除外）
+ */
+import { describe, it, expect } from 'vitest';
+import { extractDomain, createSavedTab } from './tabSaver.js';
+
+// テスト用のモックタブを作成するヘルパー関数
+function createMockTab(overrides: Partial<chrome.tabs.Tab> = {}): chrome.tabs.Tab {
+  return {
+    id: 1,
+    index: 0,
+    windowId: 1,
+    highlighted: false,
+    active: false,
+    pinned: false,
+    incognito: false,
+    selected: false,
+    discarded: false,
+    autoDiscardable: true,
+    groupId: -1,
+    url: 'https://example.com',
+    ...overrides,
+  } as chrome.tabs.Tab;
+}
+
+describe('tabSaver', () => {
+  describe('extractDomain', () => {
+    it('通常のURLからドメインを抽出する', () => {
+      expect(extractDomain('https://github.com/user/repo')).toBe('github.com');
+    });
+
+    it('サブドメインを含むURLからドメインを抽出する', () => {
+      expect(extractDomain('https://docs.google.com/document')).toBe('docs.google.com');
+    });
+
+    it('ポート番号を含むURLからドメインを抽出する', () => {
+      expect(extractDomain('http://localhost:3000/path')).toBe('localhost');
+    });
+
+    it('IPアドレスのURLからホストを抽出する', () => {
+      expect(extractDomain('http://192.168.1.1/admin')).toBe('192.168.1.1');
+    });
+
+    it('無効なURLの場合は"unknown"を返す', () => {
+      expect(extractDomain('invalid-url')).toBe('unknown');
+      expect(extractDomain('')).toBe('unknown');
+    });
+
+    it('file://スキームのURLからパスを取得しようとする', () => {
+      // file://の場合、hostnameは空文字列になる
+      const result = extractDomain('file:///C:/path/to/file.html');
+      expect(result).toBe('');
+    });
+  });
+
+  describe('createSavedTab', () => {
+    it('タブ情報からSavedTabオブジェクトを作成する', () => {
+      const mockTab = createMockTab({
+        url: 'https://example.com/page',
+        title: 'Example Page',
+        favIconUrl: 'https://example.com/favicon.ico',
+        lastAccessed: 1000000000000,
+      });
+      const mockScreenshot = new Blob(['test'], { type: 'image/jpeg' });
+      const savedAt = 1000000001000;
+
+      const result = createSavedTab(mockTab, mockScreenshot, savedAt);
+
+      expect(result.url).toBe('https://example.com/page');
+      expect(result.title).toBe('Example Page');
+      expect(result.domain).toBe('example.com');
+      expect(result.group).toBe('example.com');
+      expect(result.groupType).toBe('domain');
+      expect(result.favIconUrl).toBe('https://example.com/favicon.ico');
+      expect(result.screenshot).toBe(mockScreenshot);
+      expect(result.lastAccessed).toBe(1000000000000);
+      expect(result.savedAt).toBe(savedAt);
+      expect(result.id).toBeDefined();
+    });
+
+    it('タイトルがない場合は"Untitled"を使用する', () => {
+      const mockTab = createMockTab({
+        url: 'https://example.com',
+        // title is undefined
+      });
+      const mockScreenshot = new Blob([], { type: 'image/jpeg' });
+      
+      const result = createSavedTab(mockTab, mockScreenshot, Date.now());
+      
+      expect(result.title).toBe('Untitled');
+    });
+
+    it('favIconUrlがない場合は空文字を使用する', () => {
+      const mockTab = createMockTab({
+        url: 'https://example.com',
+        title: 'Test',
+        // favIconUrl is undefined
+      });
+      const mockScreenshot = new Blob([], { type: 'image/jpeg' });
+      
+      const result = createSavedTab(mockTab, mockScreenshot, Date.now());
+      
+      expect(result.favIconUrl).toBe('');
+    });
+
+    it('lastAccessedがない場合はsavedAtを使用する', () => {
+      const mockTab = createMockTab({
+        url: 'https://example.com',
+        title: 'Test',
+        // lastAccessed is undefined
+      });
+      const mockScreenshot = new Blob([], { type: 'image/jpeg' });
+      const savedAt = 1234567890000;
+      
+      const result = createSavedTab(mockTab, mockScreenshot, savedAt);
+      
+      expect(result.lastAccessed).toBe(savedAt);
+    });
+  });
+});
