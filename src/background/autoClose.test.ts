@@ -70,6 +70,11 @@ describe('autoClose', () => {
         itemSort: 'saved-desc',
         restoreMode: 'lazy',
         restoreIntervalMs: 100,
+        linkCheckRules: [],
+        linkCheckTimeoutMs: 10000,
+        linkCheckConcurrency: 5,
+        linkCheckDomainConcurrency: 1,
+        linkCheckDomainDelayMs: 100,
       };
 
       setCachedSettings(mockSettings);
@@ -92,6 +97,11 @@ describe('autoClose', () => {
         itemSort: 'saved-desc',
         restoreMode: 'normal',
         restoreIntervalMs: 100,
+        linkCheckRules: [],
+        linkCheckTimeoutMs: 10000,
+        linkCheckConcurrency: 5,
+        linkCheckDomainConcurrency: 1,
+        linkCheckDomainDelayMs: 100,
       };
 
       const settings2: Settings = {
@@ -105,6 +115,11 @@ describe('autoClose', () => {
         itemSort: 'title-asc',
         restoreMode: 'lazy',
         restoreIntervalMs: 200,
+        linkCheckRules: [],
+        linkCheckTimeoutMs: 10000,
+        linkCheckConcurrency: 5,
+        linkCheckDomainConcurrency: 1,
+        linkCheckDomainDelayMs: 100,
       };
 
       setCachedSettings(settings1);

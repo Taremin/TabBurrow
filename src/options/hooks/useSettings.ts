@@ -38,6 +38,11 @@ const defaultSettings: Settings = {
   itemSort: 'saved-desc',
   restoreMode: 'lazy',
   restoreIntervalMs: 100,
+  linkCheckRules: [],
+  linkCheckTimeoutMs: 10000,
+  linkCheckConcurrency: 5,
+  linkCheckDomainConcurrency: 1,
+  linkCheckDomainDelayMs: 100,
 };
 
 /**

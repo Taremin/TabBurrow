@@ -93,32 +93,34 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleMessage = (message: { type: string; checkId?: string; progress?: LinkCheckProgress; results?: LinkCheckResult[]; error?: string }) => {
+    const handleMessage = (message: unknown) => {
       // キャンセル後の進捗更新は無視（refで最新の値を参照）
       if (isCancelledRef.current) return;
 
-      switch (message.type) {
+      const msg = message as { type: string; checkId?: string; progress?: LinkCheckProgress; results?: LinkCheckResult[]; error?: string };
+
+      switch (msg.type) {
         case 'link-check-progress':
           // チェックIDが一致しない場合は無視（古いチェックのメッセージ）
-          if (message.checkId && currentCheckIdRef.current !== message.checkId) {
+          if (msg.checkId && currentCheckIdRef.current !== msg.checkId) {
             return;
           }
-          if (message.progress) {
+          if (msg.progress) {
             // ベース進捗（再開前のチェック済み分）を加算して表示
             const base = baseProgressRef.current;
             setProgress({
-              total: message.progress.total + base.total,
-              checked: message.progress.checked + base.checked,
-              alive: message.progress.alive + base.alive,
-              dead: message.progress.dead + base.dead,
-              warning: message.progress.warning + base.warning,
+              total: msg.progress.total + base.total,
+              checked: msg.progress.checked + base.checked,
+              alive: msg.progress.alive + base.alive,
+              dead: msg.progress.dead + base.dead,
+              warning: msg.progress.warning + base.warning,
             });
             // 現時点の結果も更新（キャンセル時に備えて）
-            if (message.results) {
+            if (msg.results) {
               setResults(prev => {
                 // 既存のベース結果（再開前の結果）に新しい結果を追加
                 const baseResults = prev.slice(0, base.checked);
-                return [...baseResults, ...message.results!];
+                return [...baseResults, ...msg.results!];
               });
             }
           }
@@ -126,7 +128,7 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
 
         case 'link-check-complete':
           // チェックIDが一致しない場合は無視（古いチェックの完了メッセージ）
-          if (message.checkId && currentCheckIdRef.current !== message.checkId) {
+          if (msg.checkId && currentCheckIdRef.current !== msg.checkId) {
             return;
           }
           setIsRunning(false);
@@ -136,11 +138,11 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
 
         case 'link-check-error':
           // チェックIDが一致しない場合は無視（古いチェックのエラーメッセージ）
-          if (message.checkId && currentCheckIdRef.current !== message.checkId) {
+          if (msg.checkId && currentCheckIdRef.current !== msg.checkId) {
             return;
           }
           setIsRunning(false);
-          setError(message.error || 'Unknown error');
+          setError(msg.error || 'Unknown error');
           break;
       }
     };
