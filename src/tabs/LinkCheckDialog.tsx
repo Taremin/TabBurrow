@@ -3,7 +3,7 @@
  * 進捗表示と結果操作のUIを提供
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import browser from '../browserApi.js';
 import { t } from '../i18n.js';
 import type { LinkCheckAction } from '../settings.js';
@@ -52,6 +52,7 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
   // 状態
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const [progress, setProgress] = useState<LinkCheckProgress>({
     total: 0,
     checked: 0,
@@ -66,6 +67,21 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
   const [customGroups, setCustomGroups] = useState<CustomGroupMeta[]>([]);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
 
+  // 再開時のベース進捗（既にチェック済みの結果から計算）
+  const baseProgressRef = useRef<LinkCheckProgress>({
+    total: 0,
+    checked: 0,
+    alive: 0,
+    dead: 0,
+    warning: 0,
+  });
+
+  // キャンセル状態をrefで追跡（メッセージハンドラー内で最新の値を参照するため）
+  const isCancelledRef = useRef(false);
+
+  // 現在有効なチェックIDを追跡（古いチェックのメッセージを無視するため）
+  const currentCheckIdRef = useRef<string | null>(null);
+
   // カスタムグループを読み込み
   useEffect(() => {
     if (isOpen) {
@@ -77,23 +93,52 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleMessage = (message: { type: string; progress?: LinkCheckProgress; results?: LinkCheckResult[]; error?: string }) => {
+    const handleMessage = (message: { type: string; checkId?: string; progress?: LinkCheckProgress; results?: LinkCheckResult[]; error?: string }) => {
+      // キャンセル後の進捗更新は無視（refで最新の値を参照）
+      if (isCancelledRef.current) return;
+
       switch (message.type) {
         case 'link-check-progress':
+          // チェックIDが一致しない場合は無視（古いチェックのメッセージ）
+          if (message.checkId && currentCheckIdRef.current !== message.checkId) {
+            return;
+          }
           if (message.progress) {
-            setProgress(message.progress);
+            // ベース進捗（再開前のチェック済み分）を加算して表示
+            const base = baseProgressRef.current;
+            setProgress({
+              total: message.progress.total + base.total,
+              checked: message.progress.checked + base.checked,
+              alive: message.progress.alive + base.alive,
+              dead: message.progress.dead + base.dead,
+              warning: message.progress.warning + base.warning,
+            });
+            // 現時点の結果も更新（キャンセル時に備えて）
+            if (message.results) {
+              setResults(prev => {
+                // 既存のベース結果（再開前の結果）に新しい結果を追加
+                const baseResults = prev.slice(0, base.checked);
+                return [...baseResults, ...message.results!];
+              });
+            }
           }
           break;
 
         case 'link-check-complete':
+          // チェックIDが一致しない場合は無視（古いチェックの完了メッセージ）
+          if (message.checkId && currentCheckIdRef.current !== message.checkId) {
+            return;
+          }
           setIsRunning(false);
           setIsComplete(true);
-          if (message.results) {
-            setResults(message.results);
-          }
+          // 結果は進捗更新時に既に追加されているので、ここでは追加しない
           break;
 
         case 'link-check-error':
+          // チェックIDが一致しない場合は無視（古いチェックのエラーメッセージ）
+          if (message.checkId && currentCheckIdRef.current !== message.checkId) {
+            return;
+          }
           setIsRunning(false);
           setError(message.error || 'Unknown error');
           break;
@@ -106,10 +151,19 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
     };
   }, [isOpen]);
 
-  // リンクチェックを開始
+  // リンクチェックを開始（新規）
   const startCheck = useCallback(async () => {
+    // ベース進捗をリセット
+    baseProgressRef.current = { total: 0, checked: 0, alive: 0, dead: 0, warning: 0 };
+    // キャンセル状態をリセット
+    isCancelledRef.current = false;
+    // 新しいチェックIDを生成して記録
+    const newCheckId = `check-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    currentCheckIdRef.current = newCheckId;
+    
     setIsRunning(true);
     setIsComplete(false);
+    setIsCancelled(false);
     setResults([]);
     setSelectedIds(new Set());
     setError(null);
@@ -118,29 +172,84 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
     try {
       await browser.runtime.sendMessage({
         type: 'link-check-start',
+        checkId: newCheckId,
         tabIds: [],
+        excludeTabIds: [],
       });
     } catch (err) {
       setError(String(err));
       setIsRunning(false);
     }
   }, []);
+  // リンクチェックを再開（中断したところから）
+  const resumeCheck = useCallback(async () => {
+    // ベース進捗をresultsから計算（累積を防止）
+    const checkedCount = results.length;
+    let aliveCount = 0;
+    let deadCount = 0;
+    let warningCount = 0;
+    for (const r of results) {
+      switch (r.action) {
+        case 'alive': aliveCount++; break;
+        case 'dead': deadCount++; break;
+        case 'warning': warningCount++; break;
+      }
+    }
+    
+    baseProgressRef.current = { 
+      total: checkedCount,
+      checked: checkedCount,
+      alive: aliveCount,
+      dead: deadCount,
+      warning: warningCount,
+    };
+    
+    // キャンセル状態をリセット
+    isCancelledRef.current = false;
+    // 新しいチェックIDを生成して記録
+    const newCheckId = `check-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    currentCheckIdRef.current = newCheckId;
+    
+    // 既にチェック済みのタブIDを取得
+    const checkedTabIds = results.map(r => r.tabId);
+    
+    setIsRunning(true);
+    setIsCancelled(false);
+    setError(null);
 
-  // ダイアログが開いたときに自動開始
+    try {
+      await browser.runtime.sendMessage({
+        type: 'link-check-start',
+        checkId: newCheckId,
+        tabIds: [],
+        excludeTabIds: checkedTabIds,
+      });
+    } catch (err) {
+      setError(String(err));
+      setIsRunning(false);
+    }
+  }, [results]);
+
+  // ダイアログが開いたときに自動開始（キャンセル中でなく、結果がない場合のみ）
   useEffect(() => {
-    if (isOpen && !isRunning && !isComplete && results.length === 0) {
+    if (isOpen && !isRunning && !isComplete && !isCancelled && results.length === 0) {
       startCheck();
     }
-  }, [isOpen, isRunning, isComplete, results.length, startCheck]);
+  }, [isOpen, isRunning, isComplete, isCancelled, results.length, startCheck]);
 
-  // キャンセル
+  // キャンセル（中止）
   const handleCancel = useCallback(async () => {
+    // 先に全ての状態を更新（UIを即座にキャンセル状態にする）
+    isCancelledRef.current = true;
+    setIsRunning(false);
+    setIsCancelled(true);
+    
+    // バックグラウンドにキャンセルを通知（非同期）
     try {
       await browser.runtime.sendMessage({ type: 'link-check-cancel' });
     } catch (err) {
       console.error('Failed to cancel:', err);
     }
-    setIsRunning(false);
   }, []);
 
   // 閉じる
@@ -150,8 +259,11 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
     }
     onClose();
     // 状態をリセット
+    isCancelledRef.current = false;
+    baseProgressRef.current = { total: 0, checked: 0, alive: 0, dead: 0, warning: 0 };
     setIsRunning(false);
     setIsComplete(false);
+    setIsCancelled(false);
     setResults([]);
     setSelectedIds(new Set());
     setError(null);
@@ -281,7 +393,7 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
             />
           </div>
           <div className="link-check-progress-text">
-            {isRunning ? t('linkCheck.checking') : t('linkCheck.complete')}
+            {isRunning ? t('linkCheck.checking') : isCancelled ? t('linkCheck.cancelled') : t('linkCheck.complete')}
             {' '}
             {progress.checked}/{progress.total} ({progressPercent}%)
           </div>
@@ -393,6 +505,10 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
           {isRunning ? (
             <button className="btn-cancel" onClick={handleCancel}>
               {t('linkCheck.cancel')}
+            </button>
+          ) : isCancelled ? (
+            <button className="btn-resume" onClick={resumeCheck}>
+              {t('linkCheck.resume')}
             </button>
           ) : (
             <button className="btn-close" onClick={handleClose}>

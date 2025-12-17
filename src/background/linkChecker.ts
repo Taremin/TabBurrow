@@ -13,7 +13,9 @@ import type { SavedTab } from '../dbSchema.js';
 
 /** リンクチェックリクエスト */
 export interface LinkCheckRequest {
+  checkId: string;  // UIから送信されるチェックID
   tabIds: string[];  // チェック対象のタブID（空なら全件）
+  excludeTabIds?: string[];  // 除外するタブID（再開時に既にチェック済みのタブを除外）
 }
 
 /** リンクチェック進捗 */
@@ -130,17 +132,28 @@ export function isLinkCheckRunning(): boolean {
 // ======================
 
 /**
+ * リンクチェック結果とチェックIDを含む戻り値
+ */
+export interface LinkCheckResponse {
+  checkId: string;
+  results: LinkCheckResult[];
+}
+
+/**
  * リンクチェックを実行
- * @param request チェック対象のタブID（空なら全件）
- * @param onProgress 進捗コールバック
- * @returns チェック結果の配列
+ * @param request チェック対象のタブID（空なら全件）、チェックIDを含む
+ * @param onProgress 進捗コールバック（チェックID、進捗、現時点での結果を受け取る）
+ * @returns チェック結果とチェックIDを含むレスポンス
  */
 export async function checkLinks(
   request: LinkCheckRequest,
-  onProgress: (progress: LinkCheckProgress) => void
-): Promise<LinkCheckResult[]> {
+  onProgress: (checkId: string, progress: LinkCheckProgress, results: LinkCheckResult[]) => void
+): Promise<LinkCheckResponse> {
   // 既存のチェックをキャンセル
   cancelLinkCheck();
+  
+  // UIから送信されたチェックIDを使用
+  const checkId = request.checkId;
   
   // 新しいAbortControllerを作成
   currentCheckAbortController = new AbortController();
@@ -159,8 +172,14 @@ export async function checkLinks(
       tabs = await getAllTabs();
     }
 
+    // 除外対象のタブを除外（再開時に既にチェック済みのタブを除外）
+    if (request.excludeTabIds && request.excludeTabIds.length > 0) {
+      const excludeSet = new Set(request.excludeTabIds);
+      tabs = tabs.filter(tab => !excludeSet.has(tab.id));
+    }
+
     if (tabs.length === 0) {
-      return [];
+      return { checkId, results: [] };
     }
 
     // 進捗を初期化
@@ -171,7 +190,11 @@ export async function checkLinks(
       dead: 0,
       warning: 0,
     };
-    onProgress({ ...progress });
+
+    // 結果を格納する配列
+    const results: LinkCheckResult[] = [];
+    
+    onProgress(checkId, { ...progress }, [...results]);
 
     // ドメイン別にグループ化
     const tabsByDomain = groupTabsByDomain(tabs);
@@ -184,47 +207,42 @@ export async function checkLinks(
       settings.linkCheckDomainConcurrency,
       settings.linkCheckDomainDelayMs
     );
-
-    // 結果を格納する配列
-    const results: LinkCheckResult[] = [];
     
     // 並列処理用のプロミス管理
     const pendingPromises: Map<string, Promise<void>> = new Map();
-    let tabIndex = 0;
+    // 処理待ちタブのインデックスを管理（スキップされたタブを含む）
+    const pendingTabIndices: Set<number> = new Set();
+    for (let i = 0; i < orderedTabs.length; i++) {
+      pendingTabIndices.add(i);
+    }
 
     // 全タブの処理が完了するまでループ
-    while (tabIndex < orderedTabs.length || pendingPromises.size > 0) {
+    while (pendingTabIndices.size > 0 || pendingPromises.size > 0) {
       // キャンセルチェック
       if (signal.aborted) {
         throw new Error('Link check cancelled');
       }
 
       // 新しいリクエストを開始できる場合
-      while (
-        tabIndex < orderedTabs.length &&
-        pendingPromises.size < settings.linkCheckConcurrency
-      ) {
+      let startedAny = false;
+      for (const tabIndex of pendingTabIndices) {
+        if (pendingPromises.size >= settings.linkCheckConcurrency) {
+          break;
+        }
+
         const tab = orderedTabs[tabIndex];
         const domain = extractDomain(tab.url);
 
         // ドメイン別の制限をチェック
         if (!domainQueue.canRequest(domain)) {
           // このドメインはまだリクエストできない、次のタブを試す
-          // ただし、全てのドメインが待機中の場合はループを抜ける
-          const allWaiting = orderedTabs
-            .slice(tabIndex)
-            .every(t => !domainQueue.canRequest(extractDomain(t.url)));
-          
-          if (allWaiting && pendingPromises.size > 0) {
-            break;
-          }
-          tabIndex++;
           continue;
         }
 
         // リクエストを開始
         domainQueue.recordStart(domain);
-        tabIndex++;
+        pendingTabIndices.delete(tabIndex);
+        startedAny = true;
 
         const promise = (async () => {
           try {
@@ -266,7 +284,7 @@ export async function checkLinks(
                 break;
               // 'ignore'は何もカウントしない
             }
-            onProgress({ ...progress });
+            onProgress(checkId, { ...progress }, [...results]);
           } finally {
             domainQueue.recordComplete(domain);
             pendingPromises.delete(tab.id);
@@ -279,13 +297,13 @@ export async function checkLinks(
       // 少なくとも1つのプロミスが完了するのを待つ
       if (pendingPromises.size > 0) {
         await Promise.race(pendingPromises.values());
-      } else if (tabIndex < orderedTabs.length) {
+      } else if (pendingTabIndices.size > 0) {
         // 全てのドメインが待機中の場合、少し待機
         await sleep(50);
       }
     }
 
-    return results;
+    return { checkId, results };
   } finally {
     currentCheckAbortController = null;
   }

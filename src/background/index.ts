@@ -15,7 +15,7 @@ import { saveAndCloseTabs } from './tabSaver.js';
 import { initAutoClose, handleAutoCloseAlarm } from './autoClose.js';
 import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus } from './contextMenu.js';
 import { setupTabEventListeners } from './tabEvents.js';
-import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress } from './linkChecker.js';
+import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker.js';
 
 /**
  * 拡張アイコンがクリックされたときの処理
@@ -99,7 +99,9 @@ browser.runtime.onInstalled.addListener(async () => {
 // メッセージの型定義
 interface BackgroundMessage {
   type: string;
+  checkId?: string;
   tabIds?: string[];
+  excludeTabIds?: string[];
 }
 
 // 設定変更時のメッセージを処理
@@ -120,31 +122,42 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
     case 'link-check-start':
       // リンクチェックを開始（非同期で実行、進捗はポート経由で通知）
       (async () => {
+        // UIから送信されたチェックIDを使用
+        const checkId = message.checkId || `check-${Date.now()}`;
+        
         try {
-          const results = await checkLinks(
-            { tabIds: message.tabIds || [] },
-            (progress: LinkCheckProgress) => {
-              // 進捗を全タブに通知
+          const response = await checkLinks(
+            { 
+              checkId,
+              tabIds: message.tabIds || [],
+              excludeTabIds: message.excludeTabIds || [],
+            },
+            (checkId: string, progress: LinkCheckProgress, partialResults: LinkCheckResult[]) => {
+              // 進捗と現時点の結果を全タブに通知（チェックIDを含む）
               browser.runtime.sendMessage({
                 type: 'link-check-progress',
+                checkId,
                 progress,
+                results: partialResults,
               }).catch(() => {
                 // リスナーがいない場合は無視
               });
             }
           );
           
-          // 完了を通知
+          // 完了を通知（チェックIDを含む）
           browser.runtime.sendMessage({
             type: 'link-check-complete',
-            results,
+            checkId: response.checkId,
+            results: response.results,
           }).catch(() => {
             // リスナーがいない場合は無視
           });
         } catch (error) {
-          // エラーを通知
+          // エラーを通知（チェックIDを含む）
           browser.runtime.sendMessage({
             type: 'link-check-error',
+            checkId,
             error: String(error),
           }).catch(() => {
             // リスナーがいない場合は無視

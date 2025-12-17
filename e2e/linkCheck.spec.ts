@@ -356,17 +356,18 @@ test.describe('リンクチェック機能', () => {
     await page.close();
   });
 
-  test('キャンセルが動作する', async ({ context, extensionId }) => {
-    // 遅延なしでモック
+  test('キャンセルが動作する（大量データ）', async ({ context, extensionId }) => {
+    // 長い遅延を追加してリクエストを確実に遅くする
     await setupNetworkMocks(context, [
-      { pattern: 'example', status: 200 },
+      { pattern: 'example', status: 200, delay: 500 },
     ]);
 
     const page = await context.newPage();
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     
-    // テストデータを作成（3件に削減）
-    for (let i = 0; i < 3; i++) {
+    // テストデータを100件作成（500件は時間がかかりすぎる）
+    const dataCount = 100;
+    for (let i = 0; i < dataCount; i++) {
       await createTestTabData(page, {
         url: `https://example${i}.com/page${i}`,
         title: `Example Page ${i}`,
@@ -382,14 +383,271 @@ test.describe('リンクチェック機能', () => {
     // ダイアログが開いたことを確認
     await expect(page.locator(selectors.linkCheckDialog)).toBeVisible();
     
+    // キャンセルボタンが表示されるまで待機（チェック中状態になるまで）
+    await expect(page.locator(selectors.linkCheckCancelButton)).toBeVisible({ timeout: 10000 });
+    
+    // キャンセルボタンをクリック
+    await page.click(selectors.linkCheckCancelButton);
+    
+    // キャンセル後の状態を確認（再開ボタンが表示されるまで待機）
+    const resumeButton = page.locator('.btn-resume');
+    await expect(resumeButton).toBeVisible({ timeout: 5000 });
+    
+    // キャンセル後の進捗を記録
+    const progressTextAfterCancel = await page.locator(selectors.linkCheckProgressText).textContent();
+    
+    // キャンセル状態であることを確認（「キャンセル」または「Cancelled」が表示される）
+    expect(progressTextAfterCancel).toMatch(/キャンセル|Cancelled/);
+    
+    // 進捗が止まっていることを確認（全件はチェックされていない）
+    const progressMatch = progressTextAfterCancel?.match(/(\d+)\/(\d+)/);
+    if (progressMatch) {
+      const checked = parseInt(progressMatch[1], 10);
+      const total = parseInt(progressMatch[2], 10);
+      // 全件がチェックされていないことを確認
+      expect(checked).toBeLessThan(total);
+    }
+    
+    // 少し待って進捗が増えないことを確認
+    await wait(2000);
+    const progressTextAfterWait = await page.locator(selectors.linkCheckProgressText).textContent();
+    expect(progressTextAfterWait).toBe(progressTextAfterCancel);
+    
+    await page.close();
+  });
+
+  test('再開が動作する（中断したところから継続）', async ({ context, extensionId }) => {
+    // 遅延を追加してリクエストを遅くする
+    await setupNetworkMocks(context, [
+      { pattern: 'example', status: 200, delay: 200 },
+    ]);
+
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    
+    // テストデータを30件作成
+    const dataCount = 30;
+    for (let i = 0; i < dataCount; i++) {
+      await createTestTabData(page, {
+        url: `https://example${i}.com/page${i}`,
+        title: `Example Page ${i}`,
+      });
+    }
+    
+    await page.reload();
+    await page.waitForSelector('.tab-card');
+    
+    // リンクチェックを開始
+    await page.click(selectors.linkCheckButton);
+    
+    // ダイアログが開いたことを確認
+    await expect(page.locator(selectors.linkCheckDialog)).toBeVisible();
+    
+    // キャンセルボタンが表示されるまで待機
+    await expect(page.locator(selectors.linkCheckCancelButton)).toBeVisible({ timeout: 10000 });
+    
+    // キャンセルボタンをクリック
+    await page.click(selectors.linkCheckCancelButton);
+    
+    // 再開ボタンが表示されるまで待機
+    const resumeButton = page.locator('.btn-resume');
+    await expect(resumeButton).toBeVisible({ timeout: 5000 });
+    
+    // 再開ボタンをクリック
+    await resumeButton.click();
+    
+    // チェック完了を待機（100%になるまで）
+    await page.waitForFunction(() => {
+      const text = document.querySelector('.link-check-progress-text')?.textContent || '';
+      return text.includes('完了') || text.includes('Complete') || text.includes('100%');
+    }, { timeout: 60000 });
+    
+    // 最終的にチェック完了していることを確認（100%）
+    const finalProgressText = await page.locator(selectors.linkCheckProgressText).textContent();
+    expect(finalProgressText).toMatch(/100%/);
+    
+    // 閉じるボタンが表示されることを確認（チェック完了）
+    await expect(page.locator(selectors.linkCheckCloseButton)).toBeVisible();
+    
+    await page.close();
+  });
+
+  test('複数回再開してもトータル件数が増えない', async ({ context, extensionId }) => {
+    // 遅延を追加してリクエストを遅くする
+    await setupNetworkMocks(context, [
+      { pattern: 'example', status: 200, delay: 300 },
+    ]);
+
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    
+    // テストデータを20件作成
+    const dataCount = 20;
+    for (let i = 0; i < dataCount; i++) {
+      await createTestTabData(page, {
+        url: `https://example${i}.com/page${i}`,
+        title: `Example Page ${i}`,
+      });
+    }
+    
+    await page.reload();
+    await page.waitForSelector('.tab-card');
+    
+    // リンクチェックを開始
+    await page.click(selectors.linkCheckButton);
+    
+    // ダイアログが開いたことを確認
+    await expect(page.locator(selectors.linkCheckDialog)).toBeVisible();
+    
+    // キャンセルボタンが表示されるまで待機
+    await expect(page.locator(selectors.linkCheckCancelButton)).toBeVisible({ timeout: 10000 });
+    
+    // 1回目のキャンセル
+    await page.click(selectors.linkCheckCancelButton);
+    
+    // 再開ボタンが表示されるまで待機
+    const resumeButton = page.locator('.btn-resume');
+    await expect(resumeButton).toBeVisible({ timeout: 5000 });
+    
+    // 1回目再開後のトータルを記録
+    const progressText1 = await page.locator(selectors.linkCheckProgressText).textContent();
+    const totalMatch1 = progressText1?.match(/\/(\d+)/);
+    const total1 = totalMatch1 ? parseInt(totalMatch1[1], 10) : 0;
+    
+    // 1回目の再開
+    await resumeButton.click();
+    
+    // キャンセルボタンが表示されるまで待機
+    await expect(page.locator(selectors.linkCheckCancelButton)).toBeVisible({ timeout: 10000 });
+    
+    // 2回目のキャンセル
+    await page.click(selectors.linkCheckCancelButton);
+    
+    // 再開ボタンが表示されるまで待機
+    await expect(resumeButton).toBeVisible({ timeout: 5000 });
+    
+    // 2回目のトータルを記録
+    const progressText2 = await page.locator(selectors.linkCheckProgressText).textContent();
+    const totalMatch2 = progressText2?.match(/\/(\d+)/);
+    const total2 = totalMatch2 ? parseInt(totalMatch2[1], 10) : 0;
+    
+    // トータル件数が同じであることを確認（増えていないこと）
+    expect(total2).toBe(total1);
+    expect(total2).toBeLessThanOrEqual(dataCount);
+    
+    // 3回目の再開
+    await resumeButton.click();
+    
     // チェック完了を待機
     await page.waitForFunction(() => {
       const text = document.querySelector('.link-check-progress-text')?.textContent || '';
-      return text.includes('3/3');
-    }, { timeout: 30000 });
+      return text.includes('100%') || text.includes('完了') || text.includes('Complete');
+    }, { timeout: 60000 });
     
-    // 閉じるボタンが表示される
+    // 最終的なトータルも同じであることを確認
+    const progressText3 = await page.locator(selectors.linkCheckProgressText).textContent();
+    const totalMatch3 = progressText3?.match(/\/(\d+)/);
+    const total3 = totalMatch3 ? parseInt(totalMatch3[1], 10) : 0;
+    
+    expect(total3).toBe(total1);
+    
+    await page.close();
+  });
+
+  test('複数回キャンセル・再開後に全件正しくチェックされる', async ({ context, extensionId }) => {
+    // 長い遅延を追加してリクエストを確実に遅くする
+    await setupNetworkMocks(context, [
+      { pattern: 'example', status: 200, delay: 500 },
+    ]);
+
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    
+    // テストデータを200件作成（実際の使用状況に近い）
+    const dataCount = 200;
+    for (let i = 0; i < dataCount; i++) {
+      await createTestTabData(page, {
+        url: `https://example${i}.com/page${i}`,
+        title: `Example Page ${i}`,
+      });
+    }
+    
+    await page.reload();
+    await page.waitForSelector('.tab-card');
+    
+    // リンクチェックを開始
+    await page.click(selectors.linkCheckButton);
+    
+    // ダイアログが開いたことを確認
+    await expect(page.locator(selectors.linkCheckDialog)).toBeVisible();
+    
+    // 5回キャンセル・再開を繰り返す
+    for (let i = 0; i < 5; i++) {
+      // キャンセルボタンが表示されるまで待機（チェック中であること）
+      const cancelButton = page.locator(selectors.linkCheckCancelButton);
+      try {
+        await expect(cancelButton).toBeVisible({ timeout: 15000 });
+      } catch {
+        // チェックが完了した場合はループを抜ける
+        break;
+      }
+      
+      // 少し待ってからキャンセル
+      await wait(500);
+      
+      // まだキャンセルボタンが表示されているか確認
+      if (await cancelButton.isVisible()) {
+        await cancelButton.click();
+        
+        // 再開ボタンが表示されるまで待機
+        const resumeButton = page.locator('.btn-resume');
+        await expect(resumeButton).toBeVisible({ timeout: 5000 });
+        
+        // 少し待ってから再開
+        await wait(200);
+        await resumeButton.click();
+      }
+    }
+    
+    // チェック完了を待機（100%になるまで）
+    await page.waitForFunction(() => {
+      const text = document.querySelector('.link-check-progress-text')?.textContent || '';
+      return text.includes('100%');
+    }, { timeout: 300000 });  // 5分タイムアウト
+    
+    // 最終的な進捗を確認
+    const finalProgressText = await page.locator(selectors.linkCheckProgressText).textContent();
+    
+    // checked/total の形式から数値を抽出
+    const progressMatch = finalProgressText?.match(/(\d+)\/(\d+)/);
+    expect(progressMatch).not.toBeNull();
+    
+    const checked = parseInt(progressMatch![1], 10);
+    const total = parseInt(progressMatch![2], 10);
+    
+    // checked と total が一致することを確認（全件チェック完了）
+    expect(checked).toBe(total);
+    
+    // total が作成したデータ件数以上であることを確認
+    expect(total).toBeGreaterThanOrEqual(dataCount);
+    
+    // 100% であることを確認
+    expect(finalProgressText).toMatch(/100%/);
+    
+    // 閉じるボタンが表示されていることを確認（完了状態）
     await expect(page.locator(selectors.linkCheckCloseButton)).toBeVisible();
+    
+    // 統計の合計が checked と一致することを確認
+    const aliveText = await page.locator(selectors.statAlive).textContent() || '';
+    const deadText = await page.locator(selectors.statDead).textContent() || '';
+    const warningText = await page.locator(selectors.statWarning).textContent() || '';
+    
+    const aliveNum = parseInt(aliveText.match(/\d+/)?.[0] || '0', 10);
+    const deadNum = parseInt(deadText.match(/\d+/)?.[0] || '0', 10);
+    const warningNum = parseInt(warningText.match(/\d+/)?.[0] || '0', 10);
+    
+    // 統計の合計がchecked数と一致
+    expect(aliveNum + deadNum + warningNum).toBe(checked);
     
     await page.close();
   });
