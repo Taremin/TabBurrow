@@ -7,7 +7,7 @@ import browser from '../browserApi.js';
 import type { Menus, Tabs } from 'webextension-polyfill';
 import { saveTabs, saveTabsForCustomGroup, getAllCustomGroups, createCustomGroup, type SavedTab } from '../storage.js';
 import { t } from '../i18n.js';
-import { extractDomain, openTabManagerPage, getTabScreenshot } from './tabSaver.js';
+import { extractDomain, openTabManagerPage, getTabScreenshot, saveAndCloseTabs } from './tabSaver.js';
 
 // カスタムグループメニューIDのプレフィックス
 const CUSTOM_GROUP_MENU_PREFIX = 'save-to-custom-group-';
@@ -24,6 +24,13 @@ export function createContextMenus(): void {
   browser.contextMenus.create({
     id: 'open-tab-manager',
     title: t('contextMenu.openManager'),
+    contexts: ['action'], // 拡張アイコンのコンテキストメニューに表示
+  });
+
+  // 固定タブも含めてすべてしまうメニュー
+  browser.contextMenus.create({
+    id: 'save-all-including-pinned',
+    title: t('contextMenu.saveAllIncludingPinned'),
     contexts: ['action'], // 拡張アイコンのコンテキストメニューに表示
   });
 
@@ -86,12 +93,42 @@ export async function handleContextMenuClick(
 ): Promise<void> {
   if (info.menuItemId === 'open-tab-manager') {
     await openTabManagerPage();
+  } else if (info.menuItemId === 'save-all-including-pinned') {
+    await handleSaveAllIncludingPinned(tab);
   } else if (info.menuItemId === NEW_GROUP_MENU_ID && tab?.url) {
     await handleCreateNewGroupAndSave(tab);
   } else if (typeof info.menuItemId === 'string' && info.menuItemId.startsWith(CUSTOM_GROUP_MENU_PREFIX) && tab?.url) {
     const groupName = info.menuItemId.slice(CUSTOM_GROUP_MENU_PREFIX.length);
     await handleSaveToCustomGroup(tab, groupName);
   }
+}
+
+/**
+ * 固定タブも含めてすべてのタブを保存
+ */
+async function handleSaveAllIncludingPinned(clickedTab?: Tabs.Tab): Promise<void> {
+  // 現在のウィンドウのすべてのタブを取得（固定タブも含む）
+  const tabs = await browser.tabs.query({
+    currentWindow: true,
+  });
+
+  // 保存対象のタブをフィルタリング
+  // 特殊URLは除外（chrome://, edge://, about:, 拡張機能ページなど）
+  const validTabs = tabs.filter(tab => {
+    if (!tab.url || tab.id === undefined) return false;
+    // 特殊URLは除外
+    return /^(https?|file):\/\//i.test(tab.url);
+  });
+
+  if (validTabs.length === 0) {
+    console.log('保存対象のタブがありません');
+    return;
+  }
+
+  await saveAndCloseTabs(validTabs, {
+    activeTabWindowId: clickedTab?.windowId,
+    openTabManager: true,
+  });
 }
 
 /**
@@ -168,7 +205,7 @@ async function handleSaveToCustomGroup(tab: Tabs.Tab, groupName: string): Promis
 /**
  * URLが保存対象かどうかを判定（http/https/fileのみ対象）
  */
-function isSaveableUrl(url: string): boolean {
+export function isSaveableUrl(url: string): boolean {
   return /^(https?|file):\/\//i.test(url);
 }
 
@@ -193,6 +230,7 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
  */
 export function updateContextMenuTitles(): void {
   browser.contextMenus.update('open-tab-manager', { title: t('contextMenu.openManager') });
+  browser.contextMenus.update('save-all-including-pinned', { title: t('contextMenu.saveAllIncludingPinned') });
   browser.contextMenus.update(PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
 }

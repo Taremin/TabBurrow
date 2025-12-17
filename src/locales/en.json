@@ -242,7 +242,8 @@
     "contextMenu": {
         "openManager": "Open Tab Manager",
         "saveToCustomGroup": "Save to Custom Group",
-        "newGroup": "New Group..."
+        "newGroup": "New Group...",
+        "saveAllIncludingPinned": "Save All (Including Pinned)"
     },
     "manifest": {
         "description": "Save and manage browser tabs",
