@@ -372,3 +372,132 @@ test.describe('設定画面 - データ管理', () => {
   });
 });
 
+// ======================
+// リンクチェック設定 テスト
+// ======================
+
+test.describe('設定画面 - リンクチェック設定', () => {
+  test('リンクチェック設定セクションが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // リンクチェック設定セクションが存在することを確認
+    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    await expect(linkCheckSection).toBeVisible();
+  });
+
+  test('ルール追加ボタンをクリックするとダイアログが開く', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // リンクチェック設定セクションを探す
+    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    
+    // ルール追加ボタンをクリック
+    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    await expect(addRuleButton).toBeVisible();
+    await addRuleButton.click();
+    
+    // ダイアログが表示されることを確認
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // ダイアログにルール名、条件、アクションのフィールドがあることを確認
+    await expect(dialog.locator('#linkCheckRuleName')).toBeVisible();
+    await expect(dialog.locator('#linkCheckRuleCondition')).toBeVisible();
+    await expect(dialog.locator('#linkCheckRuleAction')).toBeVisible();
+    
+    // キャンセルボタンで閉じる
+    await dialog.locator('.btn-secondary').click();
+    await expect(dialog).not.toBeVisible();
+  });
+
+  test('ルール追加ダイアログで条件が空の場合エラーが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // ルール追加ボタンをクリック
+    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    await addRuleButton.click();
+    
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 条件を入力せずに保存ボタンをクリック
+    const saveButton = dialog.locator('.btn-primary');
+    await saveButton.click();
+    
+    // エラーメッセージが表示されることを確認
+    const errorHint = dialog.locator('.form-hint').filter({ hasText: /入力|enter|required/i });
+    await expect(errorHint).toBeVisible();
+    
+    // ダイアログはまだ開いている
+    await expect(dialog).toBeVisible();
+    
+    // キャンセルで閉じる
+    await dialog.locator('.btn-secondary').click();
+  });
+
+  test('ルールを追加できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // ルール追加ボタンをクリック
+    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    await addRuleButton.click();
+    
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // ルール名と条件を入力
+    await dialog.locator('#linkCheckRuleName').fill('テストルール');
+    await dialog.locator('#linkCheckRuleCondition').fill('418');
+    
+    // アクションを「リンク切れ」に変更
+    await dialog.locator('#linkCheckRuleAction').selectOption('dead');
+    
+    // 保存ボタンをクリック
+    await dialog.locator('.btn-primary').click();
+    
+    // ダイアログが閉じる
+    await expect(dialog).not.toBeVisible();
+    
+    // ルールリストに追加されたルールが表示される
+    const rulesList = linkCheckSection.locator('.link-check-rules-list');
+    await expect(rulesList.locator('.link-check-rule-item').filter({ hasText: '418' })).toBeVisible();
+  });
+
+  test('既存ルールを編集できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // リンクチェック設定セクション
+    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    
+    // デフォルトルール（404）の編集ボタンをクリック
+    const ruleItem = linkCheckSection.locator('.link-check-rule-item').filter({ hasText: '404' }).first();
+    await expect(ruleItem).toBeVisible();
+    
+    const editButton = ruleItem.locator('.btn-rule-edit');
+    await editButton.click();
+    
+    // ダイアログが開く
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 条件フィールドに既存値が表示されている
+    const conditionInput = dialog.locator('#linkCheckRuleCondition');
+    await expect(conditionInput).toHaveValue('404');
+    
+    // キャンセルで閉じる
+    await dialog.locator('.btn-secondary').click();
+    await expect(dialog).not.toBeVisible();
+  });
+});

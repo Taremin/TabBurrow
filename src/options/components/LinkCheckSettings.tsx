@@ -2,9 +2,10 @@
  * TabBurrow - リンクチェック設定コンポーネント
  */
 
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { LinkCheckRule, LinkCheckAction } from '../../settings.js';
+import { LinkCheckRuleDialog } from './LinkCheckRuleDialog.js';
 
 interface LinkCheckSettingsProps {
   rules: LinkCheckRule[];
@@ -41,6 +42,10 @@ export function LinkCheckSettings({
 }: LinkCheckSettingsProps) {
   const { t } = useTranslation();
 
+  // ダイアログ状態
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<LinkCheckRule | null>(null);
+
   // ルールの有効/無効切り替え
   const handleToggleRule = useCallback((ruleId: string) => {
     const updatedRules = rules.map(r =>
@@ -63,20 +68,40 @@ export function LinkCheckSettings({
     onRulesChange(updatedRules);
   }, [rules, onRulesChange]);
 
-  // 新規ルール追加
+  // ルール追加ダイアログを開く
   const handleAddRule = useCallback(() => {
-    const condition = window.prompt(t('linkCheck.settings.condition'), '');
-    if (!condition || !condition.trim()) return;
-    
-    const newRule: LinkCheckRule = {
-      id: crypto.randomUUID(),
-      enabled: true,
-      name: condition.trim(),
-      condition: condition.trim(),
-      action: 'warning',
-    };
-    onRulesChange([...rules, newRule]);
-  }, [rules, onRulesChange, t]);
+    setEditingRule(null);
+    setIsDialogOpen(true);
+  }, []);
+
+  // ルール編集ダイアログを開く
+  const handleEditRule = useCallback((ruleId: string) => {
+    const rule = rules.find(r => r.id === ruleId);
+    if (rule) {
+      setEditingRule(rule);
+      setIsDialogOpen(true);
+    }
+  }, [rules]);
+
+  // ルールを保存（追加または更新）
+  const handleSaveRule = useCallback((rule: LinkCheckRule) => {
+    const existingIndex = rules.findIndex(r => r.id === rule.id);
+    if (existingIndex >= 0) {
+      // 更新
+      const updatedRules = [...rules];
+      updatedRules[existingIndex] = rule;
+      onRulesChange(updatedRules);
+    } else {
+      // 追加
+      onRulesChange([...rules, rule]);
+    }
+  }, [rules, onRulesChange]);
+
+  // ダイアログを閉じる
+  const handleCloseDialog = useCallback(() => {
+    setIsDialogOpen(false);
+    setEditingRule(null);
+  }, []);
 
   return (
     <>
@@ -202,6 +227,14 @@ export function LinkCheckSettings({
               </select>
               <button
                 type="button"
+                className="btn-rule-edit"
+                onClick={() => handleEditRule(rule.id)}
+                title={t('linkCheck.settings.editRule')}
+              >
+                ✏️
+              </button>
+              <button
+                type="button"
                 className="btn-rule-delete"
                 onClick={() => handleDeleteRule(rule.id)}
                 title={t('common.delete')}
@@ -212,6 +245,15 @@ export function LinkCheckSettings({
           ))}
         </div>
       </div>
+
+      {/* ルール編集ダイアログ */}
+      <LinkCheckRuleDialog
+        isOpen={isDialogOpen}
+        editingRule={editingRule}
+        onSave={handleSaveRule}
+        onClose={handleCloseDialog}
+      />
     </>
   );
 }
+
