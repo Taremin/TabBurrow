@@ -46,17 +46,58 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "バージョン: $VERSION"
 
-      - name: ZIPファイルを作成
+      - name: 前のリリースタグを決定
+        id: release_info
         run: |
-          cd dist
-          zip -r ../tabburrow-${{ steps.get_version.outputs.version }}.zip .
+          VERSION="${{ steps.get_version.outputs.version }}"
+          if [[ "$VERSION" == *"-"* ]]; then
+            # プレリリース: 直前のタグを使用
+            PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          else
+            # 正式リリース: 現在のタグを除外した最新の正式バージョンを取得
+            PREVIOUS_TAG=$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -v '-' | grep -v "^${VERSION}$" | head -1)
+          fi
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+          echo "前のタグ: $PREVIOUS_TAG"
+
+      - name: Chrome用ZIPを作成
+        run: |
+          cd dist/chrome
+          zip -r ../../tabburrow-chrome-${{ steps.get_version.outputs.version }}.zip .
+
+      - name: Firefox用ZIPを作成
+        run: |
+          cd dist/firefox
+          zip -r ../../tabburrow-firefox-${{ steps.get_version.outputs.version }}.zip .
+
+      - name: コミット履歴を生成
+        id: changelog
+        run: |
+          PREVIOUS_TAG="${{ steps.release_info.outputs.previous_tag }}"
+          VERSION="${{ steps.get_version.outputs.version }}"
+          
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "## 変更内容 (${PREVIOUS_TAG}...${VERSION})" > changelog.md
+            echo "" >> changelog.md
+            git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD >> changelog.md
+          else
+            echo "## 変更内容" > changelog.md
+            echo "" >> changelog.md
+            git log --pretty=format:"- %s (%h)" >> changelog.md
+          fi
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          cat changelog.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: リリースを作成
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: TabBurrow ${{ steps.get_version.outputs.version }}
-          files: tabburrow-${{ steps.get_version.outputs.version }}.zip
-          generate_release_notes: true
-          draft: false
+          body: ${{ steps.changelog.outputs.changelog }}
+          files: |
+            tabburrow-chrome-${{ steps.get_version.outputs.version }}.zip
+            tabburrow-firefox-${{ steps.get_version.outputs.version }}.zip
+          draft: true
           prerelease: ${{ contains(steps.get_version.outputs.version, '-') }}
