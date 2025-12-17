@@ -57,9 +57,12 @@ test.describe('拡張機能の基本動作', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // chrome.runtime.getManifest()が動作することを確認
+    // browser.runtime.getManifest()が動作することを確認
+    // Playwright evaluate内ではpolyfillが読み込まれていない場合があるため、
+    // browserが未定義の場合はchromeにフォールバック
     const manifest = await page.evaluate(() => {
-      return chrome.runtime.getManifest();
+      const api = typeof browser !== 'undefined' ? browser : chrome;
+      return api.runtime.getManifest();
     });
     
     expect(manifest.name).toBe('TabBurrow');
