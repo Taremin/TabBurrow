@@ -186,6 +186,7 @@
         },
         "group": {
             "openButton": "グループを開く",
+            "openAsTabGroupButton": "タブグループとして開く",
             "deleteButton": "グループ削除"
         },
         "confirmDialog": {
@@ -231,6 +232,7 @@
             "bulkDelete": "一括削除",
             "bulkMoveToGroup": "グループに移動",
             "bulkRemoveFromGroup": "グループから外す",
+            "openAsTabGroup": "タブグループとして開く",
             "confirmDeleteTitle": "選択したタブを削除",
             "confirmDeleteMessage": "{count}件のタブを削除しますか？この操作は取り消せません。"
         },

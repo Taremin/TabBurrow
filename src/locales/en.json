@@ -186,6 +186,7 @@
         },
         "group": {
             "openButton": "Open Group",
+            "openAsTabGroupButton": "Open as Tab Group",
             "deleteButton": "Delete Group"
         },
         "confirmDialog": {
@@ -231,6 +232,7 @@
             "bulkDelete": "Delete Selected",
             "bulkMoveToGroup": "Move to Group",
             "bulkRemoveFromGroup": "Remove from Group",
+            "openAsTabGroup": "Open as Tab Group",
             "confirmDeleteTitle": "Delete Selected Tabs",
             "confirmDeleteMessage": "Delete {count} tabs? This action cannot be undone."
         },

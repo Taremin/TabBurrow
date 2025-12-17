@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import browser from '../browserApi.js';
+import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import type { Tabs } from 'webextension-polyfill';
 import {
   getAllTabs,
@@ -282,6 +283,61 @@ export function App() {
     await openTabsWithRestoreMode(urls);
   }, [filteredTabs, openTabsWithRestoreMode]);
 
+  // グループ内のタブをタブグループとして開く
+  const handleOpenGroupAsTabGroup = useCallback(async (groupName: string) => {
+    const groupTabs_ = filteredTabs.filter(t => t.group === groupName);
+    if (groupTabs_.length === 0) return;
+    
+    try {
+      // タブを作成
+      const tabIds: number[] = [];
+      for (const tab of groupTabs_) {
+        const newTab = await browser.tabs.create({ url: tab.url, active: false });
+        if (newTab.id) {
+          tabIds.push(newTab.id);
+        }
+      }
+      
+      if (tabIds.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const groupId = await (browser.tabs as any).group({ tabIds });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (browser as any).tabGroups.update(groupId, { title: groupName, collapsed: false });
+      }
+    } catch (error) {
+      console.error('タブグループの作成に失敗:', error);
+    }
+  }, [filteredTabs]);
+
+  // 選択したタブをタブグループとして開く
+  const handleBulkOpenAsTabGroup = useCallback(async () => {
+    if (selectedTabIds.size === 0) return;
+    
+    try {
+      const selectedTabs = filteredTabs.filter(t => selectedTabIds.has(t.id));
+      const tabIds: number[] = [];
+      for (const tab of selectedTabs) {
+        const newTab = await browser.tabs.create({ url: tab.url, active: false });
+        if (newTab.id) {
+          tabIds.push(newTab.id);
+        }
+      }
+      
+      if (tabIds.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const groupId = await (browser.tabs as any).group({ tabIds });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (browser as any).tabGroups.update(groupId, { title: `${selectedTabs.length} tabs`, collapsed: false });
+      }
+      
+      // 選択モードを解除
+      setSelectedTabIds(new Set());
+      setIsSelectionMode(false);
+    } catch (error) {
+      console.error('タブグループの作成に失敗:', error);
+    }
+  }, [selectedTabIds, filteredTabs]);
+
   // カスタムグループ名を変更
   const handleRenameGroup = useCallback(async (oldName: string, newName: string) => {
     try {
@@ -497,6 +553,7 @@ export function App() {
         onBulkDelete={handleBulkDelete}
         onBulkMoveToGroup={handleBulkMoveToGroup}
         onBulkRemoveFromGroup={handleBulkRemoveFromGroup}
+        onBulkOpenAsTabGroup={handleBulkOpenAsTabGroup}
         customGroups={customGroups}
       />
 
@@ -520,6 +577,7 @@ export function App() {
             onDeleteTab={handleDeleteTab}
             onDeleteGroup={handleDeleteGroup}
             onOpenGroup={handleOpenGroup}
+            onOpenGroupAsTabGroup={handleOpenGroupAsTabGroup}
             onOpenTab={handleOpenTab}
             onRenameGroup={handleRenameGroup}
             onMoveToGroup={handleMoveToGroup}

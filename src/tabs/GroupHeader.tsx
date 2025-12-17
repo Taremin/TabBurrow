@@ -12,6 +12,7 @@ interface GroupHeaderProps {
   tabCount: number;
   onDeleteGroup: (name: string, groupType: 'domain' | 'custom') => void;
   onOpenGroup: (name: string) => void;
+  onOpenGroupAsTabGroup?: (name: string) => void;
   onRenameGroup?: (oldName: string, newName: string) => void;
   // グループ内フィルタ
   filterPattern?: string;
@@ -34,6 +35,7 @@ export const GroupHeader = memo(function GroupHeader({
   tabCount, 
   onDeleteGroup,
   onOpenGroup,
+  onOpenGroupAsTabGroup,
   onRenameGroup,
   filterPattern = '',
   onFilterChange,
@@ -83,6 +85,12 @@ export const GroupHeader = memo(function GroupHeader({
   const handleOpen = useCallback(() => {
     onOpenGroup(name);
   }, [name, onOpenGroup]);
+
+  const handleOpenAsTabGroup = useCallback(() => {
+    if (onOpenGroupAsTabGroup) {
+      onOpenGroupAsTabGroup(name);
+    }
+  }, [name, onOpenGroupAsTabGroup]);
 
   const handleRename = useCallback(() => {
     if (!onRenameGroup) return;
@@ -193,6 +201,15 @@ export const GroupHeader = memo(function GroupHeader({
         >
           {t('tabManager.group.openButton')}
         </button>
+        {onOpenGroupAsTabGroup && (
+          <button 
+            className="group-open" 
+            title={t('tabManager.group.openAsTabGroupButton')}
+            onClick={handleOpenAsTabGroup}
+          >
+            {t('tabManager.group.openAsTabGroupButton')}
+          </button>
+        )}
         <button 
           className="group-delete" 
           title={t('tabManager.group.deleteButton')}

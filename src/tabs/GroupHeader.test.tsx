@@ -232,3 +232,47 @@ describe('GroupHeader - 選択モード', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 });
+
+describe('GroupHeader - タブグループとして開く', () => {
+  const defaultProps = {
+    name: 'example.com',
+    groupType: 'domain' as const,
+    tabCount: 5,
+    onDeleteGroup: vi.fn(),
+    onOpenGroup: vi.fn(),
+  };
+
+  it('onOpenGroupAsTabGroupがあるとボタンが表示される', () => {
+    const onOpenGroupAsTabGroup = vi.fn();
+    render(
+      <GroupHeader
+        {...defaultProps}
+        onOpenGroupAsTabGroup={onOpenGroupAsTabGroup}
+      />
+    );
+    
+    // 翻訳キーが返される（テスト環境ではt()はキーをそのまま返す）
+    expect(screen.getByText('tabManager.group.openAsTabGroupButton')).toBeInTheDocument();
+  });
+
+  it('onOpenGroupAsTabGroupがない場合はボタンが表示されない', () => {
+    render(<GroupHeader {...defaultProps} />);
+    
+    expect(screen.queryByText('tabManager.group.openAsTabGroupButton')).not.toBeInTheDocument();
+  });
+
+  it('ボタンをクリックするとonOpenGroupAsTabGroupが呼ばれる', () => {
+    const onOpenGroupAsTabGroup = vi.fn();
+    render(
+      <GroupHeader
+        {...defaultProps}
+        onOpenGroupAsTabGroup={onOpenGroupAsTabGroup}
+      />
+    );
+    
+    const button = screen.getByText('tabManager.group.openAsTabGroupButton');
+    fireEvent.click(button);
+    
+    expect(onOpenGroupAsTabGroup).toHaveBeenCalledWith('example.com');
+  });
+});

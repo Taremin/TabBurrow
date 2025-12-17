@@ -573,6 +573,61 @@ test.describe('グループ内正規表現検索', () => {
   });
 });
 
+test.describe('タブグループとして開く機能', () => {
+  test('グループヘッダーに「タブグループとして開く」ボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/tabgroup-test',
+      title: 'Tab Group Test Page',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // グループヘッダーの「タブグループとして開く」ボタンを確認（テキストで検索）
+    const openAsTabGroupButton = page.locator('.group-header button', { hasText: /タブグループとして開く|Open as Tab Group/i }).first();
+    await expect(openAsTabGroupButton).toBeVisible();
+  });
+
+  test('選択モードに「タブグループとして開く」ボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/selection-test1',
+      title: 'Selection Test 1',
+    });
+    await createTestTabData(page, {
+      url: 'https://example.com/selection-test2',
+      title: 'Selection Test 2',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // 選択モードに切り替え
+    const selectionToggle = page.locator('[data-testid="selection-mode-toggle"]');
+    await selectionToggle.click();
+    await page.waitForTimeout(100);
+    
+    // 選択ツールバーに「タブグループとして開く」ボタンが表示される
+    const openAsTabGroupButton = page.locator('.selection-toolbar button[title*="タブグループ"], .selection-toolbar button[title*="Tab Group"]');
+    await expect(openAsTabGroupButton).toBeVisible();
+  });
+});
+
 test.describe('大規模データパフォーマンステスト', () => {
   const LARGE_DATA_COUNT = 500;
   const DOMAIN_COUNT = 50; // 50グループに分散
