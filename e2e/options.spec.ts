@@ -501,3 +501,99 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await expect(dialog).not.toBeVisible();
   });
 });
+
+// ======================
+// アイコンクリック設定 テスト
+// ======================
+
+test.describe('設定画面 - アイコンクリック設定', () => {
+  test('アイコンクリック設定セクションが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // アイコンクリック設定セクションが存在することを確認
+    const iconClickSection = page.locator('.settings-section').filter({ hasText: /アイコンクリック|Icon Click/ });
+    await expect(iconClickSection).toBeVisible();
+  });
+
+  test('自動クローズルール適用チェックボックスが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // チェックボックスが存在することを確認（CSSで非表示なのでtoBeAttachedを使用）
+    const applyRulesCheckbox = page.locator('#iconClickApplyRules');
+    await expect(applyRulesCheckbox).toBeAttached();
+    
+    // デフォルトでチェックされていることを確認
+    await expect(applyRulesCheckbox).toBeChecked();
+  });
+
+  test('自動クローズルール適用チェックボックスをトグルできる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    const applyRulesCheckbox = page.locator('#iconClickApplyRules');
+    // チェックボックスのラベルを取得
+    const checkboxLabel = page.locator('label:has(#iconClickApplyRules)');
+    
+    // チェックを外す（ラベルをクリック）
+    await checkboxLabel.click();
+    await expect(applyRulesCheckbox).not.toBeChecked();
+    
+    // チェックを付ける（再度ラベルをクリック）
+    await checkboxLabel.click();
+    await expect(applyRulesCheckbox).toBeChecked();
+  });
+
+  test('固定タブの扱いラジオボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // ラジオボタンが存在することを確認（CSSで非表示なのでtoBeAttachedを使用）
+    const skipOption = page.locator('input[name="pinnedAction"][value="skip"]');
+    const suspendOption = page.locator('input[name="pinnedAction"][value="suspend"]');
+    
+    await expect(skipOption).toBeAttached();
+    await expect(suspendOption).toBeAttached();
+    
+    // デフォルトで「何もしない」が選択されていることを確認
+    await expect(skipOption).toBeChecked();
+  });
+
+  test('固定タブの扱いラジオボタンを切り替えられる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    const skipOption = page.locator('input[name="pinnedAction"][value="skip"]');
+    const suspendOption = page.locator('input[name="pinnedAction"][value="suspend"]');
+    
+    // サスペンドオプションを選択（CSSで非表示なのでforceを使用）
+    await suspendOption.click({ force: true });
+    await expect(suspendOption).toBeChecked();
+    await expect(skipOption).not.toBeChecked();
+    
+    // スキップオプションに戻す
+    await skipOption.click({ force: true });
+    await expect(skipOption).toBeChecked();
+    await expect(suspendOption).not.toBeChecked();
+  });
+
+  test('設定変更後に保存ボタンがアクティブになる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 固定タブの扱いを変更（CSSで非表示なのでforceを使用）
+    const suspendOption = page.locator('input[name="pinnedAction"][value="suspend"]');
+    await suspendOption.click({ force: true });
+    
+    // 保存ボタンがクリック可能になることを確認
+    const submitButton = page.locator(optionsPageSelectors.submitButton);
+    await expect(submitButton).toBeEnabled();
+  });
+});

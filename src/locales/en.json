@@ -99,6 +99,18 @@
             "intervalMs": "ms",
             "intervalHint": "Delay between opening multiple tabs (0-1000 ms). Default is 100 ms."
         },
+        "iconClick": {
+            "title": "Icon Click",
+            "description": "Configure behavior when the extension icon is clicked.",
+            "applyRules": "Apply auto close rules",
+            "applyRulesHint": "When enabled, auto close rules are also applied when clicking the icon.",
+            "pinnedTabs": {
+                "label": "Pinned Tab Handling",
+                "skip": "Do nothing",
+                "suspend": "Try to suspend"
+            },
+            "pinnedTabsHint": "Pinned tabs are not saved or closed. Suspend may not work due to browser limitations."
+        },
         "dataManagement": {
             "title": "Data Management",
             "tabData": "Tab Data",

@@ -21,35 +21,58 @@ import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress
  * 拡張アイコンがクリックされたときの処理
  */
 async function handleActionClick(clickedTab: Tabs.Tab): Promise<void> {
+  // 設定を取得
+  const settings = await getSettings();
+
   // 現在のウィンドウのタブを取得（固定タブを除外）
   const tabs = await browser.tabs.query({
     currentWindow: true,
     pinned: false,
   });
 
-  // 設定を取得
-  const settings = await getSettings();
-  console.log("tabs:", tabs)
+  console.log("tabs:", tabs);
 
   // 保存対象のタブをフィルタリング
   // 特殊URLは除外（chrome://, edge://, about:, 拡張機能ページなど）
-  // ルールでexcludeが指定されたタブも除外
+  // ルールでexcludeが指定されたタブも除外（設定で有効な場合のみ）
   const validTabs = tabs.filter(tab => {
     if (!tab.url || tab.id === undefined) return false;
     
     // 特殊URLは除外
     if (!/^(https?|file):\/\//i.test(tab.url)) return false;
     
-    // ルールでexcludeが指定されているか確認
-    const matchedRule = matchAutoCloseRule(
-      { url: tab.url, title: tab.title },
-      settings.autoCloseRules,
-      settings.autoCloseRuleOrder
-    );
-    if (matchedRule?.action === 'exclude') return false;
+    // ルール適用が有効な場合のみ、excludeルールをチェック
+    if (settings.iconClickApplyRules) {
+      const matchedRule = matchAutoCloseRule(
+        { url: tab.url, title: tab.title },
+        settings.autoCloseRules,
+        settings.autoCloseRuleOrder
+      );
+      if (matchedRule?.action === 'exclude') return false;
+    }
     
     return true;
   });
+
+  // 固定タブの処理（設定でsuspendが選択されている場合）
+  if (settings.iconClickPinnedAction === 'suspend') {
+    const pinnedTabs = await browser.tabs.query({
+      currentWindow: true,
+      pinned: true,
+    });
+    
+    // 固定タブをサスペンド（アクティブタブ以外）
+    for (const tab of pinnedTabs) {
+      if (tab.id !== undefined && !tab.active) {
+        try {
+          await browser.tabs.discard(tab.id);
+          console.log(`固定タブをサスペンド: ${tab.id}`);
+        } catch (e) {
+          console.warn(`固定タブのサスペンドに失敗: ${tab.id}`, e);
+        }
+      }
+    }
+  }
 
   if (validTabs.length === 0) {
     console.log('保存対象のタブがありません');

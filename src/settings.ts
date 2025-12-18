@@ -28,6 +28,10 @@ export type RuleActionType = 'exclude' | 'saveToGroup' | 'saveOnly' | 'close' | 
 // ルール評価順序
 export type RuleOrderType = 'asc' | 'desc';
 
+// 固定タブのアクション
+// skip: 何もしない, suspend: サスペンドする
+export type PinnedTabAction = 'skip' | 'suspend';
+
 // 自動クローズルール
 export interface AutoCloseRule {
   id: string;              // ユニークID
@@ -94,6 +98,10 @@ export interface Settings {
   linkCheckConcurrency: number;              // グローバル同時リクエスト数
   linkCheckDomainConcurrency: number;        // ドメイン別同時リクエスト数
   linkCheckDomainDelayMs: number;            // 同一ドメイン間ディレイ（ミリ秒）
+
+  // アイコンクリック設定
+  iconClickApplyRules: boolean;              // 自動クローズルールを適用するか
+  iconClickPinnedAction: PinnedTabAction;    // 固定タブの扱い
 }
 
 // デフォルト設定
@@ -116,6 +124,10 @@ const DEFAULT_SETTINGS: Settings = {
   linkCheckConcurrency: 5,           // 5並列
   linkCheckDomainConcurrency: 1,     // ドメインあたり1並列
   linkCheckDomainDelayMs: 100,       // 100ms
+
+  // アイコンクリック設定
+  iconClickApplyRules: true,         // デフォルトでルールを適用
+  iconClickPinnedAction: 'skip',     // デフォルトは何もしない
 };
 
 const STORAGE_KEY = 'settings';

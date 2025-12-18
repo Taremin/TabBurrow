@@ -11,6 +11,7 @@ import { LanguageSettings } from './components/LanguageSettings.js';
 import { AppearanceSettings } from './components/AppearanceSettings.js';
 import { SortSettings } from './components/SortSettings.js';
 import { AutoCloseSettings } from './components/AutoCloseSettings.js';
+import { IconClickSettings } from './components/IconClickSettings.js';
 import { RestoreSettings } from './components/RestoreSettings.js';
 import { LinkCheckSettings } from './components/LinkCheckSettings.js';
 import { DataManagement } from './components/DataManagement.js';
@@ -111,6 +112,22 @@ export function App() {
               savedItemSort={savedSettings.itemSort}
               onGroupSortChange={(value) => updateSetting('groupSort', value)}
               onItemSortChange={(value) => updateSetting('itemSort', value)}
+            />
+          </SettingsSection>
+
+          {/* アイコンクリック設定 */}
+          <SettingsSection
+            icon="👁"
+            title={t('settings.iconClick.title')}
+            description={t('settings.iconClick.description')}
+          >
+            <IconClickSettings
+              applyRules={settings.iconClickApplyRules}
+              pinnedAction={settings.iconClickPinnedAction}
+              savedApplyRules={savedSettings.iconClickApplyRules}
+              savedPinnedAction={savedSettings.iconClickPinnedAction}
+              onApplyRulesChange={(value) => updateSetting('iconClickApplyRules', value)}
+              onPinnedActionChange={(value) => updateSetting('iconClickPinnedAction', value)}
             />
           </SettingsSection>
 

@@ -99,6 +99,18 @@
             "intervalMs": "ミリ秒",
             "intervalHint": "複数タブを開く際の間隔（0-1000ミリ秒）。デフォルトは100ミリ秒です。"
         },
+        "iconClick": {
+            "title": "アイコンクリック",
+            "description": "拡張機能アイコンをクリックした時の動作を設定します。",
+            "applyRules": "自動クローズルールを適用する",
+            "applyRulesHint": "有効にすると、アイコンクリック時にも自動クローズルールが適用されます。",
+            "pinnedTabs": {
+                "label": "固定タブの扱い",
+                "skip": "何もしない",
+                "suspend": "サスペンドを試みる"
+            },
+            "pinnedTabsHint": "固定タブは保存・クローズの対象外です。サスペンドはブラウザの制限により動作しない場合があります。"
+        },
         "dataManagement": {
             "title": "データ管理",
             "tabData": "タブデータ",
