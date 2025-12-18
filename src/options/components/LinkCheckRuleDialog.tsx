@@ -78,7 +78,6 @@ export function LinkCheckRuleDialog({ isOpen, editingRule, onSave, onClose }: Li
   return (
     <div className="dialog-overlay" onClick={handleOverlayClick}>
       <div className="dialog dialog-wide">
-        <div className="dialog-icon">📋</div>
         <h3 className="dialog-title">
           {editingRule ? t('linkCheck.settings.editRule') : t('linkCheck.settings.addRule')}
         </h3>

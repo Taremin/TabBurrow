@@ -293,7 +293,19 @@
             "actionAlive": "OK",
             "actionDead": "Dead",
             "actionWarning": "Warning",
-            "actionIgnore": "Ignore"
+            "actionIgnore": "Ignore",
+            "editRule": "Edit Rule",
+            "dialog": {
+                "name": "Rule Name",
+                "namePlaceholder": "e.g. 404 Error",
+                "conditionLabel": "Condition",
+                "conditionPlaceholder": "e.g. 404, 4xx, timeout",
+                "conditionHint": "Numbers, ranges (4xx), timeout, or network-error",
+                "conditionRequired": "Please enter a condition",
+                "actionLabel": "Action",
+                "save": "Save",
+                "cancel": "Cancel"
+            }
         }
     }
 }

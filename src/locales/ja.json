@@ -293,7 +293,19 @@
             "actionAlive": "正常",
             "actionDead": "リンク切れ",
             "actionWarning": "警告",
-            "actionIgnore": "無視"
+            "actionIgnore": "無視",
+            "editRule": "ルールを編集",
+            "dialog": {
+                "name": "ルール名",
+                "namePlaceholder": "例: 404エラー",
+                "conditionLabel": "条件",
+                "conditionPlaceholder": "例: 404, 4xx, timeout",
+                "conditionHint": "数字、範囲（4xx）、timeout、network-errorが使用可能",
+                "conditionRequired": "条件を入力してください",
+                "actionLabel": "アクション",
+                "save": "保存",
+                "cancel": "キャンセル"
+            }
         }
     }
 }

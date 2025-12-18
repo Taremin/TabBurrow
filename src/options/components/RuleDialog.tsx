@@ -107,7 +107,6 @@ export function RuleDialog({ isOpen, editingRule, onSave, onClose }: RuleDialogP
   return (
     <div className="dialog-overlay" onClick={handleOverlayClick}>
       <div className="dialog dialog-wide">
-        <div className="dialog-icon">📋</div>
         <h3 className="dialog-title">
           {editingRule ? t('settings.autoClose.editRule') : t('settings.autoClose.addRule')}
         </h3>
