@@ -17,7 +17,7 @@ import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, up
 import { setupTabEventListeners } from './tabEvents.js';
 import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker.js';
 import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup.js';
-import { createBackup, listBackups, restoreFromBackup, deleteBackup, downloadBackup } from '../backupStorage.js';
+import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage.js';
 
 /**
  * 拡張アイコンがクリックされたときの処理
@@ -230,11 +230,16 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
       }
       return deleteBackup(message.backupId).then(() => ({ success: true }));
 
-    case 'backup-download':
+    case 'backup-export':
       if (!message.backupId) {
         return Promise.resolve({ success: false, error: 'backupId is required' });
       }
-      return downloadBackup(message.backupId).then(() => ({ success: true }));
+      return (async () => {
+        const { exportBackupAsJson, getBackup } = await import('../backupStorage.js');
+        const jsonData = await exportBackupAsJson(message.backupId!);
+        const backup = await getBackup(message.backupId!);
+        return { success: true, jsonData, createdAt: backup?.createdAt };
+      })();
   }
 });
 

@@ -120,7 +120,32 @@ export function BackupSettings({
     setIsLoading(true);
     setMessage(null);
     try {
-      await browser.runtime.sendMessage({ type: 'backup-download', backupId });
+      const response = await browser.runtime.sendMessage({ type: 'backup-export', backupId }) as {
+        success: boolean;
+        jsonData?: string;
+        createdAt?: number;
+        error?: string;
+      };
+      
+      if (!response?.success || !response.jsonData) {
+        throw new Error(response?.error || 'Export failed');
+      }
+      
+      // UI側でダウンロードを実行
+      const blob = new Blob([response.jsonData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const date = response.createdAt ? new Date(response.createdAt) : new Date();
+      const filename = `tabburrow-backup-${date.toISOString().slice(0, 10)}.json`;
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
       setMessage({ type: 'success', text: t('settings.backup.exportSuccess') });
     } catch (error) {
       setMessage({ type: 'error', text: String(error) });
