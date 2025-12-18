@@ -152,7 +152,13 @@
             "deleteAllButton": "全て削除"
         },
         "search": {
-            "placeholder": "URL・タイトルで検索..."
+            "placeholder": "URL・タイトルで検索...",
+            "options": {
+                "caseSensitive": "大文字/小文字を区別",
+                "wholeWord": "単語単位で検索",
+                "useRegex": "正規表現を使用"
+            },
+            "regexError": "無効な正規表現"
         },
         "sort": {
             "groupLabel": "グループ順:",

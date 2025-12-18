@@ -1,5 +1,5 @@
 import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
-import type { DateRangeFilter, ViewMode, CustomGroupMeta } from './types';
+import type { DateRangeFilter, ViewMode, CustomGroupMeta, SearchOptions } from './types';
 import { useTranslation } from '../common/i18nContext.js';
 import { DateRangeFilterComponent } from './DateRangeFilter';
 
@@ -10,6 +10,9 @@ interface HeaderProps {
   dateRange: DateRangeFilter;
   viewMode: ViewMode;
   onSearchChange: (query: string) => void;
+  searchOptions: SearchOptions;
+  onSearchOptionsChange: (options: SearchOptions) => void;
+  regexError: string | null;
   onDateRangeChange: (range: DateRangeFilter) => void;
   onViewModeChange: (mode: ViewMode) => void;
   onDeleteAll: () => void;
@@ -36,6 +39,9 @@ export const Header = memo(function Header({
   dateRange,
   viewMode,
   onSearchChange,
+  searchOptions,
+  onSearchOptionsChange,
+  regexError,
   onDateRangeChange,
   onViewModeChange,
   onDeleteAll,
@@ -107,6 +113,19 @@ export const Header = memo(function Header({
     setLocalQuery('');
     onSearchChange('');
   }, [onSearchChange]);
+
+  // 検索オプションのトグル
+  const toggleCaseSensitive = useCallback(() => {
+    onSearchOptionsChange({ ...searchOptions, caseSensitive: !searchOptions.caseSensitive });
+  }, [searchOptions, onSearchOptionsChange]);
+
+  const toggleWholeWord = useCallback(() => {
+    onSearchOptionsChange({ ...searchOptions, wholeWord: !searchOptions.wholeWord });
+  }, [searchOptions, onSearchOptionsChange]);
+
+  const toggleUseRegex = useCallback(() => {
+    onSearchOptionsChange({ ...searchOptions, useRegex: !searchOptions.useRegex });
+  }, [searchOptions, onSearchOptionsChange]);
 
   const toggleDateFilter = useCallback(() => {
     setShowDateFilter(prev => !prev);
@@ -209,7 +228,7 @@ export const Header = memo(function Header({
                 <span className="search-icon">🔍</span>
                 <input
                   type="text"
-                  className="search-input search-input-compact"
+                  className={`search-input search-input-compact ${regexError ? 'search-input-error' : ''}`}
                   placeholder={t('tabManager.search.placeholder')}
                   value={localQuery}
                   onChange={handleInputChange}
@@ -219,7 +238,36 @@ export const Header = memo(function Header({
                     ✕
                   </button>
                 )}
+                <div className="search-options">
+                  <button
+                    type="button"
+                    className={`search-option-btn ${searchOptions.caseSensitive ? 'active' : ''}`}
+                    onClick={toggleCaseSensitive}
+                    title={t('tabManager.search.options.caseSensitive')}
+                  >
+                    Aa
+                  </button>
+                  <button
+                    type="button"
+                    className={`search-option-btn ${searchOptions.wholeWord ? 'active' : ''}`}
+                    onClick={toggleWholeWord}
+                    title={t('tabManager.search.options.wholeWord')}
+                  >
+                    <span className="search-option-underline">ab</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`search-option-btn ${searchOptions.useRegex ? 'active' : ''} ${regexError ? 'error' : ''}`}
+                    onClick={toggleUseRegex}
+                    title={t('tabManager.search.options.useRegex')}
+                  >
+                    .*
+                  </button>
+                </div>
               </div>
+              {regexError && (
+                <span className="search-error-hint">{t('tabManager.search.regexError')}</span>
+              )}
               <button 
                 className={`btn btn-icon btn-filter ${isSelectionMode ? 'active' : ''}`}
                 onClick={onToggleSelectionMode}

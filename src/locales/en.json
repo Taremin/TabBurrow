@@ -152,7 +152,13 @@
             "deleteAllButton": "Delete All"
         },
         "search": {
-            "placeholder": "Search by URL or title..."
+            "placeholder": "Search by URL or title...",
+            "options": {
+                "caseSensitive": "Match Case",
+                "wholeWord": "Match Whole Word",
+                "useRegex": "Use Regular Expression"
+            },
+            "regexError": "Invalid regex"
         },
         "sort": {
             "groupLabel": "Group Order:",

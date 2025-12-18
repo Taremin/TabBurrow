@@ -38,3 +38,17 @@ export type ViewMode = 'grouped' | 'flat';
 export interface GroupFilter {
   [groupName: string]: string;
 }
+
+// 検索オプション（エディタ風トグルボタン用）
+export interface SearchOptions {
+  caseSensitive: boolean;  // [Aa] 大文字/小文字を区別
+  wholeWord: boolean;      // [ab] 単語単位で検索
+  useRegex: boolean;       // [.*] 正規表現モード
+}
+
+// 検索オプションのデフォルト値
+export const DEFAULT_SEARCH_OPTIONS: SearchOptions = {
+  caseSensitive: false,
+  wholeWord: false,
+  useRegex: false,
+};

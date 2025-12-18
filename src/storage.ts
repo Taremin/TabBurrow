@@ -225,17 +225,95 @@ export async function getAllTabs(): Promise<SavedTab[]> {
 }
 
 /**
- * URL/タイトルで検索（部分一致）
+ * URL/タイトルで検索（オプション付き）
  */
-export async function searchTabs(query: string): Promise<SavedTab[]> {
+export async function searchTabs(
+  query: string,
+  options?: {
+    caseSensitive?: boolean;  // 大文字小文字を区別
+    wholeWord?: boolean;      // 単語単位で検索
+    useRegex?: boolean;       // 正規表現モード
+  }
+): Promise<SavedTab[]> {
   const allTabs = await getAllTabs();
-  const lowerQuery = query.toLowerCase();
+  
+  if (!query.trim()) {
+    return allTabs;
+  }
+  
+  const caseSensitive = options?.caseSensitive ?? false;
+  const wholeWord = options?.wholeWord ?? false;
+  const useRegex = options?.useRegex ?? false;
+  
+  // 検索マッチ関数を生成
+  const matchFn = createMatchFunction(query, { caseSensitive, wholeWord, useRegex });
+  
+  if (!matchFn) {
+    // 無効な正規表現の場合は空配列を返す
+    return [];
+  }
   
   return allTabs.filter(tab => 
-    tab.url.toLowerCase().includes(lowerQuery) ||
-    tab.title.toLowerCase().includes(lowerQuery)
+    matchFn(tab.url) || matchFn(tab.title)
   );
 }
+
+/**
+ * 検索マッチ関数を生成
+ * 無効な正規表現の場合はnullを返す
+ */
+function createMatchFunction(
+  query: string,
+  options: { caseSensitive: boolean; wholeWord: boolean; useRegex: boolean }
+): ((text: string) => boolean) | null {
+  const { caseSensitive, wholeWord, useRegex } = options;
+  
+  if (useRegex) {
+    // 正規表現モード
+    try {
+      let pattern = query;
+      if (wholeWord) {
+        pattern = `\\b${pattern}\\b`;
+      }
+      const flags = caseSensitive ? '' : 'i';
+      const regex = new RegExp(pattern, flags);
+      return (text: string) => regex.test(text);
+    } catch {
+      // 無効な正規表現
+      return null;
+    }
+  } else {
+    // 通常検索モード
+    if (wholeWord) {
+      // 単語境界を使用
+      try {
+        const escapedQuery = escapeRegExp(query);
+        const pattern = `\\b${escapedQuery}\\b`;
+        const flags = caseSensitive ? '' : 'i';
+        const regex = new RegExp(pattern, flags);
+        return (text: string) => regex.test(text);
+      } catch {
+        return null;
+      }
+    } else {
+      // シンプルな部分一致
+      if (caseSensitive) {
+        return (text: string) => text.includes(query);
+      } else {
+        const lowerQuery = query.toLowerCase();
+        return (text: string) => text.toLowerCase().includes(lowerQuery);
+      }
+    }
+  }
+}
+
+/**
+ * 正規表現の特殊文字をエスケープ
+ */
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 
 /**
  * ドメインごとにグループ化したタブを取得

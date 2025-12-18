@@ -24,7 +24,8 @@ import {
   removeMultipleTabsFromGroup,
 } from '../storage.js';
 import { getSettings, type GroupSortType, type ItemSortType, type RestoreMode } from '../settings.js';
-import type { SavedTab, DateRangeFilter, CustomGroupMeta, ViewMode, GroupFilter } from './types';
+import type { SavedTab, DateRangeFilter, CustomGroupMeta, ViewMode, GroupFilter, SearchOptions } from './types';
+import { DEFAULT_SEARCH_OPTIONS } from './types';
 import { formatBytes } from './utils';
 import { Header } from './Header';
 import { TabList } from './TabList';
@@ -89,6 +90,10 @@ export function App() {
   // グループ内フィルタ
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
 
+  // 検索オプション
+  const [searchOptions, setSearchOptions] = useState<SearchOptions>(DEFAULT_SEARCH_OPTIONS);
+  const [regexError, setRegexError] = useState<string | null>(null);
+
   // リンクチェックダイアログ
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
 
@@ -140,19 +145,43 @@ export function App() {
   }, []);
 
   // 検索
-  const handleSearch = useCallback(async (query: string) => {
+  const handleSearch = useCallback(async (query: string, options?: SearchOptions) => {
     setSearchQuery(query);
+    const opts = options || searchOptions;
     if (!query.trim()) {
       setFilteredTabs(allTabs);
+      setRegexError(null);
       return;
     }
     try {
-      const results = await searchTabs(query);
+      const results = await searchTabs(query, opts);
+      // 正規表現エラーチェック: useRegexがtrueで結果が空でパターンがある場合
+      if (opts.useRegex && results.length === 0) {
+        try {
+          new RegExp(query);
+          setRegexError(null);
+        } catch {
+          setRegexError(query);
+          setFilteredTabs([]);
+          return;
+        }
+      } else {
+        setRegexError(null);
+      }
       setFilteredTabs(results);
     } catch (error) {
       console.error('検索に失敗:', error);
     }
-  }, [allTabs]);
+  }, [allTabs, searchOptions]);
+
+  // 検索オプション変更
+  const handleSearchOptionsChange = useCallback((newOptions: SearchOptions) => {
+    setSearchOptions(newOptions);
+    // オプションが変わったら再検索
+    if (searchQuery.trim()) {
+      handleSearch(searchQuery, newOptions);
+    }
+  }, [searchQuery, handleSearch]);
 
   // 日時フィルタリング
   const applyDateFilter = useCallback((tabs: SavedTab[]): SavedTab[] => {
@@ -185,7 +214,7 @@ export function App() {
 
       // 検索フィルター
       if (searchQuery.trim()) {
-        filtered = await searchTabs(searchQuery);
+        filtered = await searchTabs(searchQuery, searchOptions);
       }
 
       // 日時フィルター適用
@@ -195,7 +224,7 @@ export function App() {
     };
 
     applyFilters();
-  }, [allTabs, searchQuery, dateRange, applyDateFilter]);
+  }, [allTabs, searchQuery, searchOptions, dateRange, applyDateFilter]);
 
   // タブを開く
   const handleOpenTab = useCallback((url: string) => {
@@ -537,6 +566,9 @@ export function App() {
         storageInfo={storageInfo}
         searchQuery={searchQuery}
         onSearchChange={handleSearch}
+        searchOptions={searchOptions}
+        onSearchOptionsChange={handleSearchOptionsChange}
+        regexError={regexError}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         viewMode={viewMode}
