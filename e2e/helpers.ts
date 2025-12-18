@@ -88,9 +88,10 @@ export async function createTestTabData(page: Page, tabData: {
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 1;
+  const DB_VERSION = 3;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
+  const BACKUPS_STORE_NAME = 'backups';
   
   // IndexedDBに直接テストデータを挿入
   await page.evaluate(async ({ data, dbConfig }) => {
@@ -121,6 +122,12 @@ export async function createTestTabData(page: Page, tabData: {
           if (!db.objectStoreNames.contains(CUSTOM_GROUPS_STORE_NAME)) {
             const groupStore = db.createObjectStore(CUSTOM_GROUPS_STORE_NAME, { keyPath: 'name' });
             groupStore.createIndex('createdAt', 'createdAt', { unique: false });
+          }
+          
+          // backupsストアを作成
+          if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
+            const backupStore = db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
+            backupStore.createIndex('createdAt', 'createdAt', { unique: false });
           }
         };
         
@@ -165,7 +172,7 @@ export async function createTestTabData(page: Page, tabData: {
     });
   }, { 
     data: tabData, 
-    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME } 
+    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME } 
   });
 }
 
@@ -179,9 +186,10 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 } = {}): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 1;
+  const DB_VERSION = 3;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
+  const BACKUPS_STORE_NAME = 'backups';
   
   const { domainPrefix = 'test', domainCount = 50 } = options;
   
@@ -213,6 +221,12 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
           if (!db.objectStoreNames.contains(CUSTOM_GROUPS_STORE_NAME)) {
             const groupStore = db.createObjectStore(CUSTOM_GROUPS_STORE_NAME, { keyPath: 'name' });
             groupStore.createIndex('createdAt', 'createdAt', { unique: false });
+          }
+          
+          // backupsストアを作成
+          if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
+            const backupStore = db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
+            backupStore.createIndex('createdAt', 'createdAt', { unique: false });
           }
         };
         
@@ -258,7 +272,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
     count, 
     domainPrefix, 
     domainCount,
-    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME } 
+    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME } 
   });
 }
 
@@ -269,9 +283,10 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 export async function clearTestData(page: Page): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 1;
+  const DB_VERSION = 3;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
+  const BACKUPS_STORE_NAME = 'backups';
   
   await page.evaluate(async (dbConfig) => {
     const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
@@ -290,6 +305,9 @@ export async function clearTestData(page: Page): Promise<void> {
           if (!db.objectStoreNames.contains(CUSTOM_GROUPS_STORE_NAME)) {
             db.createObjectStore(CUSTOM_GROUPS_STORE_NAME, { keyPath: 'name' });
           }
+          if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
+            db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
+          }
         };
       });
     };
@@ -303,6 +321,6 @@ export async function clearTestData(page: Page): Promise<void> {
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error);
     });
-  }, { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME });
+  }, { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME });
 }
 

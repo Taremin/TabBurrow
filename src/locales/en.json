@@ -151,6 +151,43 @@
             "cancelButton": "Cancel",
             "confirmButton": "Start Import",
             "successMessage": "Import complete: {imported} added, {skipped} skipped"
+        },
+        "backup": {
+            "title": "Auto Backup",
+            "description": "Periodically backup your saved tabs.",
+            "enableLabel": "Enable auto backup",
+            "intervalLabel": "Backup interval",
+            "interval": {
+                "off": "Off",
+                "1h": "Every hour",
+                "6h": "Every 6 hours",
+                "12h": "Every 12 hours",
+                "24h": "Every 24 hours",
+                "custom": "Custom"
+            },
+            "customIntervalLabel": "min",
+            "keepCountLabel": "Backups to keep",
+            "keepCountHint": "0=disabled, -1=unlimited",
+            "manualBackup": "Backup now",
+            "backupList": "Backup history",
+            "noBackups": "No backups available",
+            "restore": "Restore",
+            "export": "Export",
+            "delete": "Delete",
+            "restoreDialogTitle": "Restore from backup",
+            "restoreDialogMessage": "Restore from backup created on {date}?",
+            "restoreMode": {
+                "merge": "Merge (combine with existing data)",
+                "overwrite": "Overwrite (replace existing data)"
+            },
+            "restoreSuccess": "Restore complete: {restored} added, {skipped} skipped",
+            "backupSuccess": "Backup created successfully",
+            "exportSuccess": "Backup exported successfully",
+            "deleteSuccess": "Backup deleted",
+            "lastBackup": "Last backup: {datetime}",
+            "tabCount": "{count} tabs",
+            "confirmDeleteTitle": "Delete backup",
+            "confirmDeleteMessage": "Delete backup from {date}?"
         }
     },
     "tabManager": {

@@ -14,6 +14,7 @@ import { AutoCloseSettings } from './components/AutoCloseSettings.js';
 import { IconClickSettings } from './components/IconClickSettings.js';
 import { RestoreSettings } from './components/RestoreSettings.js';
 import { LinkCheckSettings } from './components/LinkCheckSettings.js';
+import { BackupSettings } from './components/BackupSettings.js';
 import { DataManagement } from './components/DataManagement.js';
 
 export function App() {
@@ -184,6 +185,28 @@ export function App() {
               onConcurrencyChange={(value) => updateSetting('linkCheckConcurrency', value)}
               onDomainConcurrencyChange={(value) => updateSetting('linkCheckDomainConcurrency', value)}
               onDomainDelayChange={(value) => updateSetting('linkCheckDomainDelayMs', value)}
+            />
+          </SettingsSection>
+
+          {/* バックアップ設定 */}
+          <SettingsSection
+            icon="📀"
+            title={t('settings.backup.title')}
+            description={t('settings.backup.description')}
+          >
+            <BackupSettings
+              enabled={settings.autoBackupEnabled}
+              intervalPreset={settings.autoBackupIntervalPreset}
+              intervalMinutes={settings.autoBackupIntervalMinutes}
+              keepCount={settings.autoBackupKeepCount}
+              savedEnabled={savedSettings.autoBackupEnabled}
+              savedIntervalPreset={savedSettings.autoBackupIntervalPreset}
+              savedIntervalMinutes={savedSettings.autoBackupIntervalMinutes}
+              savedKeepCount={savedSettings.autoBackupKeepCount}
+              onEnabledChange={(value) => updateSetting('autoBackupEnabled', value)}
+              onIntervalPresetChange={(value) => updateSetting('autoBackupIntervalPreset', value)}
+              onIntervalMinutesChange={(value) => updateSetting('autoBackupIntervalMinutes', value)}
+              onKeepCountChange={(value) => updateSetting('autoBackupKeepCount', value)}
             />
           </SettingsSection>
 

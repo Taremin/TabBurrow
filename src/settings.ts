@@ -32,6 +32,10 @@ export type RuleOrderType = 'asc' | 'desc';
 // skip: 何もしない, suspend: サスペンドする
 export type PinnedTabAction = 'skip' | 'suspend';
 
+// バックアップ間隔プリセット
+// off: 無効, 1h/6h/12h/24h: プリセット, custom: カスタム
+export type BackupIntervalPreset = 'off' | '1h' | '6h' | '12h' | '24h' | 'custom';
+
 // 自動クローズルール
 export interface AutoCloseRule {
   id: string;              // ユニークID
@@ -102,6 +106,12 @@ export interface Settings {
   // アイコンクリック設定
   iconClickApplyRules: boolean;              // 自動クローズルールを適用するか
   iconClickPinnedAction: PinnedTabAction;    // 固定タブの扱い
+
+  // バックアップ設定
+  autoBackupEnabled: boolean;                // 自動バックアップ有効/無効
+  autoBackupIntervalPreset: BackupIntervalPreset;  // プリセット選択
+  autoBackupIntervalMinutes: number;         // カスタム間隔（分）
+  autoBackupKeepCount: number;               // 保持する世代数（0=無効、-1=無制限）
 }
 
 // デフォルト設定
@@ -128,6 +138,12 @@ const DEFAULT_SETTINGS: Settings = {
   // アイコンクリック設定
   iconClickApplyRules: true,         // デフォルトでルールを適用
   iconClickPinnedAction: 'skip',     // デフォルトは何もしない
+
+  // バックアップ設定
+  autoBackupEnabled: false,          // デフォルトは無効
+  autoBackupIntervalPreset: '24h',   // デフォルトは24時間ごと
+  autoBackupIntervalMinutes: 1440,   // 24時間 = 1440分
+  autoBackupKeepCount: 5,            // デフォルト5世代
 };
 
 const STORAGE_KEY = 'settings';
@@ -273,4 +289,19 @@ export function createAutoCloseRule(
     action,
     targetGroup,
   };
+}
+
+/**
+ * バックアップ間隔プリセットを分に変換
+ */
+export function getBackupIntervalMinutes(settings: Settings): number {
+  switch (settings.autoBackupIntervalPreset) {
+    case 'off': return 0;
+    case '1h': return 60;
+    case '6h': return 360;
+    case '12h': return 720;
+    case '24h': return 1440;
+    case 'custom': return settings.autoBackupIntervalMinutes;
+    default: return 1440; // デフォルトは24時間
+  }
 }

@@ -9,6 +9,7 @@ import {
   DB_VERSION,
   TABS_STORE_NAME,
   CUSTOM_GROUPS_STORE_NAME,
+  BACKUPS_STORE_NAME,
   type SavedTab,
   type CustomGroupMeta,
   type GroupType,
@@ -78,8 +79,14 @@ async function openDB(): Promise<IDBDatabase> {
         
         // 既存タブにgroup/groupTypeフィールドを追加
         const tabStore = transaction.objectStore(STORE_NAME);
-        tabStore.createIndex('group', 'group', { unique: false });
-        tabStore.createIndex('groupType', 'groupType', { unique: false });
+        
+        // インデックスが存在しない場合のみ作成
+        if (!tabStore.indexNames.contains('group')) {
+          tabStore.createIndex('group', 'group', { unique: false });
+        }
+        if (!tabStore.indexNames.contains('groupType')) {
+          tabStore.createIndex('groupType', 'groupType', { unique: false });
+        }
         
         // 既存データのマイグレーション
         const cursorRequest = tabStore.openCursor();
@@ -96,6 +103,15 @@ async function openDB(): Promise<IDBDatabase> {
             cursor.continue();
           }
         };
+      }
+      
+      // バージョン3: バックアップ機能対応
+      if (oldVersion < 3) {
+        // バックアップストアを作成
+        if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
+          const backupStore = db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
+          backupStore.createIndex('createdAt', 'createdAt', { unique: false });
+        }
       }
     };
   });

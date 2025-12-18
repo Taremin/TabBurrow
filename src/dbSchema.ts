@@ -11,13 +11,16 @@
 export const DB_NAME = 'TabBurrowDB';
 
 /** データベースバージョン */
-export const DB_VERSION = 1;
+export const DB_VERSION = 3;
 
 /** タブストア名 */
 export const TABS_STORE_NAME = 'tabs';
 
 /** カスタムグループストア名 */
 export const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
+
+/** バックアップストア名 */
+export const BACKUPS_STORE_NAME = 'backups';
 
 // ======================
 // 型定義
@@ -51,6 +54,35 @@ export interface CustomGroupMeta {
   updatedAt: number;  // 更新日時
 }
 
+/**
+ * バックアップ用タブデータ
+ * SavedTabと同じ構造だが、バックアップ専用として明示
+ */
+export interface BackupTab {
+  id: string;
+  url: string;
+  title: string;
+  domain: string;
+  group: string;
+  groupType: GroupType;
+  favIconUrl: string;
+  screenshot: Blob;     // Blobのまま保存
+  lastAccessed: number;
+  savedAt: number;
+}
+
+/**
+ * バックアップレコード
+ */
+export interface BackupRecord {
+  id: string;                       // "backup-{timestamp}"
+  createdAt: number;                // バックアップ作成日時
+  version: number;                  // スキーマバージョン（復元時の互換性用）
+  tabCount: number;                 // タブ数（一覧表示用）
+  customGroups: CustomGroupMeta[];  // カスタムグループも含める
+  tabs: BackupTab[];
+}
+
 // ======================
 // インデックス定義
 // ======================
@@ -79,6 +111,13 @@ export const TABS_INDEXES_V2 = [
  * カスタムグループストアのインデックス定義
  */
 export const CUSTOM_GROUPS_INDEXES = [
+  { name: 'createdAt', keyPath: 'createdAt', unique: false },
+] as const;
+
+/**
+ * バックアップストアのインデックス定義
+ */
+export const BACKUPS_INDEXES = [
   { name: 'createdAt', keyPath: 'createdAt', unique: false },
 ] as const;
 

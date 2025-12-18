@@ -151,6 +151,43 @@
             "cancelButton": "キャンセル",
             "confirmButton": "インポート開始",
             "successMessage": "インポート完了: {imported}件追加、{skipped}件スキップ"
+        },
+        "backup": {
+            "title": "自動バックアップ",
+            "description": "保存されたタブを定期的にバックアップします。",
+            "enableLabel": "自動バックアップを有効にする",
+            "intervalLabel": "バックアップ間隔",
+            "interval": {
+                "off": "オフ",
+                "1h": "1時間ごと",
+                "6h": "6時間ごと",
+                "12h": "12時間ごと",
+                "24h": "24時間ごと",
+                "custom": "カスタム"
+            },
+            "customIntervalLabel": "分",
+            "keepCountLabel": "保持する世代数",
+            "keepCountHint": "0=バックアップ無効、-1=無制限",
+            "manualBackup": "今すぐバックアップ",
+            "backupList": "バックアップ履歴",
+            "noBackups": "バックアップがありません",
+            "restore": "復元",
+            "export": "エクスポート",
+            "delete": "削除",
+            "restoreDialogTitle": "バックアップから復元",
+            "restoreDialogMessage": "{date} のバックアップから復元しますか？",
+            "restoreMode": {
+                "merge": "マージ（既存データと統合）",
+                "overwrite": "上書き（既存データを置換）"
+            },
+            "restoreSuccess": "復元完了: {restored}件追加、{skipped}件スキップ",
+            "backupSuccess": "バックアップを作成しました",
+            "exportSuccess": "バックアップをエクスポートしました",
+            "deleteSuccess": "バックアップを削除しました",
+            "lastBackup": "最終バックアップ: {datetime}",
+            "tabCount": "{count}タブ",
+            "confirmDeleteTitle": "バックアップを削除",
+            "confirmDeleteMessage": "{date} のバックアップを削除しますか？"
         }
     },
     "tabManager": {

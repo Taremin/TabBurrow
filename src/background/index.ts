@@ -16,6 +16,8 @@ import { initAutoClose, handleAutoCloseAlarm } from './autoClose.js';
 import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus } from './contextMenu.js';
 import { setupTabEventListeners } from './tabEvents.js';
 import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker.js';
+import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup.js';
+import { createBackup, listBackups, restoreFromBackup, deleteBackup, downloadBackup } from '../backupStorage.js';
 
 /**
  * 拡張アイコンがクリックされたときの処理
@@ -114,6 +116,11 @@ browser.runtime.onInstalled.addListener(async () => {
     console.log('[onInstalled] Initializing auto close...');
     await initAutoClose();
     console.log('[onInstalled] Auto close initialized');
+
+    // 自動バックアップを初期化
+    console.log('[onInstalled] Initializing auto backup...');
+    await initAutoBackup();
+    console.log('[onInstalled] Auto backup initialized');
   } catch (error) {
     console.error('[onInstalled] Error:', error);
   }
@@ -125,6 +132,8 @@ interface BackgroundMessage {
   checkId?: string;
   tabIds?: string[];
   excludeTabIds?: string[];
+  backupId?: string;
+  mode?: 'merge' | 'overwrite';
 }
 
 // 設定変更時のメッセージを処理
@@ -139,6 +148,8 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
         applyLocaleSetting(settings.locale);
         // コンテキストメニューのタイトルを更新
         updateContextMenuTitles();
+        // 自動バックアップを再初期化
+        await initAutoBackup();
       });
       return Promise.resolve({ success: true });
 
@@ -198,11 +209,42 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
         success: true, 
         running: isLinkCheckRunning() 
       });
+
+    // バックアップ関連のメッセージ
+    case 'backup-create':
+      return triggerBackup().then(() => ({ success: true }));
+
+    case 'backup-list':
+      return listBackups().then(backups => ({ success: true, backups }));
+
+    case 'backup-restore':
+      if (!message.backupId || !message.mode) {
+        return Promise.resolve({ success: false, error: 'backupId and mode are required' });
+      }
+      return restoreFromBackup(message.backupId, message.mode)
+        .then(result => ({ success: true, ...result }));
+
+    case 'backup-delete':
+      if (!message.backupId) {
+        return Promise.resolve({ success: false, error: 'backupId is required' });
+      }
+      return deleteBackup(message.backupId).then(() => ({ success: true }));
+
+    case 'backup-download':
+      if (!message.backupId) {
+        return Promise.resolve({ success: false, error: 'backupId is required' });
+      }
+      return downloadBackup(message.backupId).then(() => ({ success: true }));
   }
 });
 
 // アラームが発火したときの処理
-browser.alarms.onAlarm.addListener(handleAutoCloseAlarm);
+browser.alarms.onAlarm.addListener((alarm) => {
+  // 自動クローズアラーム
+  handleAutoCloseAlarm(alarm);
+  // バックアップアラーム
+  handleBackupAlarm(alarm);
+});
 
 // コンテキストメニューがクリックされたときの処理
 browser.contextMenus.onClicked.addListener(handleContextMenuClick);
