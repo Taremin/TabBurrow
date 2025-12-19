@@ -304,7 +304,9 @@
         "openManager": "Open Tab Manager",
         "saveToCustomGroup": "Save to Custom Group",
         "newGroup": "New Group...",
-        "saveAllIncludingPinned": "Save All (Including Pinned)"
+        "saveAllIncludingPinned": "Save All (Including Pinned)",
+        "tabBurrow": "TabBurrow",
+        "removeAndClose": "Remove from Tab Manager and Close"
     },
     "manifest": {
         "description": "Save and manage browser tabs",

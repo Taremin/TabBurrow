@@ -5,14 +5,16 @@
 
 import browser from '../browserApi.js';
 import type { Menus, Tabs } from 'webextension-polyfill';
-import { saveTabs, saveTabsForCustomGroup, getAllCustomGroups, createCustomGroup, type SavedTab } from '../storage.js';
+import { saveTabs, saveTabsForCustomGroup, getAllCustomGroups, createCustomGroup, findTabByUrl, deleteTab, type SavedTab } from '../storage.js';
 import { t } from '../i18n.js';
 import { extractDomain, openTabManagerPage, getTabScreenshot, saveAndCloseTabs } from './tabSaver.js';
 
-// カスタムグループメニューIDのプレフィックス
+// メニューIDの定数
+const TABBURROW_MENU_ID = 'tabburrow';
 const CUSTOM_GROUP_MENU_PREFIX = 'save-to-custom-group-';
 const NEW_GROUP_MENU_ID = 'create-new-custom-group';
 const PARENT_MENU_ID = 'save-to-custom-group';
+const REMOVE_AND_CLOSE_MENU_ID = 'remove-and-close';
 
 /**
  * コンテキストメニューを作成
@@ -34,9 +36,17 @@ export function createContextMenus(): void {
     contexts: ['action'], // 拡張アイコンのコンテキストメニューに表示
   });
 
-  // カスタムグループに保存する親メニュー
+  // TabBurrow親メニュー（ページコンテキストメニュー）
+  browser.contextMenus.create({
+    id: TABBURROW_MENU_ID,
+    title: t('contextMenu.tabBurrow'),
+    contexts: ['page', 'frame'],
+  });
+
+  // カスタムグループに保存するメニュー（TabBurrowの子メニュー）
   browser.contextMenus.create({
     id: PARENT_MENU_ID,
+    parentId: TABBURROW_MENU_ID,
     title: t('contextMenu.saveToCustomGroup'),
     contexts: ['page', 'frame'],
   });
@@ -46,6 +56,14 @@ export function createContextMenus(): void {
     id: NEW_GROUP_MENU_ID,
     parentId: PARENT_MENU_ID,
     title: t('contextMenu.newGroup'),
+    contexts: ['page', 'frame'],
+  });
+
+  // タブ管理から削除して閉じるメニュー（TabBurrowの子メニュー）
+  browser.contextMenus.create({
+    id: REMOVE_AND_CLOSE_MENU_ID,
+    parentId: TABBURROW_MENU_ID,
+    title: t('contextMenu.removeAndClose'),
     contexts: ['page', 'frame'],
   });
 
@@ -95,6 +113,8 @@ export async function handleContextMenuClick(
     await openTabManagerPage();
   } else if (info.menuItemId === 'save-all-including-pinned') {
     await handleSaveAllIncludingPinned(tab);
+  } else if (info.menuItemId === REMOVE_AND_CLOSE_MENU_ID && tab?.url) {
+    await handleRemoveAndClose(tab);
   } else if (info.menuItemId === NEW_GROUP_MENU_ID && tab?.url) {
     await handleCreateNewGroupAndSave(tab);
   } else if (typeof info.menuItemId === 'string' && info.menuItemId.startsWith(CUSTOM_GROUP_MENU_PREFIX) && tab?.url) {
@@ -210,19 +230,51 @@ export function isSaveableUrl(url: string): boolean {
 }
 
 /**
- * カスタムグループメニューの表示/非表示を更新
+ * タブ管理から削除してブラウザタブを閉じる
+ */
+async function handleRemoveAndClose(tab: Tabs.Tab): Promise<void> {
+  if (!tab.url || !tab.id) return;
+  
+  try {
+    // タブがストレージに保存されているか確認
+    const savedTab = await findTabByUrl(tab.url);
+    
+    if (savedTab) {
+      // ストレージから削除
+      await deleteTab(savedTab.id);
+      console.log(`タブ管理から削除しました: ${tab.url}`);
+      
+      // タブ管理画面に変更を通知
+      browser.runtime.sendMessage({ type: 'tabs-changed' }).catch(() => {});
+    } else {
+      console.log(`タブ管理に存在しません: ${tab.url}`);
+    }
+    
+    // ブラウザタブを閉じる
+    await browser.tabs.remove(tab.id);
+  } catch (error) {
+    console.error('タブ管理からの削除に失敗:', error);
+  }
+}
+
+/**
+ * コンテキストメニューの表示/非表示を更新
  */
 export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> {
   if (!tab.url) return;
   
   // 保存対象外のURL（拡張ページ、ブラウザ内部ページなど）ではメニューを非表示
   if (!isSaveableUrl(tab.url)) {
-    browser.contextMenus.update(PARENT_MENU_ID, { visible: false });
+    browser.contextMenus.update(TABBURROW_MENU_ID, { visible: false });
     return;
   }
   
-  // 保存対象のURLではメニューを表示
-  browser.contextMenus.update(PARENT_MENU_ID, { visible: true });
+  // 保存対象のURLではTabBurrowメニューを表示
+  browser.contextMenus.update(TABBURROW_MENU_ID, { visible: true });
+  
+  // タブがストレージに保存されているか確認し、「削除して閉じる」メニューの有効/無効を設定
+  const savedTab = await findTabByUrl(tab.url);
+  browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { enabled: savedTab !== null });
 }
 
 /**
@@ -231,7 +283,8 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
 export function updateContextMenuTitles(): void {
   browser.contextMenus.update('open-tab-manager', { title: t('contextMenu.openManager') });
   browser.contextMenus.update('save-all-including-pinned', { title: t('contextMenu.saveAllIncludingPinned') });
+  browser.contextMenus.update(TABBURROW_MENU_ID, { title: t('contextMenu.tabBurrow') });
   browser.contextMenus.update(PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
+  browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
 }
-

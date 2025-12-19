@@ -40,6 +40,8 @@ vi.mock('../storage.js', () => ({
   saveTabsForCustomGroup: vi.fn().mockResolvedValue(undefined),
   getAllCustomGroups: vi.fn().mockResolvedValue([]),
   createCustomGroup: vi.fn().mockResolvedValue(undefined),
+  findTabByUrl: vi.fn().mockResolvedValue(null),
+  deleteTab: vi.fn().mockResolvedValue(undefined),
 }));
 
 // i18n.jsのモック
@@ -183,6 +185,45 @@ describe('contextMenu', () => {
       await handleContextMenuClick(info, createMockTab());
 
       expect(saveAndCloseTabs).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleContextMenuClick - remove-and-close', () => {
+    it('remove-and-closeメニューで管理対象タブを削除して閉じる', async () => {
+      const { findTabByUrl, deleteTab } = await import('../storage.js');
+      const savedTab = { id: 'saved-tab-id', url: 'https://example.com' };
+      vi.mocked(findTabByUrl).mockResolvedValueOnce(savedTab as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'remove-and-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(findTabByUrl).toHaveBeenCalledWith('https://example.com');
+      expect(deleteTab).toHaveBeenCalledWith('saved-tab-id');
+      expect(browser.tabs.remove).toHaveBeenCalledWith(1);
+    });
+
+    it('remove-and-closeで管理対象外のタブでもブラウザタブは閉じる', async () => {
+      const { findTabByUrl, deleteTab } = await import('../storage.js');
+      vi.mocked(findTabByUrl).mockResolvedValueOnce(null);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'remove-and-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(findTabByUrl).toHaveBeenCalledWith('https://example.com');
+      expect(deleteTab).not.toHaveBeenCalled();
+      expect(browser.tabs.remove).toHaveBeenCalledWith(1);
     });
   });
 

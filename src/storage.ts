@@ -120,7 +120,7 @@ async function openDB(): Promise<IDBDatabase> {
 /**
  * URLで既存のタブを検索
  */
-async function findTabByUrl(url: string): Promise<SavedTab | null> {
+export async function findTabByUrl(url: string): Promise<SavedTab | null> {
   const db = await openDB();
   
   return new Promise((resolve, reject) => {

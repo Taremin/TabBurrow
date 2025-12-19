@@ -304,7 +304,9 @@
         "openManager": "タブ管理画面を開く",
         "saveToCustomGroup": "カスタムグループに保存",
         "newGroup": "新規グループ...",
-        "saveAllIncludingPinned": "固定タブも含めてすべてしまう"
+        "saveAllIncludingPinned": "固定タブも含めてすべてしまう",
+        "tabBurrow": "TabBurrow",
+        "removeAndClose": "タブ管理から削除して閉じる"
     },
     "manifest": {
         "description": "タブを保存して管理する拡張機能",
