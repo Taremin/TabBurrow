@@ -7,6 +7,10 @@
         "tabs": "tabs",
         "tabCount": "{count} tabs"
     },
+    "dialog": {
+        "ok": "OK",
+        "promptPlaceholder": "Enter value"
+    },
     "settings": {
         "title": "TabBurrow - Settings",
         "headerTitle": "Settings",

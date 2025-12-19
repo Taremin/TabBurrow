@@ -22,6 +22,7 @@ import { notifySettingsChanged } from '../../settings.js';
 import { ImportModeDialog } from './ImportModeDialog.js';
 import { TextExportDialog } from './TextExportDialog.js';
 import { TextImportDialog } from './TextImportDialog.js';
+import { AlertDialog } from '../../common/AlertDialog.js';
 import { Database, Download, Upload, FileJson, ClipboardPaste } from 'lucide-react';
 
 interface DataManagementProps {
@@ -46,6 +47,18 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
   const [isTabsImportDialogOpen, setIsTabsImportDialogOpen] = useState(false);
   const [isSettingsImportDialogOpen, setIsSettingsImportDialogOpen] = useState(false);
 
+  // AlertDialog状態
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string; variant: 'success' | 'error' | 'info' }>({ isOpen: false, title: '', message: '', variant: 'info' });
+
+  // AlertDialogを表示するヘルパー
+  const showAlert = useCallback((title: string, message: string, variant: 'success' | 'error' | 'info' = 'info') => {
+    setAlertDialog({ isOpen: true, title, message, variant });
+  }, []);
+
+  const closeAlert = useCallback(() => {
+    setAlertDialog(prev => ({ ...prev, isOpen: false }));
+  }, []);
+
   // 設定エクスポート（ファイル）
   const handleExportSettings = useCallback(async () => {
     try {
@@ -53,9 +66,9 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
       downloadAsFile(data, generateSettingsExportFilename());
     } catch (error) {
       console.error('設定のエクスポートに失敗:', error);
-      alert('設定のエクスポートに失敗しました。');
+      showAlert(t('settings.saveError'), t('settings.dataManagement.exportError') || '設定のエクスポートに失敗しました。', 'error');
     }
-  }, []);
+  }, [showAlert, t]);
 
   // 設定インポート（ファイル）
   const handleImportSettings = useCallback(async () => {
@@ -69,14 +82,14 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
       // 親コンポーネントに通知
       onSettingsImported();
       
-      alert('✓ 設定をインポートしました');
+      showAlert(t('settings.importSuccess'), t('settings.importSuccess'), 'success');
     } catch (error) {
       if ((error as Error).message !== 'ファイル選択がキャンセルされました') {
         console.error('設定のインポートに失敗:', error);
-        alert('設定のインポートに失敗しました: ' + (error as Error).message);
+        showAlert(t('settings.saveError'), '設定のインポートに失敗しました: ' + (error as Error).message, 'error');
       }
     }
-  }, [onSettingsImported]);
+  }, [onSettingsImported, showAlert, t]);
 
   // タブエクスポート（ファイル）
   const handleExportTabs = useCallback(async () => {
@@ -85,9 +98,9 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
       downloadAsFile(data, generateTabsExportFilename());
     } catch (error) {
       console.error('タブのエクスポートに失敗:', error);
-      alert('タブのエクスポートに失敗しました。');
+      showAlert(t('settings.saveError'), 'タブのエクスポートに失敗しました。', 'error');
     }
-  }, []);
+  }, [showAlert, t]);
 
   // タブインポート開始（モード選択ダイアログを表示）
   const handleImportTabs = useCallback(async () => {
@@ -99,10 +112,10 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
     } catch (error) {
       if ((error as Error).message !== 'ファイル選択がキャンセルされました') {
         console.error('ファイル読み込みに失敗:', error);
-        alert('ファイルの読み込みに失敗しました。');
+        showAlert(t('settings.saveError'), 'ファイルの読み込みに失敗しました。', 'error');
       }
     }
-  }, []);
+  }, [showAlert, t]);
 
   // インポートダイアログ確定（ファイルベース）
   const handleConfirmImport = useCallback(async () => {
@@ -112,12 +125,12 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
       const result = await importTabs(pendingTabImportData, importMode);
       setIsImportDialogOpen(false);
       setPendingTabImportData(null);
-      alert(`インポート完了: ${result.imported}件追加、${result.skipped}件スキップ`);
+      showAlert(t('settings.importDialog.successMessage', { imported: result.imported, skipped: result.skipped }), `インポート完了: ${result.imported}件追加、${result.skipped}件スキップ`, 'success');
     } catch (error) {
       console.error('インポートに失敗:', error);
-      alert('インポートに失敗しました: ' + (error as Error).message);
+      showAlert(t('settings.saveError'), 'インポートに失敗しました: ' + (error as Error).message, 'error');
     }
-  }, [pendingTabImportData, importMode]);
+  }, [pendingTabImportData, importMode, showAlert, t]);
 
   // インポートダイアログキャンセル
   const handleCancelImport = useCallback(() => {
@@ -133,9 +146,9 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
       setIsTabsExportDialogOpen(true);
     } catch (error) {
       console.error('タブのエクスポートに失敗:', error);
-      alert('タブのエクスポートに失敗しました。');
+      showAlert(t('settings.saveError'), 'タブのエクスポートに失敗しました。', 'error');
     }
-  }, []);
+  }, [showAlert, t]);
 
   // 設定をJSONで表示
   const handleShowSettingsJson = useCallback(async () => {
@@ -145,16 +158,16 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
       setIsSettingsExportDialogOpen(true);
     } catch (error) {
       console.error('設定のエクスポートに失敗:', error);
-      alert('設定のエクスポートに失敗しました。');
+      showAlert(t('settings.saveError'), '設定のエクスポートに失敗しました。', 'error');
     }
-  }, []);
+  }, [showAlert, t]);
 
   // タブデータをテキストからインポート（複数フォーマット対応）
   const handleImportTabsFromText = useCallback(async (text: string) => {
     // importTabsFromTextはフォーマットを自動判定してインポート
     const result = await importTabsFromText(text, 'merge');
-    alert(`インポート完了: ${result.imported}件追加、${result.skipped}件スキップ`);
-  }, []);
+    showAlert(t('settings.importDialog.successMessage', { imported: result.imported, skipped: result.skipped }), `インポート完了: ${result.imported}件追加、${result.skipped}件スキップ`, 'success');
+  }, [showAlert, t]);
 
   // 設定をテキストからインポート
   const handleImportSettingsFromText = useCallback(async (jsonText: string) => {
@@ -167,8 +180,8 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
     // 親コンポーネントに通知
     onSettingsImported();
     
-    alert('✓ 設定をインポートしました');
-  }, [onSettingsImported]);
+    showAlert(t('settings.importSuccess'), t('settings.importSuccess'), 'success');
+  }, [onSettingsImported, showAlert, t]);
 
   return (
     <>
@@ -312,6 +325,15 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
         isTabsImport={false}
         onImport={handleImportSettingsFromText}
         onClose={() => setIsSettingsImportDialogOpen(false)}
+      />
+
+      {/* 共通のAlertDialog */}
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+        onClose={closeAlert}
       />
     </>
   );

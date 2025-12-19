@@ -10,6 +10,8 @@ import type { LinkCheckAction } from '../settings.js';
 import { deleteMultipleTabs, assignMultipleTabsToGroup, getAllCustomGroups } from '../storage.js';
 import type { CustomGroupMeta } from '../dbSchema.js';
 import { CheckCircle, XCircle, AlertTriangle, Minus, Clock, X } from 'lucide-react';
+import { ConfirmDialog } from './ConfirmDialog.js';
+import { PromptDialog } from '../common/PromptDialog.js';
 
 // ======================
 // 型定義
@@ -67,6 +69,10 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
   const [error, setError] = useState<string | null>(null);
   const [customGroups, setCustomGroups] = useState<CustomGroupMeta[]>([]);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
+
+  // ダイアログ状態
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isNewGroupPromptOpen, setIsNewGroupPromptOpen] = useState(false);
 
   // 再開時のベース進捗（既にチェック済みの結果から計算）
   const baseProgressRef = useRef<LinkCheckProgress>({
@@ -307,15 +313,15 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
     });
   }, []);
 
-  // 選択を削除
-  const handleDeleteSelected = useCallback(async () => {
+  // 削除確認ダイアログを開く
+  const handleDeleteSelected = useCallback(() => {
     if (selectedIds.size === 0) return;
-    
-    const confirmed = window.confirm(
-      t('linkCheck.confirmDeleteMessage', { count: selectedIds.size.toString() })
-    );
-    if (!confirmed) return;
+    setIsDeleteConfirmOpen(true);
+  }, [selectedIds]);
 
+  // 削除を確定
+  const handleConfirmDelete = useCallback(async () => {
+    setIsDeleteConfirmOpen(false);
     try {
       await deleteMultipleTabs(Array.from(selectedIds));
       // 結果から削除したタブを除外
@@ -340,12 +346,16 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
     }
   }, [selectedIds, onTabsDeleted]);
 
-  // 新規グループ作成
-  const handleCreateNewGroup = useCallback(async () => {
-    const name = window.prompt(t('tabManager.customGroup.renameDialogTitle'));
-    if (!name || !name.trim()) return;
-    
-    await handleMoveToGroup(name.trim());
+  // 新規グループ作成ダイアログを開く
+  const handleCreateNewGroup = useCallback(() => {
+    setIsNewGroupPromptOpen(true);
+    setShowGroupMenu(false);
+  }, []);
+
+  // 新規グループ名を確定
+  const handleConfirmNewGroup = useCallback(async (name: string) => {
+    setIsNewGroupPromptOpen(false);
+    await handleMoveToGroup(name);
   }, [handleMoveToGroup]);
 
   // ダイアログが閉じている場合は何も表示しない
@@ -519,6 +529,23 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
           )}
         </div>
       </div>
+
+      {/* 削除確認ダイアログ */}
+      <ConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        title={t('linkCheck.confirmDeleteTitle')}
+        message={t('linkCheck.confirmDeleteMessage', { count: selectedIds.size.toString() })}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+      />
+
+      {/* 新規グループ名入力ダイアログ */}
+      <PromptDialog
+        isOpen={isNewGroupPromptOpen}
+        title={t('tabManager.customGroup.renameDialogTitle')}
+        onConfirm={handleConfirmNewGroup}
+        onCancel={() => setIsNewGroupPromptOpen(false)}
+      />
     </div>
   );
 }

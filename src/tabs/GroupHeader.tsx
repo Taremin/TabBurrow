@@ -15,6 +15,8 @@ interface GroupHeaderProps {
   onOpenGroup: (name: string) => void;
   onOpenGroupAsTabGroup?: (name: string) => void;
   onRenameGroup?: (oldName: string, newName: string) => void;
+  // リネームリクエスト（親でPromptDialogを表示）
+  onRequestRename?: (currentName: string) => void;
   // グループ内フィルタ
   filterPattern?: string;
   onFilterChange?: (pattern: string) => void;
@@ -40,6 +42,7 @@ export const GroupHeader = memo(function GroupHeader({
   onOpenGroup,
   onOpenGroupAsTabGroup,
   onRenameGroup,
+  onRequestRename,
   filterPattern = '',
   onFilterChange,
   isCompact = false,
@@ -97,12 +100,11 @@ export const GroupHeader = memo(function GroupHeader({
   }, [name, onOpenGroupAsTabGroup]);
 
   const handleRename = useCallback(() => {
-    if (!onRenameGroup) return;
-    const newName = prompt(t('tabManager.customGroup.renameDialogTitle'), name);
-    if (newName && newName.trim() && newName !== name) {
-      onRenameGroup(name, newName.trim());
+    // 親コンポーネントにリネームリクエストを通知（PromptDialogを表示させる）
+    if (onRequestRename) {
+      onRequestRename(name);
     }
-  }, [name, onRenameGroup, t]);
+  }, [name, onRequestRename]);
 
   const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (onFilterChange) {

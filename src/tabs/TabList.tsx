@@ -22,6 +22,7 @@ interface TabListProps {
   onOpenGroupAsTabGroup?: (groupName: string) => void;
   onOpenTab: (url: string) => void;
   onRenameGroup?: (oldName: string, newName: string) => void;
+  onRequestRename?: (currentName: string) => void;
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string) => void;
   // 選択モード関連
@@ -165,6 +166,7 @@ export function TabList({
   onOpenGroupAsTabGroup,
   onOpenTab,
   onRenameGroup,
+  onRequestRename,
   onMoveToGroup,
   onRemoveFromGroup,
   isSelectionMode,
@@ -225,6 +227,7 @@ export function TabList({
         onOpenGroup={onOpenGroup}
         onOpenGroupAsTabGroup={onOpenGroupAsTabGroup}
         onRenameGroup={onRenameGroup}
+        onRequestRename={onRequestRename}
         filterPattern={groupFilters[group.name] || ''}
         onFilterChange={(pattern: string) => onGroupFilterChange(group.name, pattern)}
         isSelectionMode={isSelectionMode}
@@ -235,7 +238,7 @@ export function TabList({
         isCompact={isCompact}
       />
     );
-  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact]);
+  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact]);
 
   // タブカードのレンダリング
   const itemContent = useCallback((index: number) => {

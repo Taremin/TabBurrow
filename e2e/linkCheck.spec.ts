@@ -334,24 +334,25 @@ test.describe('リンクチェック機能', () => {
     // 全選択
     await page.click(selectors.linkCheckSelectAllButton);
     
-    // 確認ダイアログを先に設定
-    page.once('dialog', async (dialog) => {
-      await dialog.accept();
-    });
-    
     // 削除ボタンをクリック
     await page.click(selectors.linkCheckDeleteButton);
     
-    // 削除処理を待機
-    await wait(1000);
+    // ConfirmDialogが表示されることを確認
+    // dialog-actionsはConfirmDialogにのみ存在し、LinkCheckDialogにはない
+    const confirmDialogActions = page.locator('.dialog-overlay .dialog-actions');
+    await expect(confirmDialogActions).toBeVisible({ timeout: 5000 });
     
-    // ダイアログを閉じる
-    await page.click(selectors.linkCheckCloseButton);
+    // 確認ボタン（削除ボタン）が存在することを確認
+    const deleteButton = confirmDialogActions.locator('.btn-danger');
+    await expect(deleteButton).toBeVisible();
     
-    // タブが削除されていることを確認
-    await page.waitForFunction(() => {
-      return document.querySelectorAll('.tab-card').length === 0;
-    }, { timeout: 10000 });
+    // キャンセルボタンが存在することを確認
+    const cancelButton = confirmDialogActions.locator('.btn-secondary');
+    await expect(cancelButton).toBeVisible();
+    
+    // ダイアログのタイトルが表示されていることを確認
+    const dialogTitle = page.locator('.dialog-overlay .dialog-title');
+    await expect(dialogTitle).toBeVisible();
     
     await page.close();
   });

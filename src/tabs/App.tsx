@@ -31,6 +31,7 @@ import { Header } from './Header';
 import { TabList } from './TabList';
 import { ConfirmDialog } from './ConfirmDialog';
 import { LinkCheckDialog } from './LinkCheckDialog';
+import { PromptDialog } from '../common/PromptDialog.js';
 import { useTranslation } from '../common/i18nContext.js';
 
 interface DialogState {
@@ -99,6 +100,9 @@ export function App() {
 
   // リンクチェックダイアログ
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
+
+  // リネームダイアログ
+  const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string }>({ isOpen: false, currentName: '' });
 
   // タブ数
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
@@ -383,6 +387,19 @@ export function App() {
     }
   }, [loadTabs]);
 
+  // リネームリクエスト（PromptDialogを表示）
+  const handleRequestRename = useCallback((currentName: string) => {
+    setRenameDialog({ isOpen: true, currentName });
+  }, []);
+
+  // リネーム確定
+  const handleConfirmRename = useCallback(async (newName: string) => {
+    setRenameDialog({ isOpen: false, currentName: '' });
+    if (renameDialog.currentName && newName !== renameDialog.currentName) {
+      await handleRenameGroup(renameDialog.currentName, newName);
+    }
+  }, [renameDialog.currentName, handleRenameGroup]);
+
   // タブをカスタムグループに移動
   const handleMoveToGroup = useCallback(async (tabId: string, groupName: string) => {
     try {
@@ -632,6 +649,7 @@ export function App() {
             onOpenGroupAsTabGroup={handleOpenGroupAsTabGroup}
             onOpenTab={handleOpenTab}
             onRenameGroup={handleRenameGroup}
+            onRequestRename={handleRequestRename}
             onMoveToGroup={handleMoveToGroup}
             onRemoveFromGroup={handleRemoveFromGroup}
             isSelectionMode={isSelectionMode}
@@ -672,6 +690,15 @@ export function App() {
         isOpen={isLinkCheckOpen}
         onClose={() => setIsLinkCheckOpen(false)}
         onTabsDeleted={loadTabs}
+      />
+
+      {/* リネーム用PromptDialog */}
+      <PromptDialog
+        isOpen={renameDialog.isOpen}
+        title={t('tabManager.customGroup.renameDialogTitle')}
+        defaultValue={renameDialog.currentName}
+        onConfirm={handleConfirmRename}
+        onCancel={() => setRenameDialog({ isOpen: false, currentName: '' })}
       />
     </div>
   );

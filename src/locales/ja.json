@@ -7,6 +7,10 @@
         "tabs": "タブ",
         "tabCount": "{count} タブ"
     },
+    "dialog": {
+        "ok": "OK",
+        "promptPlaceholder": "入力してください"
+    },
     "settings": {
         "title": "TabBurrow - 設定",
         "headerTitle": "設定",
