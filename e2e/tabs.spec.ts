@@ -310,6 +310,63 @@ test.describe('コンパクト表示機能', () => {
     await page.waitForTimeout(300);
     await expect(screenshotPopup).not.toBeVisible();
   });
+
+  test('コンパクト表示から通常表示に切り替えた際にサムネイルが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // スクリーンショット付きテストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/switch-test',
+      title: 'Switch Display Mode Test',
+      screenshot: true,
+    });
+    
+    // リロード
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(1);
+    
+    // ドロップダウンメニューを開いてコンパクト表示に切替
+    const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
+    await viewModeToggle.click();
+    await page.waitForTimeout(300);
+    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.waitForTimeout(500);
+    
+    // コンパクト表示になっていることを確認（スクリーンショットサムネイルが非表示）
+    const screenshotContainer = page.locator('.tab-screenshot');
+    await expect(screenshotContainer).not.toBeVisible();
+    
+    // コンパクト表示時のインジケータが表示されていることを確認
+    const screenshotIndicator = page.locator('.tab-screenshot-indicator');
+    await expect(screenshotIndicator).toBeVisible({ timeout: 3000 });
+    
+    // 再度ドロップダウンメニューを開いて通常表示に切替
+    await viewModeToggle.click();
+    await page.waitForTimeout(300);
+    await page.locator('.view-mode-menu-item').filter({ hasText: /通常|Normal/i }).click();
+    await page.waitForTimeout(500);
+    
+    // 通常表示になっていることを確認（スクリーンショットサムネイルが表示）
+    await expect(screenshotContainer).toBeVisible({ timeout: 3000 });
+    
+    // サムネイル内の画像が表示されていることを確認
+    const thumbnailImage = page.locator('.tab-screenshot img');
+    await expect(thumbnailImage).toBeVisible({ timeout: 3000 });
+    
+    // 画像のsrc属性が設定されていることを確認（blob: URLまたはdata: URL）
+    const imgSrc = await thumbnailImage.getAttribute('src');
+    expect(imgSrc).toBeTruthy();
+    expect(imgSrc!.length).toBeGreaterThan(0);
+  });
 });
 
 test.describe('一括選択機能', () => {

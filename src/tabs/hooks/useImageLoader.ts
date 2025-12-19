@@ -12,7 +12,7 @@ interface UseImageLoaderOptions {
 
 interface UseImageLoaderResult {
   url: string | null;
-  ref: React.RefObject<HTMLDivElement>;
+  ref: (node: HTMLDivElement | null) => void;
   isVisible: boolean;
 }
 
@@ -21,6 +21,7 @@ interface UseImageLoaderResult {
  * - ビューポート進入時: BlobからObject URLを生成
  * - ビューポート退出時: Object URLを解放
  * - 表示モード切替時: URLを保持（要素が変わっても維持）
+ * - ref callbackパターンで要素の変更を検知
  */
 export function useImageLoader(
   blob: Blob | null,
@@ -29,10 +30,15 @@ export function useImageLoader(
   const { rootMargin = '100px', threshold = 0 } = options;
   const [url, setUrl] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const urlRef = useRef<string | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  // 要素の変更を追跡するためのstate
+  const [element, setElement] = useState<HTMLDivElement | null>(null);
 
-
+  // ref callbackを使用して要素の変更を検知
+  const ref = useCallback((node: HTMLDivElement | null) => {
+    setElement(node);
+  }, []);
 
   // URLを生成（まだ生成されていない場合のみ）
   const generateUrl = useCallback(() => {
@@ -44,7 +50,6 @@ export function useImageLoader(
   }, [blob]);
 
   useEffect(() => {
-    const element = ref.current;
     if (!element) {
       // 要素がない場合でも、既存のURLは保持する（表示モード切替対応）
       return;
@@ -64,6 +69,7 @@ export function useImageLoader(
       },
       { rootMargin, threshold }
     );
+    observerRef.current = observer;
 
     observer.observe(element);
 
@@ -77,9 +83,10 @@ export function useImageLoader(
 
     return () => {
       observer.disconnect();
-      // 注意: ここではクリーンアップしない（表示モード切替時にURLを保持するため）
+      observerRef.current = null;
+      // 注意: ここではURLをクリーンアップしない（表示モード切替時にURLを保持するため）
     };
-  }, [blob, rootMargin, threshold, generateUrl]);
+  }, [element, blob, rootMargin, threshold, generateUrl]);
 
   // コンポーネントの完全アンマウント時にクリーンアップ
   useEffect(() => {
