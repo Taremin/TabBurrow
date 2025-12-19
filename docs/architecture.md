@@ -1,28 +1,47 @@
 # アーキテクチャ概要
 
 ## 全体構成
-CompactTabは、Chrome Extension Manifest V3に基づいたタブ管理拡張機能です。
+TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機能です（Chrome/Firefox/Vivaldi対応）。
 主に以下の要素で構成されています。
 
-1.  **Background Service Worker**: 常駐スクリプト。自動クローズの監視、コンテキストメニューの処理、タブ保存の実データ処理を担当。
+1.  **Background Service Worker**: 常駐スクリプト。自動クローズの監視、コンテキストメニューの処理、タブ保存、リンクチェック、自動バックアップを担当。
 2.  **Tab Manager UI (React)**: 保存されたタブの一覧・管理・検索を行うフロントエンド。仮想スクロールを採用。
-3.  **Storage Layer**:
-    *   **IndexedDB**: タブ情報とスクリーンショット（Blob）の保存。大量のデータを扱うため使用。
-    *   **Chrome Storage (Local)**: ユーザー設定（自動クローズ設定、ソート順など）の保存。
+3.  **Options UI (React)**: 設定画面。自動クローズ、リンクチェック、アイコンクリック動作、バックアップなどの設定を管理。
+4.  **Storage Layer**:
+    *   **IndexedDB**: タブ情報、スクリーンショット（Blob）、バックアップの保存。大量のデータを扱うため使用。
+    *   **Browser Storage (Local)**: ユーザー設定（自動クローズ設定、ソート順、リンクチェック設定など）の保存。
 
 ## ディレクトリ構成 (`src/`)
 
 *   **`background/`**: バックグラウンドスクリプト群。
-    *   `index.ts`: エントリーポイント。
+    *   `index.ts`: エントリーポイント。メッセージハンドリング、アクションクリック処理。
     *   `autoClose.ts`: 自動クローズロジック。
-    *   `tabSaver.ts`: タブ保存・スクリーンショット取得。
+    *   `tabSaver.ts`: タブ保存処理。
+    *   `screenshot.ts`: スクリーンショット取得・リサイズ。
+    *   `contextMenu.ts`: コンテキストメニューの作成・ハンドリング。
+    *   `tabEvents.ts`: タブイベント監視（アクティベート、更新時のスクショキャッシュ）。
+    *   `linkChecker.ts`: リンク切れチェック機能。
+    *   `backup.ts`: 自動バックアップ機能。
 *   **`tabs/`**: タブ管理画面（Reactアプリケーション）。
     *   `App.tsx`: メインコンポーネント。状態管理。
-    *   `TabList.tsx`: 仮想スクロールリスト。
+    *   `TabList.tsx`: 仮想スクロールリスト（GroupedVirtuoso使用）。
+    *   `TabCard.tsx`: 個々のタブカード表示。
+    *   `GroupHeader.tsx`: グループヘッダー（一括操作ボタン含む）。
+    *   `Header.tsx`: 検索バー、統計情報、検索オプション。
+    *   `ConfirmDialog.tsx`: 確認ダイアログ。
+    *   `LinkCheckDialog.tsx`: リンクチェックダイアログ。
+    *   `DateRangeFilter.tsx`: 日付範囲フィルタ。
+*   **`options/`**: 設定画面（Reactアプリケーション）。
+    *   `App.tsx`: 設定画面メイン。
+    *   `components/`: 各種設定コンポーネント。
 *   **ルートファイル**:
     *   `storage.ts`: IndexedDBラッパー。
-    *   `settings.ts`: Chrome Storageラッパー。
-    *   `manifest.json`: 拡張機能定義。
+    *   `dbSchema.ts`: IndexedDBスキーマ定義。
+    *   `settings.ts`: Browser Storageラッパー。
+    *   `browserApi.ts`: webextension-polyfillのラッパー。
+    *   `i18n.ts`: 国際化対応。
+    *   `theme.ts`: テーマ管理。
+    *   `manifest.json` / `manifest.firefox.json`: 拡張機能定義。
 
 ## データフロー
 
