@@ -11,7 +11,7 @@ import { getSettings, matchAutoCloseRule } from '../settings.js';
 import { applyLocaleSetting } from '../i18n.js';
 
 // モジュールのインポート
-import { saveAndCloseTabs } from './tabSaver.js';
+import { saveAndCloseTabs, openTabManagerPage } from './tabSaver.js';
 import { initAutoClose, handleAutoCloseAlarm } from './autoClose.js';
 import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus } from './contextMenu.js';
 import { setupTabEventListeners } from './tabEvents.js';
@@ -78,6 +78,7 @@ async function handleActionClick(clickedTab: Tabs.Tab): Promise<void> {
 
   if (validTabs.length === 0) {
     console.log('保存対象のタブがありません');
+    await openTabManagerPage();
     return;
   }
 

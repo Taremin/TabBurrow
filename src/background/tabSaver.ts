@@ -73,21 +73,25 @@ export function createSavedTab(
 }
 
 /**
- * タブ管理画面を開く（既存のタブがあればそれをアクティブに）
+ * タブ管理画面を開く（現在のウィンドウに既存のタブがあればそれをアクティブに）
  */
 export async function openTabManagerPage(): Promise<void> {
   const extensionUrl = browser.runtime.getURL('tabs.html');
-  const existingTabs = await browser.tabs.query({ url: extensionUrl });
+  
+  // 現在のウィンドウを取得
+  const currentWindow = await browser.windows.getCurrent();
+  
+  // 現在のウィンドウ内でタブ管理画面を検索
+  const existingTabs = await browser.tabs.query({ 
+    url: extensionUrl,
+    windowId: currentWindow.id,  // 現在のウィンドウに限定
+  });
   
   if (existingTabs.length > 0 && existingTabs[0].id !== undefined) {
-    // 既存のタブをアクティブに
+    // 現在のウィンドウ内の既存タブをアクティブに
     await browser.tabs.update(existingTabs[0].id, { active: true });
-    // 既存タブのウィンドウもフォーカス
-    if (existingTabs[0].windowId !== undefined) {
-      await browser.windows.update(existingTabs[0].windowId, { focused: true });
-    }
   } else {
-    // 新しいタブを作成
+    // 現在のウィンドウに新しいタブを作成
     await browser.tabs.create({ url: extensionUrl });
   }
 }
