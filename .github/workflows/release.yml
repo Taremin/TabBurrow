@@ -86,9 +86,12 @@ jobs:
             git log --pretty=format:"- %s (%h)" >> changelog.md
           fi
           
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          # ランダムなデリミタを生成してEOF衝突を回避
+          DELIMITER="CHANGELOG_$(date +%s%N)"
+          echo "changelog<<${DELIMITER}" >> $GITHUB_OUTPUT
           cat changelog.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: リリースを作成
         uses: softprops/action-gh-release@v2
