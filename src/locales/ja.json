@@ -381,5 +381,14 @@
                 "cancel": "キャンセル"
             }
         }
+    },
+    "credits": {
+        "title": "TabBurrow - クレジット",
+        "headerTitle": "クレジット",
+        "description": "TabBurrowは以下のオープンソースライブラリを利用しています。各プロジェクトの開発者の皆様に感謝いたします。",
+        "backToSettings": "設定に戻る",
+        "extensionLicense": "TabBurrow は MIT ライセンスで公開されています",
+        "runtimeDependencies": "ランタイム依存",
+        "devDependencies": "開発依存"
     }
 }

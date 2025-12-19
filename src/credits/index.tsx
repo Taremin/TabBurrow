@@ -1,0 +1,45 @@
+/**
+ * クレジットページ - エントリーポイント
+ */
+
+import { createRoot } from 'react-dom/client';
+import browser from '../browserApi.js';
+import { App } from './App';
+import { I18nProvider } from '../common/i18nContext.js';
+import { getSettings } from '../settings.js';
+import { applyTheme } from '../theme.js';
+
+// DOMContentLoaded時に初期化
+async function init() {
+    // テーマを適用
+    const settings = await getSettings();
+    applyTheme(settings.theme);
+
+    // 設定変更メッセージを監視してテーマを再適用
+    browser.runtime.onMessage.addListener(async (message: unknown) => {
+        const msg = message as { type?: string };
+        if (msg.type === 'settings-changed') {
+            const newSettings = await getSettings();
+            applyTheme(newSettings.theme);
+        }
+    });
+
+    const container = document.getElementById('root');
+    if (!container) {
+        console.error('Root element not found');
+        return;
+    }
+
+    const root = createRoot(container);
+    root.render(
+        <I18nProvider>
+            <App />
+        </I18nProvider>
+    );
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

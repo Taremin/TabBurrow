@@ -239,6 +239,7 @@ export function App() {
         <div className="fixed-footer-content">
           <div className="footer-left">
             <span className="version-info">TabBurrow v{browser.runtime.getManifest().version}</span>
+            <a href="credits.html" className="credits-link">{t('credits.headerTitle')}</a>
           </div>
           <div className="footer-right">
             <span className={`save-status ${saveStatus === 'error' ? 'error' : ''}`}>

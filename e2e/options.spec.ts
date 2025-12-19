@@ -701,3 +701,85 @@ test.describe('設定画面 - デフォルト表示モード設定', () => {
     await expect(submitButton).toBeEnabled();
   });
 });
+
+// ======================
+// クレジットページ テスト
+// ======================
+
+test.describe('クレジットページ', () => {
+  test('設定画面からクレジットページへのリンクが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // クレジットリンクが存在することを確認
+    const creditsLink = page.locator('.credits-link');
+    await expect(creditsLink).toBeVisible();
+  });
+
+  test('クレジットページへのリンクが動作する', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // クレジットリンクをクリック
+    const creditsLink = page.locator('.credits-link');
+    await creditsLink.click();
+    await waitForPageLoad(page);
+    
+    // クレジットページに遷移したことを確認
+    expect(page.url()).toContain('credits.html');
+  });
+
+  test('クレジットページが正しく読み込まれる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'credits.html'));
+    await waitForPageLoad(page);
+    
+    // ヘッダーが表示されていることを確認
+    const header = page.locator('.header');
+    await expect(header).toBeVisible();
+    
+    // ライブラリカードが表示されていることを確認
+    const libraryCards = page.locator('.library-card');
+    await expect(libraryCards.first()).toBeVisible();
+    
+    // 少なくとも5つのライブラリが表示されていることを確認
+    const count = await libraryCards.count();
+    expect(count).toBeGreaterThanOrEqual(5);
+  });
+
+  test('クレジットページから設定画面に戻るリンクが動作する', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'credits.html'));
+    await waitForPageLoad(page);
+    
+    // 設定に戻るリンクをクリック
+    const backLink = page.locator('.header a.btn');
+    await expect(backLink).toBeVisible();
+    await backLink.click();
+    await waitForPageLoad(page);
+    
+    // 設定画面に遷移したことを確認
+    expect(page.url()).toContain('options.html');
+  });
+
+  test('クレジットページでライセンス情報が表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'credits.html'));
+    await waitForPageLoad(page);
+    
+    // React ライブラリの表示を確認
+    const reactCard = page.locator('.library-card:has-text("React")').first();
+    await expect(reactCard).toBeVisible();
+    
+    // ライセンス表示を確認
+    await expect(reactCard.locator('.library-license')).toBeVisible();
+    
+    // バージョン表示を確認
+    await expect(reactCard.locator('.library-version')).toBeVisible();
+    
+    // 著作権表示を確認
+    await expect(reactCard.locator('.library-copyright')).toBeVisible();
+  });
+});

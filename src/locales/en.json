@@ -381,5 +381,14 @@
                 "cancel": "Cancel"
             }
         }
+    },
+    "credits": {
+        "title": "TabBurrow - Credits",
+        "headerTitle": "Credits",
+        "description": "TabBurrow uses the following open source libraries. Thanks to all the developers who made these projects possible.",
+        "backToSettings": "Back to Settings",
+        "extensionLicense": "TabBurrow is released under the MIT License",
+        "runtimeDependencies": "Runtime Dependencies",
+        "devDependencies": "Development Dependencies"
     }
 }

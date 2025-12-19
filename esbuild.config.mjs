@@ -54,6 +54,10 @@ function copyStaticFiles(distDir, browser) {
     writeFileSync(join(distDir, 'options.html'), optionsHtml.replace(/\{\{VERSION\}\}/g, VERSION));
     copyFileSync('src/options.css', join(distDir, 'options.css'));
 
+    // credits.html/css
+    copyFileSync('src/credits.html', join(distDir, 'credits.html'));
+    copyFileSync('src/credits.css', join(distDir, 'credits.css'));
+
     // アイコン
     const iconsDir = join(distDir, 'icons');
     ensureDir(iconsDir);
@@ -83,6 +87,7 @@ async function build(distDir, browser) {
             'src/background/index.ts',
             'src/tabs/index.tsx',
             'src/options/index.tsx',
+            'src/credits/index.tsx',
         ],
         bundle: true,
         outdir: distDir,
