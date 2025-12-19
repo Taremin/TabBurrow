@@ -266,7 +266,11 @@
         "viewMode": {
             "grouped": "グループ表示",
             "flat": "フラット表示",
-            "toggleButton": "表示切替"
+            "normal": "通常表示",
+            "compact": "コンパクト",
+            "toggleButton": "表示切替",
+            "groupMode": "グループ化",
+            "density": "表示密度"
         },
         "customGroup": {
             "sectionTitle": "カスタムグループ",

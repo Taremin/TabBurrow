@@ -85,6 +85,7 @@ export async function createTestTabData(page: Page, tabData: {
   domain?: string;
   group?: string;
   groupType?: 'domain' | 'custom';
+  screenshot?: boolean; // スクリーンショットを含めるか
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
@@ -149,6 +150,28 @@ export async function createTestTabData(page: Page, tabData: {
       }
     }
     
+    // スクリーンショット用のBlob生成
+    let screenshotBlob: Blob;
+    if (data.screenshot) {
+      // ダミースクリーンショット（赤い四角）をPNG形式で生成
+      const canvas = document.createElement('canvas');
+      canvas.width = 100;
+      canvas.height = 100;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(0, 0, 100, 100);
+        ctx.fillStyle = 'white';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('Test', 20, 50);
+      }
+      screenshotBlob = await new Promise<Blob>(resolve => {
+        canvas.toBlob(blob => resolve(blob!), 'image/png');
+      });
+    } else {
+      screenshotBlob = new Blob([]);
+    }
+    
     // SavedTab型に準拠したオブジェクトを作成
     const tab = {
       id: Date.now().toString() + Math.random().toString(36).slice(2),
@@ -158,7 +181,7 @@ export async function createTestTabData(page: Page, tabData: {
       group: data.group || domain,
       groupType: data.groupType || 'domain',
       favIconUrl: '',
-      screenshot: new Blob([]),
+      screenshot: screenshotBlob,
       lastAccessed: Date.now(),
       savedAt: Date.now(),
     };

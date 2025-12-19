@@ -17,6 +17,8 @@ interface TabCardProps {
   onOpen: (url: string) => void;
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string) => void;
+  // 表示密度
+  isCompact?: boolean;
   // 選択モード関連
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -37,6 +39,7 @@ export const TabCard = memo(function TabCard({
   onOpen,
   onMoveToGroup,
   onRemoveFromGroup,
+  isCompact = false,
   isSelectionMode = false,
   isSelected = false,
   onToggleSelection,
@@ -111,17 +114,84 @@ export const TabCard = memo(function TabCard({
   }, [onRemoveFromGroup, tab.id]);
 
   // スクリーンショットホバー
+  const [compactPopupUrl, setCompactPopupUrl] = useState<string | null>(null);
+  
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
-    if (!screenshotUrl) return;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    // デバッグログ
+    console.log('[TabCard] handleMouseEnter called', {
+      isCompact,
+      screenshotUrl,
+      hasScreenshot: !!tab.screenshot,
+      screenshotSize: tab.screenshot?.size,
+    });
+    
+    // screenshotUrlがあればそれを使用、なければtab.screenshotから生成
+    let urlToUse = screenshotUrl;
+    
+    if (!urlToUse && tab.screenshot && tab.screenshot.size > 0) {
+      // コンパクト表示時: ホバー時にURLを即時生成
+      console.log('[TabCard] Creating compact popup URL from tab.screenshot');
+      urlToUse = URL.createObjectURL(tab.screenshot);
+      setCompactPopupUrl(urlToUse);
+    }
+    
+    if (!urlToUse) {
+      console.log('[TabCard] No URL to use, returning early');
+      return;
+    }
+    
     const popupWidth = 400;
     const popupHeight = 300;
+    let left: number;
+    let top: number;
     
-    let left = rect.right + 12;
-    let top = rect.top;
+    if (isCompact) {
+      // コンパクト表示時: マウスカーソルの右下に表示
+      left = e.clientX + 16;
+      top = e.clientY + 16;
+    } else {
+      // 通常表示時: 要素の右側に表示
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      left = rect.right + 12;
+      top = rect.top;
+    }
     
+    // 右側に収まらない場合は左側に表示
     if (left + popupWidth > window.innerWidth) {
-      left = rect.left - popupWidth - 12;
+      left = isCompact ? e.clientX - popupWidth - 16 : left - popupWidth - 24;
+    }
+    // 左側にも収まらない場合は画面左端に配置
+    if (left < 12) {
+      left = 12;
+    }
+    if (top + popupHeight > window.innerHeight) {
+      top = window.innerHeight - popupHeight - 12;
+    }
+    if (top < 12) {
+      top = 12;
+    }
+    
+    console.log('[TabCard] Setting popup visible', { urlToUse, left, top });
+    setPopupPosition({ left, top });
+    setShowPopup(true);
+  }, [isCompact, screenshotUrl, tab.screenshot]);
+
+  // コンパクト表示時: マウス移動でポップアップがついてくる
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isCompact || !showPopup) return;
+    
+    const popupWidth = 400;
+    const popupHeight = 300;
+    let left = e.clientX + 16;
+    let top = e.clientY + 16;
+    
+    // 右側に収まらない場合は左側に表示
+    if (left + popupWidth > window.innerWidth) {
+      left = e.clientX - popupWidth - 16;
+    }
+    // 左側にも収まらない場合は画面左端に配置
+    if (left < 12) {
+      left = 12;
     }
     if (top + popupHeight > window.innerHeight) {
       top = window.innerHeight - popupHeight - 12;
@@ -131,12 +201,16 @@ export const TabCard = memo(function TabCard({
     }
     
     setPopupPosition({ left, top });
-    setShowPopup(true);
-  }, [screenshotUrl]);
+  }, [isCompact, showPopup]);
 
   const handleMouseLeave = useCallback(() => {
     setShowPopup(false);
-  }, []);
+    // コンパクト表示用に生成したURLがあれば解放
+    if (compactPopupUrl) {
+      URL.revokeObjectURL(compactPopupUrl);
+      setCompactPopupUrl(null);
+    }
+  }, [compactPopupUrl]);
 
   // 外部クリックでメニューを閉じる
   useEffect(() => {
@@ -174,8 +248,11 @@ export const TabCard = memo(function TabCard({
   return (
     <>
       <div 
-        className={`tab-card ${isRemoving ? 'removing' : ''} ${isSelected ? 'selected' : ''}`}
+        className={`tab-card ${isRemoving ? 'removing' : ''} ${isSelected ? 'selected' : ''} ${isCompact ? 'tab-card-compact' : ''}`}
         onClick={handleClick}
+        onMouseEnter={isCompact ? handleMouseEnter : undefined}
+        onMouseMove={isCompact ? handleMouseMove : undefined}
+        onMouseLeave={isCompact ? handleMouseLeave : undefined}
       >
         {/* 選択モード時のチェックボックス */}
         {isSelectionMode && (
@@ -188,19 +265,26 @@ export const TabCard = memo(function TabCard({
             />
           </div>
         )}
-        <div 
-          className="tab-screenshot"
-          ref={imageRef}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {screenshotUrl ? (
-            <img src={screenshotUrl} alt="Screenshot" />
-          ) : (
-            <div className="tab-screenshot-placeholder">🌐</div>
-          )}
-        </div>
-        <div className="tab-info">
+        {/* 通常表示時のスクリーンショット */}
+        {!isCompact && (
+          <div 
+            className="tab-screenshot"
+            ref={imageRef}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {screenshotUrl ? (
+              <img src={screenshotUrl} alt="Screenshot" />
+            ) : (
+              <div className="tab-screenshot-placeholder">🌐</div>
+            )}
+          </div>
+        )}
+        {/* コンパクト表示時: スクリーンショットインジケータ（imageRefは使用しない） */}
+        {isCompact && tab.screenshot && tab.screenshot.size > 0 && (
+          <div className="tab-screenshot-indicator">📷</div>
+        )}
+        <div className={`tab-info ${isCompact ? 'tab-info-compact' : ''}`}>
           <div className="tab-title">
             {tab.favIconUrl && (
               <img 
@@ -212,11 +296,20 @@ export const TabCard = memo(function TabCard({
             )}
             <span>{tab.title}</span>
           </div>
-          <div className="tab-url">{tab.url}</div>
-          <div className="tab-meta">
-            <span>{t('tabManager.tabCard.lastAccessed', { datetime: formatDateTime(tab.lastAccessed) })}</span>
-            <span>{t('tabManager.tabCard.saved', { datetime: formatDateTime(tab.savedAt) })}</span>
-          </div>
+          {/* コンパクト表示時: URLを省略表示 */}
+          <div className={`tab-url ${isCompact ? 'tab-url-compact' : ''}`}>{tab.url}</div>
+          {/* メタ情報（時刻） */}
+          {isCompact ? (
+            <div className="tab-meta tab-meta-compact">
+              <span>📅 {formatDateTime(tab.lastAccessed)}</span>
+              <span>💾 {formatDateTime(tab.savedAt)}</span>
+            </div>
+          ) : (
+            <div className="tab-meta">
+              <span>{t('tabManager.tabCard.lastAccessed', { datetime: formatDateTime(tab.lastAccessed) })}</span>
+              <span>{t('tabManager.tabCard.saved', { datetime: formatDateTime(tab.savedAt) })}</span>
+            </div>
+          )}
         </div>
         <div className="tab-actions">
           {/* グループ操作ボタン */}
@@ -239,7 +332,7 @@ export const TabCard = memo(function TabCard({
       </div>
 
       {/* スクリーンショットポップアップ */}
-      {showPopup && screenshotUrl && (
+      {showPopup && (screenshotUrl || compactPopupUrl) && (
         <div 
           className="screenshot-popup"
           style={{
@@ -248,7 +341,7 @@ export const TabCard = memo(function TabCard({
             top: popupPosition.top,
           }}
         >
-          <img src={screenshotUrl} alt="Screenshot" />
+          <img src={screenshotUrl || compactPopupUrl || ''} alt="Screenshot" />
         </div>
       )}
 

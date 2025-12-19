@@ -17,6 +17,8 @@ interface GroupHeaderProps {
   // グループ内フィルタ
   filterPattern?: string;
   onFilterChange?: (pattern: string) => void;
+  // 表示密度
+  isCompact?: boolean;
   // 選択モード関連
   isSelectionMode?: boolean;
   groupTabIds?: string[];
@@ -39,6 +41,7 @@ export const GroupHeader = memo(function GroupHeader({
   onRenameGroup,
   filterPattern = '',
   onFilterChange,
+  isCompact = false,
   isSelectionMode = false,
   groupTabIds = [],
   selectedTabIds = new Set(),
@@ -134,7 +137,7 @@ export const GroupHeader = memo(function GroupHeader({
   const hasActiveFilter = filterPattern.trim().length > 0;
 
   return (
-    <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'}`}>
+    <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''}`}>
       <div className="group-title">
         {/* 選択モード時のチェックボックス */}
         {isSelectionMode && groupTabIds.length > 0 && (

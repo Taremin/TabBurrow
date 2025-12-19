@@ -24,7 +24,7 @@ import {
   removeMultipleTabsFromGroup,
 } from '../storage.js';
 import { getSettings, type GroupSortType, type ItemSortType, type RestoreMode } from '../settings.js';
-import type { SavedTab, DateRangeFilter, CustomGroupMeta, ViewMode, GroupFilter, SearchOptions } from './types';
+import type { SavedTab, DateRangeFilter, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter, SearchOptions } from './types';
 import { DEFAULT_SEARCH_OPTIONS } from './types';
 import { formatBytes } from './utils';
 import { Header } from './Header';
@@ -75,6 +75,7 @@ export function App() {
   const [restoreIntervalMs, setRestoreIntervalMs] = useState(100);
   const [dateRange, setDateRange] = useState<DateRangeFilter>({ startDate: null, endDate: null });
   const [viewMode, setViewMode] = useState<ViewMode>('grouped');
+  const [displayDensity, setDisplayDensity] = useState<DisplayDensity>('normal');
   const [storageInfo, setStorageInfo] = useState(t('tabManager.storageCalculating'));
   const [dialog, setDialog] = useState<DialogState>({
     isOpen: false,
@@ -572,7 +573,9 @@ export function App() {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         viewMode={viewMode}
+        displayDensity={displayDensity}
         onViewModeChange={setViewMode}
+        onDisplayDensityChange={setDisplayDensity}
         onDeleteAll={handleDeleteAll}
         onOpenAll={handleOpenAll}
         onLinkCheck={() => setIsLinkCheckOpen(true)}
@@ -604,6 +607,7 @@ export function App() {
             tabs={filteredTabs}
             customGroups={customGroups}
             viewMode={viewMode}
+            displayDensity={displayDensity}
             groupSort={groupSort}
             itemSort={itemSort}
             onDeleteTab={handleDeleteTab}

@@ -608,6 +608,14 @@ body {
   color: var(--text-muted);
 }
 
+/* コンパクト表示用メタ情報 */
+.tab-meta-compact {
+  font-size: 0.65rem;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .tab-actions {
   display: flex;
   align-items: center;
@@ -1674,4 +1682,123 @@ body {
   border-bottom: 1px solid var(--border-color);
   color: var(--accent-color);
   font-weight: 500;
+}
+
+/* ========================================
+   表示モードドロップダウンメニュー
+   ======================================== */
+
+.view-mode-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.view-mode-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 180px;
+  z-index: 100;
+  margin-top: 4px;
+}
+
+.view-mode-menu-section {
+  padding: 8px 0;
+}
+
+.view-mode-menu-label {
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.view-mode-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.view-mode-menu-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.view-mode-menu-item.active {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.view-mode-menu-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0;
+}
+
+/* ========================================
+   コンパクト表示モード
+   ======================================== */
+
+/* グループヘッダー - コンパクト */
+.group-header-compact {
+  padding: 6px 16px;
+}
+
+.group-header-compact .group-title {
+  gap: 6px;
+}
+
+.group-header-compact .group-icon {
+  font-size: 0.9rem;
+}
+
+.group-header-compact .group-domain {
+  font-size: 0.8rem;
+}
+
+.group-header-compact .group-count {
+  font-size: 0.7rem;
+}
+
+/* タブカード - コンパクト */
+.tab-card-compact {
+  padding: 4px 16px;
+  gap: 8px;
+}
+
+/* コンパクト時のスクリーンショットインジケータ */
+.tab-screenshot-indicator {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* コンパクト時のタブ情報 */
+.tab-info-compact {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.tab-info-compact .tab-title {
+  flex-shrink: 0;
+  max-width: 300px;
+}
+
+.tab-url-compact {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.7rem;
 }

@@ -185,9 +185,14 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
     // グループ表示（デフォルト）でグループヘッダーが表示（example.com と github.com）
     await expect(groupHeaders).toHaveCount(2);
     
-    // フラット表示に切替
+    // ドロップダウンメニューを開く
     const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
     await viewModeToggle.click();
+    await page.waitForTimeout(100);
+    
+    // フラット表示を選択
+    const flatButton = page.locator('.view-mode-menu-item', { hasText: /フラット|Flat/i });
+    await flatButton.click();
     await page.waitForTimeout(300);
     
     // フラット表示ではグループヘッダーが0になる
@@ -229,19 +234,81 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
     // グループヘッダーが2つ（異なるドメイン）
     await expect(groupHeaders).toHaveCount(2);
     
-    // フラット表示に切替
+    // ドロップダウンメニューを開いてフラット表示に切替
     await viewModeToggle.click();
     await page.waitForTimeout(300);
+    // フラット表示ボタンをクリック
+    await page.locator('.view-mode-menu-item').filter({ hasText: /フラット|Flat/i }).click();
+    await page.waitForTimeout(500);
     
     // グループヘッダーが非表示
     await expect(groupHeaders).toHaveCount(0);
     
-    // グループ表示に戻す
+    // ドロップダウンメニューを開いてグループ表示に戻す
     await viewModeToggle.click();
     await page.waitForTimeout(300);
+    // グループ表示ボタンをクリック
+    await page.locator('.view-mode-menu-item').filter({ hasText: /グループ表示|Grouped/i }).click();
+    await page.waitForTimeout(500);
     
     // グループヘッダーが復帰
     await expect(groupHeaders).toHaveCount(2);
+  });
+});
+
+test.describe('コンパクト表示機能', () => {
+  test('コンパクト表示でスクリーンショット付きタブにホバーするとポップアップが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // スクリーンショット付きテストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/with-screenshot',
+      title: 'Tab with Screenshot',
+      screenshot: true,
+    });
+    
+    // リロード
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(1);
+    
+    // ドロップダウンメニューを開いてコンパクト表示に切替
+    const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
+    await viewModeToggle.click();
+    await page.waitForTimeout(300);
+    // コンパクト表示を選択
+    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.waitForTimeout(500);
+    
+    // コンパクト表示になっていることを確認（スクリーンショットインジケータの存在）
+    const screenshotIndicator = page.locator('.tab-screenshot-indicator');
+    await expect(screenshotIndicator).toBeVisible({ timeout: 3000 });
+    
+    // タブカードにホバー
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    await tabCard.hover();
+    await page.waitForTimeout(500);
+    
+    // スクリーンショットポップアップが表示されることを確認
+    const screenshotPopup = page.locator('.screenshot-popup');
+    await expect(screenshotPopup).toBeVisible({ timeout: 3000 });
+    
+    // ポップアップ内に画像があることを確認
+    const popupImage = screenshotPopup.locator('img');
+    await expect(popupImage).toBeVisible();
+    
+    // マウスを離すとポップアップが消えることを確認
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(300);
+    await expect(screenshotPopup).not.toBeVisible();
   });
 });
 
@@ -782,6 +849,9 @@ test.describe('大規模データパフォーマンステスト', () => {
     // フラット表示に切替（時間計測）
     const toggleStart = performance.now();
     await viewModeToggle.click();
+    await page.waitForTimeout(100);
+    const flatButton = page.locator('.view-mode-menu-item', { hasText: /フラット|Flat/i });
+    await flatButton.click();
     await page.waitForTimeout(300);
     const toggleTime = performance.now() - toggleStart;
     console.log(`表示モード切替時間: ${toggleTime.toFixed(2)}ms`);

@@ -1,5 +1,5 @@
 import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
-import type { DateRangeFilter, ViewMode, CustomGroupMeta, SearchOptions } from './types';
+import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions } from './types';
 import { useTranslation } from '../common/i18nContext.js';
 import { DateRangeFilterComponent } from './DateRangeFilter';
 
@@ -9,12 +9,14 @@ interface HeaderProps {
   searchQuery: string;
   dateRange: DateRangeFilter;
   viewMode: ViewMode;
+  displayDensity: DisplayDensity;
   onSearchChange: (query: string) => void;
   searchOptions: SearchOptions;
   onSearchOptionsChange: (options: SearchOptions) => void;
   regexError: string | null;
   onDateRangeChange: (range: DateRangeFilter) => void;
   onViewModeChange: (mode: ViewMode) => void;
+  onDisplayDensityChange: (density: DisplayDensity) => void;
   onDeleteAll: () => void;
   onOpenAll: () => void;
   onLinkCheck: () => void;
@@ -38,12 +40,14 @@ export const Header = memo(function Header({
   searchQuery,
   dateRange,
   viewMode,
+  displayDensity,
   onSearchChange,
   searchOptions,
   onSearchOptionsChange,
   regexError,
   onDateRangeChange,
   onViewModeChange,
+  onDisplayDensityChange,
   onDeleteAll,
   onOpenAll,
   onLinkCheck,
@@ -63,8 +67,10 @@ export const Header = memo(function Header({
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [showDateFilter, setShowDateFilter] = useState(false);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
+  const [showViewModeMenu, setShowViewModeMenu] = useState(false);
   const debounceRef = useRef<number | null>(null);
   const groupMenuRef = useRef<HTMLDivElement>(null);
+  const viewModeMenuRef = useRef<HTMLDivElement>(null);
 
   // 日時フィルタがアクティブかどうか
   const hasActiveDateFilter = useMemo(() => {
@@ -105,6 +111,25 @@ export const Header = memo(function Header({
     };
   }, [showGroupMenu]);
 
+  // 表示モードメニューの外部クリックで閉じる
+  useEffect(() => {
+    if (!showViewModeMenu) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (viewModeMenuRef.current && !viewModeMenuRef.current.contains(e.target as Node)) {
+        setShowViewModeMenu(false);
+      }
+    };
+    
+    requestAnimationFrame(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    });
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showViewModeMenu]);
+
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalQuery(e.target.value);
   }, []);
@@ -131,10 +156,22 @@ export const Header = memo(function Header({
     setShowDateFilter(prev => !prev);
   }, []);
 
-  // 表示モード切替
-  const toggleViewMode = useCallback(() => {
-    onViewModeChange(viewMode === 'grouped' ? 'flat' : 'grouped');
-  }, [viewMode, onViewModeChange]);
+  // 表示モードメニューのトグル
+  const toggleViewModeMenu = useCallback(() => {
+    setShowViewModeMenu(prev => !prev);
+  }, []);
+
+  // 表示モード選択
+  const handleViewModeSelect = useCallback((mode: ViewMode) => {
+    onViewModeChange(mode);
+    setShowViewModeMenu(false);
+  }, [onViewModeChange]);
+
+  // 表示密度選択
+  const handleDensitySelect = useCallback((density: DisplayDensity) => {
+    onDisplayDensityChange(density);
+    setShowViewModeMenu(false);
+  }, [onDisplayDensityChange]);
 
   const handleGroupSelect = useCallback((groupName: string) => {
     onBulkMoveToGroup(groupName);
@@ -285,14 +322,51 @@ export const Header = memo(function Header({
                 <span>📅</span>
                 {hasActiveDateFilter && <span className="filter-badge"></span>}
               </button>
-              <button 
-                className={`btn btn-icon btn-filter ${viewMode === 'flat' ? 'active' : ''}`}
-                onClick={toggleViewMode}
-                title={t('tabManager.viewMode.toggleButton')}
-                data-testid="view-mode-toggle"
-              >
-                <span>{viewMode === 'grouped' ? '📊' : '📋'}</span>
-              </button>
+              <div className="view-mode-dropdown" ref={viewModeMenuRef}>
+                <button 
+                  className={`btn btn-icon btn-filter ${showViewModeMenu || displayDensity === 'compact' ? 'active' : ''}`}
+                  onClick={toggleViewModeMenu}
+                  title={t('tabManager.viewMode.toggleButton')}
+                  data-testid="view-mode-toggle"
+                >
+                  <span>{displayDensity === 'compact' ? '≡' : (viewMode === 'grouped' ? '📊' : '📋')}</span>
+                </button>
+                {showViewModeMenu && (
+                  <div className="view-mode-menu">
+                    <div className="view-mode-menu-section">
+                      <div className="view-mode-menu-label">{t('tabManager.viewMode.groupMode')}</div>
+                      <button
+                        className={`view-mode-menu-item ${viewMode === 'grouped' ? 'active' : ''}`}
+                        onClick={() => handleViewModeSelect('grouped')}
+                      >
+                        📊 {t('tabManager.viewMode.grouped')}
+                      </button>
+                      <button
+                        className={`view-mode-menu-item ${viewMode === 'flat' ? 'active' : ''}`}
+                        onClick={() => handleViewModeSelect('flat')}
+                      >
+                        📋 {t('tabManager.viewMode.flat')}
+                      </button>
+                    </div>
+                    <div className="view-mode-menu-divider" />
+                    <div className="view-mode-menu-section">
+                      <div className="view-mode-menu-label">{t('tabManager.viewMode.density')}</div>
+                      <button
+                        className={`view-mode-menu-item ${displayDensity === 'normal' ? 'active' : ''}`}
+                        onClick={() => handleDensitySelect('normal')}
+                      >
+                        {t('tabManager.viewMode.normal')}
+                      </button>
+                      <button
+                        className={`view-mode-menu-item ${displayDensity === 'compact' ? 'active' : ''}`}
+                        onClick={() => handleDensitySelect('compact')}
+                      >
+                        ≡ {t('tabManager.viewMode.compact')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <button 
                 className="btn btn-icon btn-secondary"
                 onClick={onLinkCheck}

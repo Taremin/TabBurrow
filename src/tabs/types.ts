@@ -34,6 +34,10 @@ export interface DateRangeFilter {
 // grouped: グループ表示（デフォルト）, flat: フラット表示
 export type ViewMode = 'grouped' | 'flat';
 
+// 表示密度の型
+// normal: 通常表示, compact: コンパクト表示
+export type DisplayDensity = 'normal' | 'compact';
+
 // グループごとのフィルタ状態（正規表現パターン）
 export interface GroupFilter {
   [groupName: string]: string;

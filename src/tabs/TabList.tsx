@@ -5,7 +5,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso';
-import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, GroupFilter } from './types';
+import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter } from './types';
 import { TabCard } from './TabCard';
 import { GroupHeader } from './GroupHeader';
 
@@ -13,6 +13,7 @@ interface TabListProps {
   tabs: SavedTab[];
   customGroups: CustomGroupMeta[];
   viewMode: ViewMode;
+  displayDensity: DisplayDensity;
   groupSort: GroupSortType;
   itemSort: ItemSortType;
   onDeleteTab: (id: string) => void;
@@ -155,6 +156,7 @@ export function TabList({
   tabs,
   customGroups,
   viewMode,
+  displayDensity,
   groupSort,
   itemSort,
   onDeleteTab,
@@ -173,6 +175,7 @@ export function TabList({
   groupFilters,
   onGroupFilterChange,
 }: TabListProps) {
+  const isCompact = displayDensity === 'compact';
   // グループ化とソート（フィルタ適用）
   const { groups, groupCounts, flatTabs } = useMemo(() => {
     const { customGroups: cGroups, domainGroups } = groupTabs(tabs);
@@ -229,9 +232,10 @@ export function TabList({
         selectedTabIds={selectedTabIds}
         onSelectGroup={onSelectGroup}
         onDeselectGroup={onDeselectGroup}
+        isCompact={isCompact}
       />
     );
-  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup]);
+  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact]);
 
   // タブカードのレンダリング
   const itemContent = useCallback((index: number) => {
@@ -248,9 +252,10 @@ export function TabList({
         isSelectionMode={isSelectionMode}
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
+        isCompact={isCompact}
       />
     );
-  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection]);
+  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
 
   if (tabs.length === 0) {
     return null;
@@ -276,9 +281,10 @@ export function TabList({
         isSelectionMode={isSelectionMode}
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
+        isCompact={isCompact}
       />
     );
-  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection]);
+  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
 
   return (
     <div className="tab-groups" style={{ height: 'calc(100vh - 180px)' }}>

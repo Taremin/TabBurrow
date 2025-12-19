@@ -266,7 +266,11 @@
         "viewMode": {
             "grouped": "Grouped",
             "flat": "Flat",
-            "toggleButton": "Toggle View"
+            "normal": "Normal",
+            "compact": "Compact",
+            "toggleButton": "Toggle View",
+            "groupMode": "Group Mode",
+            "density": "Density"
         },
         "customGroup": {
             "sectionTitle": "Custom Groups",
