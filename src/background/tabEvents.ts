@@ -73,11 +73,19 @@ async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): P
         // ※注意: captureVisibleTab は現在アクティブなタブを撮影するため、
         // タブ切替直後に前のタブを撮影することはできない
         // 代わりに、新しいアクティブタブの windowId を使用
+        const targetTabId = activeInfo.tabId;
         const dataURL = await captureTab(activeInfo.windowId);
+        
+        // キャプチャ完了後、タブがまだアクティブか検証（レースコンディション対策）
+        if (currentActiveTabId !== targetTabId) {
+          console.log(`[Screenshot] タブ切替検出: キャプチャを破棄 (target=${targetTabId}, current=${currentActiveTabId})`);
+          return;
+        }
+        
         if (dataURL) {
           const blob = await resizeScreenshot(dataURL);
           // 新しくアクティブになったタブのスクリーンショットをキャッシュ
-          setScreenshot(activeInfo.tabId, blob);
+          setScreenshot(targetTabId, blob);
         }
       }
     } catch (error) {
@@ -86,10 +94,18 @@ async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): P
   } else {
     // 初回のタブアクティブ化時
     try {
+      const targetTabId = activeInfo.tabId;
       const dataURL = await captureTab(activeInfo.windowId);
+      
+      // キャプチャ完了後、タブがまだアクティブか検証（レースコンディション対策）
+      if (currentActiveTabId !== targetTabId) {
+        console.log(`[Screenshot] タブ切替検出: キャプチャを破棄 (target=${targetTabId}, current=${currentActiveTabId})`);
+        return;
+      }
+      
       if (dataURL) {
         const blob = await resizeScreenshot(dataURL);
-        setScreenshot(activeInfo.tabId, blob);
+        setScreenshot(targetTabId, blob);
       }
     } catch (error) {
       console.warn('初回タブのスクリーンショット取得エラー:', error);
@@ -155,10 +171,18 @@ async function handleTabUpdated(
   if (changeInfo.status === 'complete' && tab.active && tab.windowId !== undefined &&
       !tab.url?.startsWith('chrome-extension://') && !tab.url?.startsWith('moz-extension://')) {
     try {
+      const targetTabId = tabId;
       const dataURL = await captureTab(tab.windowId);
+      
+      // キャプチャ完了後、タブがまだアクティブか検証（レースコンディション対策）
+      if (currentActiveTabId !== targetTabId) {
+        console.log(`[Screenshot] タブ切替検出: キャプチャを破棄 (target=${targetTabId}, current=${currentActiveTabId})`);
+        return;
+      }
+      
       if (dataURL) {
         const blob = await resizeScreenshot(dataURL);
-        setScreenshot(tabId, blob);
+        setScreenshot(targetTabId, blob);
       }
     } catch (error) {
       console.warn('タブ更新時のスクリーンショット取得エラー:', error);
