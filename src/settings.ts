@@ -129,7 +129,7 @@ export interface Settings {
 // デフォルト設定
 const DEFAULT_SETTINGS: Settings = {
   autoCloseEnabled: false,
-  autoCloseSeconds: 300, // 5分
+  autoCloseSeconds: 1800, // 30分
   autoCloseRules: [],
   autoCloseRuleOrder: 'asc',
   locale: 'auto',
