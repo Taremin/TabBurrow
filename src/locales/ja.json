@@ -248,7 +248,10 @@
             "deleteGroupTitle": "グループを削除",
             "deleteGroupMessage": "「{domain}」の {count} 個のタブをすべて削除しますか？",
             "deleteAllTitle": "すべて削除",
-            "deleteAllMessage": "保存されている {count} 個のタブをすべて削除しますか？この操作は取り消せません。"
+            "deleteAllMessage": "保存されている {count} 個のタブをすべて削除しますか？この操作は取り消せません。",
+            "openAllTitle": "すべてのタブを開く",
+            "openAllMessage": "{count} 個のタブを開きますか？",
+            "openAllConfirm": "開く"
         },
         "dateFilter": {
             "toggleButton": "日時フィルタ",

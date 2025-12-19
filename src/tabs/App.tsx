@@ -38,6 +38,8 @@ interface DialogState {
   title: string;
   message: string;
   onConfirm: () => void;
+  confirmButtonText?: string;
+  confirmButtonStyle?: 'danger' | 'primary';
 }
 
 // ユーティリティ: 指定ミリ秒待機
@@ -507,11 +509,22 @@ export function App() {
     }));
   }, []);
 
-  // すべてのタブを開く
-  const handleOpenAll = useCallback(async () => {
-    const urls = filteredTabs.map(tab => tab.url);
-    await openTabsWithRestoreMode(urls);
-  }, [filteredTabs, openTabsWithRestoreMode]);
+  // すべてのタブを開く（常に確認ダイアログを表示）
+  const handleOpenAll = useCallback(() => {
+    const count = filteredTabs.length;
+    setDialog({
+      isOpen: true,
+      title: t('tabManager.confirmDialog.openAllTitle'),
+      message: t('tabManager.confirmDialog.openAllMessage', { count }),
+      confirmButtonText: t('tabManager.confirmDialog.openAllConfirm'),
+      confirmButtonStyle: 'primary',
+      onConfirm: async () => {
+        const urls = filteredTabs.map(tab => tab.url);
+        await openTabsWithRestoreMode(urls);
+        setDialog(d => ({ ...d, isOpen: false }));
+      },
+    });
+  }, [filteredTabs, openTabsWithRestoreMode, t]);
 
   // 全削除
   const handleDeleteAll = useCallback(() => {
@@ -648,6 +661,8 @@ export function App() {
         message={dialog.message}
         onConfirm={dialog.onConfirm}
         onCancel={handleCancelDialog}
+        confirmButtonText={dialog.confirmButtonText}
+        confirmButtonStyle={dialog.confirmButtonStyle}
       />
 
       <LinkCheckDialog

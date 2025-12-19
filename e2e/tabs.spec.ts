@@ -913,3 +913,80 @@ test.describe('大規模データパフォーマンステスト', () => {
     expect(selectTime).toBeLessThan(2000);
   });
 });
+
+test.describe('すべて開く確認ダイアログ', () => {
+  test('「すべて開く」ボタンをクリックすると確認ダイアログが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/open-all-test',
+      title: 'Open All Test Page',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(1);
+    
+    // 「すべて開く」ボタンをクリック（ヘッダー右側のprimaryボタン）
+    const openAllButton = page.locator('.btn.btn-icon.btn-primary');
+    await expect(openAllButton).toBeVisible();
+    await openAllButton.click();
+    await page.waitForTimeout(100);
+    
+    // 確認ダイアログが表示される
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // ダイアログにタブ数が表示される
+    const dialogMessage = dialog.locator('.dialog-message');
+    await expect(dialogMessage).toContainText('1');
+    
+    // 「開く」ボタン（btn-primary）が表示される
+    const confirmButton = dialog.locator('.btn-primary');
+    await expect(confirmButton).toBeVisible();
+  });
+
+  test('確認ダイアログで「キャンセル」をクリックするとダイアログが閉じる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/cancel-test',
+      title: 'Cancel Test Page',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // 「すべて開く」ボタンをクリック
+    const openAllButton = page.locator('.btn.btn-icon.btn-primary');
+    await openAllButton.click();
+    await page.waitForTimeout(100);
+    
+    // 確認ダイアログが表示される
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // 「キャンセル」ボタンをクリック
+    const cancelButton = dialog.locator('.btn-secondary');
+    await cancelButton.click();
+    await page.waitForTimeout(100);
+    
+    // ダイアログが閉じる
+    await expect(dialog).not.toBeVisible();
+  });
+});

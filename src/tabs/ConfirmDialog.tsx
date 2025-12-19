@@ -11,6 +11,9 @@ interface ConfirmDialogProps {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
+  // 確認ボタンのカスタマイズ（オプション）
+  confirmButtonText?: string;  // 翻訳済みテキスト。省略時は「削除」
+  confirmButtonStyle?: 'danger' | 'primary';  // ボタンのスタイル。省略時は 'danger'
 }
 
 export const ConfirmDialog = memo(function ConfirmDialog({
@@ -19,6 +22,8 @@ export const ConfirmDialog = memo(function ConfirmDialog({
   message,
   onConfirm,
   onCancel,
+  confirmButtonText,
+  confirmButtonStyle = 'danger',
 }: ConfirmDialogProps) {
   const { t } = useTranslation();
 
@@ -56,8 +61,8 @@ export const ConfirmDialog = memo(function ConfirmDialog({
           <button className="btn btn-secondary" onClick={onCancel}>
             {t('common.cancel')}
           </button>
-          <button className="btn btn-danger" onClick={onConfirm}>
-            {t('common.delete')}
+          <button className={`btn btn-${confirmButtonStyle}`} onClick={onConfirm}>
+            {confirmButtonText || t('common.delete')}
           </button>
         </div>
       </div>

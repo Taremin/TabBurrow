@@ -248,7 +248,10 @@
             "deleteGroupTitle": "Delete Group",
             "deleteGroupMessage": "Delete all {count} tabs from \"{domain}\"?",
             "deleteAllTitle": "Delete All",
-            "deleteAllMessage": "Delete all {count} saved tabs? This action cannot be undone."
+            "deleteAllMessage": "Delete all {count} saved tabs? This action cannot be undone.",
+            "openAllTitle": "Open All Tabs",
+            "openAllMessage": "Open {count} tabs?",
+            "openAllConfirm": "Open"
         },
         "dateFilter": {
             "toggleButton": "Date Filter",

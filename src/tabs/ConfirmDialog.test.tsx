@@ -75,4 +75,27 @@ describe('ConfirmDialog', () => {
       expect(onCancel).toHaveBeenCalledTimes(1);
     }
   });
+
+  it('confirmButtonTextを指定した場合、そのテキストが表示される', () => {
+    render(<ConfirmDialog {...defaultProps} confirmButtonText="カスタムテキスト" />);
+    
+    expect(screen.getByText('カスタムテキスト')).toBeInTheDocument();
+    // デフォルトの「削除」テキストは表示されない
+    expect(screen.queryByText('common.delete')).not.toBeInTheDocument();
+  });
+
+  it('confirmButtonStyleをprimaryに指定した場合、btn-primaryクラスが適用される', () => {
+    render(<ConfirmDialog {...defaultProps} confirmButtonText="開く" confirmButtonStyle="primary" />);
+    
+    const confirmButton = screen.getByText('開く');
+    expect(confirmButton).toHaveClass('btn-primary');
+    expect(confirmButton).not.toHaveClass('btn-danger');
+  });
+
+  it('confirmButtonStyleを省略した場合、btn-dangerクラスが適用される', () => {
+    render(<ConfirmDialog {...defaultProps} />);
+    
+    const confirmButton = screen.getByText('common.delete');
+    expect(confirmButton).toHaveClass('btn-danger');
+  });
 });
