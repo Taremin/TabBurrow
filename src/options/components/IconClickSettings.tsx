@@ -26,7 +26,7 @@ export function IconClickSettings({
 
   return (
     <>
-      {/* 自動クローズルールを適用するチェックボックス */}
+      {/* 自動収納ルールを適用するチェックボックス */}
       <div className="form-group">
         <label className={`form-checkbox-label ${applyRules !== savedApplyRules ? 'modified' : ''}`}>
           <input

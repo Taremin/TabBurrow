@@ -49,7 +49,7 @@ export const optionsPageSelectors = {
   // テーマ設定
   themeRadio: 'input[name="theme"]',
   
-  // 自動クローズ設定
+  // 自動収納設定
   autoCloseEnabled: 'input[name="autoCloseEnabled"]',
   autoCloseSeconds: 'input[name="autoCloseSeconds"]',
   

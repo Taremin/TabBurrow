@@ -21,7 +21,7 @@ export type ItemSortType = 'saved-desc' | 'saved-asc' | 'title-asc' | 'title-des
 export type RuleTargetType = 'domain' | 'url' | 'fullUrl' | 'title';
 
 // ルールの動作タイプ
-// exclude: 除外, saveToGroup: グループに保存して閉じる, saveOnly: DBに保存/更新するがタブは閉じない
+// exclude: 除外, saveToGroup: グループに収納, saveOnly: DBに保存/更新するがタブは閉じない
 // close: 保存せずに閉じる, pin: タブをピン留めする
 export type RuleActionType = 'exclude' | 'saveToGroup' | 'saveOnly' | 'close' | 'pin';
 
@@ -44,7 +44,7 @@ export type ViewMode = 'grouped' | 'flat';
 // normal: 通常表示, compact: コンパクト表示
 export type DisplayDensity = 'normal' | 'compact';
 
-// 自動クローズルール
+// 自動収納ルール
 export interface AutoCloseRule {
   id: string;              // ユニークID
   enabled: boolean;        // ルールの有効/無効
@@ -92,9 +92,9 @@ export const DEFAULT_LINK_CHECK_RULES: LinkCheckRule[] = [
 
 // 設定の型定義
 export interface Settings {
-  autoCloseEnabled: boolean;     // 自動クローズ有効/無効
-  autoCloseSeconds: number;      // 自動クローズまでの秒数
-  autoCloseRules: AutoCloseRule[];  // 自動クローズルール
+  autoCloseEnabled: boolean;     // 自動収納有効/無効
+  autoCloseSeconds: number;      // 自動収納までの秒数
+  autoCloseRules: AutoCloseRule[];  // 自動収納ルール
   autoCloseRuleOrder: RuleOrderType;  // ルール評価順序
   locale: LocaleSetting;         // 言語設定（'ja' | 'en' | 'auto'）
   theme: ThemeSetting;           // テーマ設定（'system' | 'dark' | 'light'）
@@ -112,7 +112,7 @@ export interface Settings {
   linkCheckDomainDelayMs: number;            // 同一ドメイン間ディレイ（ミリ秒）
 
   // アイコンクリック設定
-  iconClickApplyRules: boolean;              // 自動クローズルールを適用するか
+  iconClickApplyRules: boolean;              // 自動収納ルールを適用するか
   iconClickPinnedAction: PinnedTabAction;    // 固定タブの扱い
 
   // バックアップ設定
@@ -209,7 +209,7 @@ export interface TabInfo {
 }
 
 /**
- * タブに対してマッチする自動クローズルールを検索
+ * タブに対してマッチする自動収納ルールを検索
  * @param tab タブ情報（url, title）
  * @param rules ルールリスト
  * @param order 評価順序（'asc': 上から, 'desc': 下から）

@@ -4,18 +4,18 @@
 TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機能です（Chrome/Firefox/Vivaldi対応）。
 主に以下の要素で構成されています。
 
-1.  **Background Service Worker**: 常駐スクリプト。自動クローズの監視、コンテキストメニューの処理、タブ保存、リンクチェック、自動バックアップを担当。
+1.  **Background Service Worker**: 常駐スクリプト。自動収納の監視、コンテキストメニューの処理、タブ保存、リンクチェック、自動バックアップを担当。
 2.  **Tab Manager UI (React)**: 保存されたタブの一覧・管理・検索を行うフロントエンド。仮想スクロールを採用。
-3.  **Options UI (React)**: 設定画面。自動クローズ、リンクチェック、アイコンクリック動作、バックアップなどの設定を管理。
+3.  **Options UI (React)**: 設定画面。自動収納、リンクチェック、アイコンクリック動作、バックアップなどの設定を管理。
 4.  **Storage Layer**:
     *   **IndexedDB**: タブ情報、スクリーンショット（Blob）、バックアップの保存。大量のデータを扱うため使用。
-    *   **Browser Storage (Local)**: ユーザー設定（自動クローズ設定、ソート順、リンクチェック設定など）の保存。
+    *   **Browser Storage (Local)**: ユーザー設定（自動収納設定、ソート順、リンクチェック設定など）の保存。
 
 ## ディレクトリ構成 (`src/`)
 
 *   **`background/`**: バックグラウンドスクリプト群。
     *   `index.ts`: エントリーポイント。メッセージハンドリング、アクションクリック処理。
-    *   `autoClose.ts`: 自動クローズロジック。
+    *   `autoClose.ts`: 自動収納ロジック。
     *   `tabSaver.ts`: タブ保存処理。
     *   `screenshot.ts`: スクリーンショット取得・リサイズ。
     *   `contextMenu.ts`: コンテキストメニューの作成・ハンドリング。
@@ -45,10 +45,10 @@ TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機
 
 ## データフロー
 
-1.  **自動クローズ**:
+1.  **自動収納**:
     *   `autoClose.ts` が `chrome.alarms` で定期実行。
     *   非アクティブなタブを検出し、ルール（`settings.ts`）に照合。
-    *   条件に一致した場合、`tabSaver.ts` を通じてスクリーンショットを取得し、 `storage.ts` でIndexedDBに保存してタブを閉じる。
+    *   条件に一致した場合、`tabSaver.ts` を通じてスクリーンショットを取得し、 `storage.ts` でIndexedDBに保存してタブを収納。
 2.  **手動保存**:
     *   ツールバーアイコンクリック (`background/index.ts`) またはコンテキストメニュー。
     *   現在のアクティブタブ（または全タブ）を対象に保存処理を実行。

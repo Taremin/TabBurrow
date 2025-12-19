@@ -1,6 +1,6 @@
 /**
  * TabBurrow - Background Service Worker
- * 拡張アイコンクリック時にタブを保存・クローズする
+ * 拡張アイコンクリック時にタブを収納する
  * 
  * このファイルはメインエントリポイントとして、各モジュールを統合します。
  */
@@ -112,7 +112,7 @@ browser.runtime.onInstalled.addListener(async () => {
     await updateCustomGroupMenus();
     console.log('[onInstalled] Custom group menus updated');
 
-    // 設定を読み込んで自動クローズを初期化
+    // 設定を読み込んで自動収納を初期化
     console.log('[onInstalled] Initializing auto close...');
     await initAutoClose();
     console.log('[onInstalled] Auto close initialized');
@@ -141,7 +141,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   const message = msg as BackgroundMessage;
   switch (message.type) {
     case 'settings-changed':
-      // 設定を再読み込みして自動クローズを再初期化
+      // 設定を再読み込みして自動収納を再初期化
       initAutoClose().then(async () => {
         // 言語設定も再適用
         const settings = await getSettings();
@@ -245,7 +245,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
 
 // アラームが発火したときの処理
 browser.alarms.onAlarm.addListener((alarm) => {
-  // 自動クローズアラーム
+  // 自動収納アラーム
   handleAutoCloseAlarm(alarm);
   // バックアップアラーム
   handleBackupAlarm(alarm);

@@ -41,7 +41,7 @@ async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): P
   const previousTabId = currentActiveTabId;
   currentActiveTabId = activeInfo.tabId;
 
-  // 新しくアクティブになったタブの最終アクティブ時刻を更新（自動クローズ用）
+  // 新しくアクティブになったタブの最終アクティブ時刻を更新（自動収納用）
   updateTabLastActiveTime(activeInfo.tabId);
 
   // 新しくアクティブになったタブの情報を取得
@@ -129,7 +129,7 @@ function handleTabRemoved(tabId: number): void {
 
 /**
  * 新規タブが作成されたときの処理
- * 自動クローズの猶予時間を与えるため、最終アクティブ時刻を現在に設定
+ * 自動収納の猶予時間を与えるため、最終アクティブ時刻を現在に設定
  */
 function handleTabCreated(tab: Tabs.Tab): void {
   if (tab.id !== undefined) {

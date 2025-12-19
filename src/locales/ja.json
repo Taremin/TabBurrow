@@ -32,14 +32,14 @@
             "light": "ライトモード"
         },
         "autoClose": {
-            "title": "自動クローズ",
-            "description": "一定時間非アクティブなタブを自動的に保存して閉じます。",
-            "enableLabel": "自動クローズを有効にする",
+            "title": "自動収納",
+            "description": "一定時間非アクティブなタブを自動的に収納します。",
+            "enableLabel": "自動収納を有効にする",
             "secondsLabel": "非アクティブ時間（秒）",
             "seconds": "秒",
             "hint": "30秒〜86400秒（24時間）の範囲で指定できます。デフォルトは300秒（5分）です。",
-            "rulesTitle": "自動クローズルール",
-            "rulesDescription": "ルールに基づいて自動クローズの動作をカスタマイズします。",
+            "rulesTitle": "自動収納ルール",
+            "rulesDescription": "ルールに基づいて自動収納の動作をカスタマイズします。",
             "addRule": "ルールを追加",
             "editRule": "ルールを編集",
             "noRules": "ルールがありません",
@@ -55,8 +55,8 @@
             },
             "action": {
                 "label": "動作",
-                "exclude": "除外（保存しない）",
-                "saveToGroup": "グループに保存",
+                "exclude": "除外（収納しない）",
+                "saveToGroup": "グループに収納",
                 "saveOnly": "保存のみ（閉じない）",
                 "close": "破棄（保存せず閉じる）",
                 "pin": "固定タブ化"
@@ -108,14 +108,14 @@
         "iconClick": {
             "title": "アイコンクリック",
             "description": "拡張機能アイコンをクリックした時の動作を設定します。",
-            "applyRules": "自動クローズルールを適用する",
-            "applyRulesHint": "有効にすると、アイコンクリック時にも自動クローズルールが適用されます。",
+            "applyRules": "自動収納ルールを適用する",
+            "applyRulesHint": "有効にすると、アイコンクリック時にも自動収納ルールが適用されます。",
             "pinnedTabs": {
                 "label": "固定タブの扱い",
                 "skip": "何もしない",
                 "suspend": "サスペンドを試みる"
             },
-            "pinnedTabsHint": "固定タブは保存・クローズの対象外です。サスペンドはブラウザの制限により動作しない場合があります。"
+            "pinnedTabsHint": "固定タブは収納の対象外です。サスペンドはブラウザの制限により動作しない場合があります。"
         },
         "dataManagement": {
             "title": "データ管理",
@@ -313,7 +313,7 @@
         "openManager": "タブ管理画面を開く",
         "saveToCustomGroup": "カスタムグループに保存",
         "newGroup": "新規グループ...",
-        "saveAllIncludingPinned": "固定タブも含めてすべてしまう",
+        "saveAllIncludingPinned": "固定タブも含めてすべて収納",
         "tabBurrow": "TabBurrow",
         "removeAndClose": "タブ管理から削除して閉じる"
     },

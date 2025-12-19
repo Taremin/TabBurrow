@@ -56,7 +56,7 @@ export function createContextMenus(): void {
     contexts: ['action'],
   });
 
-  // 3. 固定タブも含めてすべてしまう（既存）
+  // 3. 固定タブも含めてすべて収納（既存）
   browser.contextMenus.create({
     id: 'save-all-including-pinned',
     title: t('contextMenu.saveAllIncludingPinned'),
@@ -173,7 +173,7 @@ export async function handleContextMenuClick(
     return;
   }
 
-  // 固定タブも含めてすべてしまう
+  // 固定タブも含めてすべて収納
   if (menuItemId === 'save-all-including-pinned') {
     await handleSaveAllIncludingPinned(tab);
     return;

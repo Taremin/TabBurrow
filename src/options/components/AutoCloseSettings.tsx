@@ -1,5 +1,5 @@
 /**
- * TabBurrow - 自動クローズ設定コンポーネント
+ * TabBurrow - 自動収納設定コンポーネント
  */
 
 import { useState, useCallback } from 'react';

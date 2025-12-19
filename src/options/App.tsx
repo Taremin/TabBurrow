@@ -149,7 +149,7 @@ export function App() {
             />
           </SettingsSection>
 
-          {/* 自動クローズ設定 */}
+          {/* 自動収納設定 */}
           <SettingsSection
             icon="⏰"
             title={t('settings.autoClose.title')}

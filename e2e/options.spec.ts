@@ -517,7 +517,7 @@ test.describe('設定画面 - アイコンクリック設定', () => {
     await expect(iconClickSection).toBeVisible();
   });
 
-  test('自動クローズルール適用チェックボックスが表示される', async ({ context, extensionId }) => {
+  test('自動収納ルール適用チェックボックスが表示される', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
@@ -530,7 +530,7 @@ test.describe('設定画面 - アイコンクリック設定', () => {
     await expect(applyRulesCheckbox).toBeChecked();
   });
 
-  test('自動クローズルール適用チェックボックスをトグルできる', async ({ context, extensionId }) => {
+  test('自動収納ルール適用チェックボックスをトグルできる', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);

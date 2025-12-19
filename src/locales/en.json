@@ -32,14 +32,14 @@
             "light": "Light Mode"
         },
         "autoClose": {
-            "title": "Auto Close",
-            "description": "Automatically save and close inactive tabs after a specified time.",
-            "enableLabel": "Enable auto close",
+            "title": "Auto Stash",
+            "description": "Automatically stash inactive tabs after a specified time.",
+            "enableLabel": "Enable auto stash",
             "secondsLabel": "Inactive time (seconds)",
             "seconds": "sec",
             "hint": "Specify between 30 and 86400 seconds (24 hours). Default is 300 seconds (5 minutes).",
-            "rulesTitle": "Auto Close Rules",
-            "rulesDescription": "Customize auto close behavior based on rules.",
+            "rulesTitle": "Auto Stash Rules",
+            "rulesDescription": "Customize auto stash behavior based on rules.",
             "addRule": "Add Rule",
             "editRule": "Edit Rule",
             "noRules": "No rules",
@@ -55,8 +55,8 @@
             },
             "action": {
                 "label": "Action",
-                "exclude": "Exclude (don't save)",
-                "saveToGroup": "Save to Group",
+                "exclude": "Exclude (don't stash)",
+                "saveToGroup": "Stash to Group",
                 "saveOnly": "Save Only (don't close)",
                 "close": "Discard (close without saving)",
                 "pin": "Pin Tab"
@@ -108,14 +108,14 @@
         "iconClick": {
             "title": "Icon Click",
             "description": "Configure behavior when the extension icon is clicked.",
-            "applyRules": "Apply auto close rules",
-            "applyRulesHint": "When enabled, auto close rules are also applied when clicking the icon.",
+            "applyRules": "Apply auto stash rules",
+            "applyRulesHint": "When enabled, auto stash rules are also applied when clicking the icon.",
             "pinnedTabs": {
                 "label": "Pinned Tab Handling",
                 "skip": "Do nothing",
                 "suspend": "Try to suspend"
             },
-            "pinnedTabsHint": "Pinned tabs are not saved or closed. Suspend may not work due to browser limitations."
+            "pinnedTabsHint": "Pinned tabs are not stashed. Suspend may not work due to browser limitations."
         },
         "dataManagement": {
             "title": "Data Management",
@@ -313,7 +313,7 @@
         "openManager": "Open Tab Manager",
         "saveToCustomGroup": "Save to Custom Group",
         "newGroup": "New Group...",
-        "saveAllIncludingPinned": "Save All (Including Pinned)",
+        "saveAllIncludingPinned": "Stash All (Including Pinned)",
         "tabBurrow": "TabBurrow",
         "removeAndClose": "Remove from Tab Manager and Close"
     },

@@ -1,6 +1,6 @@
 /**
- * autoClose.ts - 自動クローズ機能
- * 非アクティブタブの自動保存・クローズを担当
+ * autoClose.ts - 自動収納機能
+ * 非アクティブタブの自動収納を担当
  */
 
 import browser from '../browserApi.js';
@@ -9,13 +9,13 @@ import { getSettings, matchAutoCloseRule, type Settings } from '../settings.js';
 import { saveAndCloseTabs, extractDomain, getTabScreenshot } from './tabSaver.js';
 import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../storage.js';
 
-// 自動クローズのアラーム名
+// 自動収納のアラーム名
 export const AUTO_CLOSE_ALARM_NAME = 'auto-close-tabs';
 
 // storage.session用キー
 const TAB_LAST_ACTIVE_TIME_KEY = 'tabLastActiveTime';
 
-// タブの最終アクティブ時刻を追跡（自動クローズ用）
+// タブの最終アクティブ時刻を追跡（自動収納用）
 // メモリ内キャッシュ（storage.sessionと同期）
 export const tabLastActiveTime = new Map<number, number>();
 
@@ -101,7 +101,7 @@ export function removeTabLastActiveTime(tabId: number): void {
 }
 
 /**
- * 自動クローズ機能を初期化
+ * 自動収納機能を初期化
  */
 export async function initAutoClose(): Promise<void> {
   // storage.sessionから状態を復元
@@ -118,14 +118,14 @@ export async function initAutoClose(): Promise<void> {
     browser.alarms.create(AUTO_CLOSE_ALARM_NAME, {
       periodInMinutes: checkInterval / 60,
     });
-    console.log(`自動クローズを有効化: ${cachedSettings.autoCloseSeconds}秒後に非アクティブタブを閉じます`);
+    console.log(`自動収納を有効化: ${cachedSettings.autoCloseSeconds}秒後に非アクティブタブを収納します`);
   } else {
-    console.log('自動クローズを無効化');
+    console.log('自動収納を無効化');
   }
 }
 
 /**
- * アラームが発火したときの処理（自動クローズチェック）
+ * アラームが発火したときの処理（自動収納チェック）
  */
 export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
   if (alarm.name !== AUTO_CLOSE_ALARM_NAME) return;
@@ -139,8 +139,8 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
   const tabs = await browser.tabs.query({ pinned: false });
   
   // 各アクションに応じて分類
-  const tabsToNormalClose: Tabs.Tab[] = [];            // 通常の保存＆クローズ
-  const tabsToSaveToGroup: { tab: Tabs.Tab; groupName: string }[] = [];  // グループに保存して閉じる
+  const tabsToNormalClose: Tabs.Tab[] = [];            // 通常の収納
+  const tabsToSaveToGroup: { tab: Tabs.Tab; groupName: string }[] = [];  // グループに収納
   const tabsToSaveOnly: Tabs.Tab[] = [];               // 保存のみ（閉じない）
   const tabsToCloseOnly: Tabs.Tab[] = [];              // 保存せず閉じる
   
@@ -172,7 +172,7 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
           // 除外（何もしない）
           continue;
         case 'saveToGroup':
-          // カスタムグループに保存して閉じる
+          // カスタムグループに収納
           if (matchedRule.targetGroup) {
             tabsToSaveToGroup.push({ tab, groupName: matchedRule.targetGroup });
           }
@@ -192,19 +192,19 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
       }
     }
     
-    // ルールにマッチしない場合は通常の保存＆クローズ
+    // ルールにマッチしない場合は通常の収納
     tabsToNormalClose.push(tab);
   }
   
-  // 通常の保存＆クローズ
+  // 通常の収納
   if (tabsToNormalClose.length > 0) {
-    console.log(`自動クローズ: ${tabsToNormalClose.length}個の非アクティブタブを保存・閉じます`);
+    console.log(`自動収納: ${tabsToNormalClose.length}個の非アクティブタブを収納します`);
     await saveAndCloseTabs(tabsToNormalClose, {
-      logPrefix: '自動クローズ: ',
+      logPrefix: '自動収納: ',
     });
   }
   
-  // グループに保存して閉じる
+  // グループに収納
   for (const { tab, groupName } of tabsToSaveToGroup) {
     if (!tab.id || !tab.url) continue;
     try {
@@ -224,7 +224,7 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
       };
       await saveTabsForCustomGroup([savedTab]);
       await browser.tabs.remove(tab.id);
-      console.log(`自動クローズ: タブを「${groupName}」グループに保存しました: ${tab.url}`);
+      console.log(`自動収納: タブを「${groupName}」グループに収納しました: ${tab.url}`);
     } catch (error) {
       console.error('グループへの保存に失敗:', error);
     }
@@ -249,7 +249,7 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
         savedAt: now,
       };
       await saveTabs([savedTab]);
-      console.log(`自動クローズ: タブを保存しました（閉じない）: ${tab.url}`);
+      console.log(`自動収納: タブを保存しました（閉じない）: ${tab.url}`);
     } catch (error) {
       console.error('保存に失敗:', error);
     }
@@ -259,7 +259,7 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
   if (tabsToCloseOnly.length > 0) {
     const tabIds = tabsToCloseOnly.map(t => t.id).filter((id): id is number => id !== undefined);
     await browser.tabs.remove(tabIds);
-    console.log(`自動クローズ: ${tabsToCloseOnly.length}個のタブを破棄しました`);
+    console.log(`自動収納: ${tabsToCloseOnly.length}個のタブを破棄しました`);
   }
 }
 

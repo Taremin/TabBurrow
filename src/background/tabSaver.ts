@@ -1,6 +1,6 @@
 /**
- * tabSaver.ts - タブ保存関連処理
- * タブの保存、閉じる、タブ管理画面を開く処理を担当
+ * tabSaver.ts - タブ収納関連処理
+ * タブの収納（保存してタブを閉じる）、タブ管理画面を開く処理を担当
  */
 
 import browser from '../browserApi.js';
@@ -93,7 +93,7 @@ export async function openTabManagerPage(): Promise<void> {
 }
 
 /**
- * タブを保存して閉じる共通処理
+ * タブを収納する共通処理
  */
 export async function saveAndCloseTabs(
   tabs: Tabs.Tab[],

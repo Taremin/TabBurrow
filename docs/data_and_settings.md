@@ -42,9 +42,9 @@
 *   **locale**: 言語設定 (`'ja' | 'en' | 'auto'`)
 *   **theme**: テーマ設定 (`'system' | 'dark' | 'light'`)
 
-#### 自動クローズ設定
-*   **autoCloseEnabled**: 自動クローズのON/OFF
-*   **autoCloseSeconds**: 自動クローズまでの待機時間（秒）
+#### 自動収納設定
+*   **autoCloseEnabled**: 自動収納のON/OFF
+*   **autoCloseSeconds**: 自動収納までの待機時間（秒）
 *   **autoCloseRules**: ルール配列
     *   `targetType`: `'domain' | 'url' | 'fullUrl' | 'title'`
     *   `pattern`: 正規表現パターン
@@ -65,7 +65,7 @@
 *   **restoreIntervalMs**: タブ復元時のインターバル（ミリ秒）
 
 #### アイコンクリック設定
-*   **iconClickApplyRules**: 自動クローズルールを適用するか
+*   **iconClickApplyRules**: 自動収納ルールを適用するか
 *   **iconClickPinnedAction**: 固定タブの扱い (`'skip' | 'suspend'`)
 
 #### リンクチェック設定
