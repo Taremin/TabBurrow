@@ -10,11 +10,19 @@ import { t } from '../i18n.js';
 import { extractDomain, openTabManagerPage, getTabScreenshot, saveAndCloseTabs } from './tabSaver.js';
 
 // メニューIDの定数
+// ページコンテキストメニュー用
 const TABBURROW_MENU_ID = 'tabburrow';
-const CUSTOM_GROUP_MENU_PREFIX = 'save-to-custom-group-';
-const NEW_GROUP_MENU_ID = 'create-new-custom-group';
 const PARENT_MENU_ID = 'save-to-custom-group';
+const NEW_GROUP_MENU_ID = 'create-new-custom-group';
 const REMOVE_AND_CLOSE_MENU_ID = 'remove-and-close';
+const TABBURROW_OPEN_MANAGER_ID = 'tabburrow-open-manager';
+const CUSTOM_GROUP_MENU_PREFIX = 'save-to-custom-group-';
+
+// 拡張アイコンコンテキストメニュー用（アクション）
+const ACTION_PARENT_MENU_ID = 'action-save-to-custom-group';
+const ACTION_NEW_GROUP_MENU_ID = 'action-create-new-custom-group';
+const ACTION_REMOVE_AND_CLOSE_MENU_ID = 'action-remove-and-close';
+const ACTION_CUSTOM_GROUP_MENU_PREFIX = 'action-save-to-custom-group-';
 
 /**
  * コンテキストメニューを作成
@@ -22,28 +30,67 @@ const REMOVE_AND_CLOSE_MENU_ID = 'remove-and-close';
 export function createContextMenus(): void {
   console.log('[contextMenu] Creating context menus...');
   
-  // コンテキストメニューを作成（拡張アイコン右クリック時に表示）
+  // ==========================================
+  // 拡張アイコンコンテキストメニュー (Context: action)
+  // ==========================================
+
+  // 1. タブ管理画面を開く（既存）
   browser.contextMenus.create({
     id: 'open-tab-manager',
     title: t('contextMenu.openManager'),
-    contexts: ['action'], // 拡張アイコンのコンテキストメニューに表示
+    contexts: ['action'],
   });
 
-  // 固定タブも含めてすべてしまうメニュー
+  // 2. カスタムグループに保存（親メニュー）
+  browser.contextMenus.create({
+    id: ACTION_PARENT_MENU_ID,
+    title: t('contextMenu.saveToCustomGroup'),
+    contexts: ['action'],
+  });
+
+  // 2-1. 新規グループ作成
+  browser.contextMenus.create({
+    id: ACTION_NEW_GROUP_MENU_ID,
+    parentId: ACTION_PARENT_MENU_ID,
+    title: t('contextMenu.newGroup'),
+    contexts: ['action'],
+  });
+
+  // 3. 固定タブも含めてすべてしまう（既存）
   browser.contextMenus.create({
     id: 'save-all-including-pinned',
     title: t('contextMenu.saveAllIncludingPinned'),
-    contexts: ['action'], // 拡張アイコンのコンテキストメニューに表示
+    contexts: ['action'],
   });
 
-  // TabBurrow親メニュー（ページコンテキストメニュー）
+  // 4. タブ管理から削除して閉じる
+  browser.contextMenus.create({
+    id: ACTION_REMOVE_AND_CLOSE_MENU_ID,
+    title: t('contextMenu.removeAndClose'),
+    contexts: ['action'],
+  });
+
+
+  // ==========================================
+  // ページコンテキストメニュー (Context: page, frame)
+  // ==========================================
+
+  // 1. TabBurrow親メニュー
   browser.contextMenus.create({
     id: TABBURROW_MENU_ID,
     title: t('contextMenu.tabBurrow'),
     contexts: ['page', 'frame'],
   });
 
-  // カスタムグループに保存するメニュー（TabBurrowの子メニュー）
+  // 1-1. タブ管理画面を開く
+  browser.contextMenus.create({
+    id: TABBURROW_OPEN_MANAGER_ID,
+    parentId: TABBURROW_MENU_ID,
+    title: t('contextMenu.openManager'),
+    contexts: ['page', 'frame'],
+  });
+
+  // 1-2. カスタムグループに保存（親メニュー）
   browser.contextMenus.create({
     id: PARENT_MENU_ID,
     parentId: TABBURROW_MENU_ID,
@@ -51,7 +98,7 @@ export function createContextMenus(): void {
     contexts: ['page', 'frame'],
   });
 
-  // 新規グループ作成オプション
+  // 1-2-1. 新規グループ作成
   browser.contextMenus.create({
     id: NEW_GROUP_MENU_ID,
     parentId: PARENT_MENU_ID,
@@ -59,7 +106,7 @@ export function createContextMenus(): void {
     contexts: ['page', 'frame'],
   });
 
-  // タブ管理から削除して閉じるメニュー（TabBurrowの子メニュー）
+  // 1-3. タブ管理から削除して閉じる
   browser.contextMenus.create({
     id: REMOVE_AND_CLOSE_MENU_ID,
     parentId: TABBURROW_MENU_ID,
@@ -82,19 +129,28 @@ export async function updateCustomGroupMenus(): Promise<void> {
     for (const group of groups) {
       try {
         await browser.contextMenus.remove(CUSTOM_GROUP_MENU_PREFIX + group.name);
-      } catch {
-        // メニューが存在しない場合は無視
-      }
+      } catch { /* 無視 */ }
+      try {
+        await browser.contextMenus.remove(ACTION_CUSTOM_GROUP_MENU_PREFIX + group.name);
+      } catch { /* 無視 */ }
     }
     
     // 最新のグループリストでメニューを再作成
     const freshGroups = await getAllCustomGroups();
     for (const group of freshGroups) {
+      // ページ用
       browser.contextMenus.create({
         id: CUSTOM_GROUP_MENU_PREFIX + group.name,
         parentId: PARENT_MENU_ID,
         title: group.name,
         contexts: ['page', 'frame'],
+      });
+      // 拡張アイコン用
+      browser.contextMenus.create({
+        id: ACTION_CUSTOM_GROUP_MENU_PREFIX + group.name,
+        parentId: ACTION_PARENT_MENU_ID,
+        title: group.name,
+        contexts: ['action'],
       });
     }
   } catch (error) {
@@ -109,17 +165,46 @@ export async function handleContextMenuClick(
   info: Menus.OnClickData,
   tab?: Tabs.Tab
 ): Promise<void> {
-  if (info.menuItemId === 'open-tab-manager') {
+  const { menuItemId } = info;
+
+  // タブ管理画面を開く
+  if (menuItemId === 'open-tab-manager' || menuItemId === TABBURROW_OPEN_MANAGER_ID) {
     await openTabManagerPage();
-  } else if (info.menuItemId === 'save-all-including-pinned') {
+    return;
+  }
+
+  // 固定タブも含めてすべてしまう
+  if (menuItemId === 'save-all-including-pinned') {
     await handleSaveAllIncludingPinned(tab);
-  } else if (info.menuItemId === REMOVE_AND_CLOSE_MENU_ID && tab?.url) {
+    return;
+  }
+  
+  // 削除して閉じる
+  if ((menuItemId === REMOVE_AND_CLOSE_MENU_ID || menuItemId === ACTION_REMOVE_AND_CLOSE_MENU_ID) && tab?.url) {
     await handleRemoveAndClose(tab);
-  } else if (info.menuItemId === NEW_GROUP_MENU_ID && tab?.url) {
+    return;
+  }
+
+  // 新規グループ作成
+  if ((menuItemId === NEW_GROUP_MENU_ID || menuItemId === ACTION_NEW_GROUP_MENU_ID) && tab?.url) {
     await handleCreateNewGroupAndSave(tab);
-  } else if (typeof info.menuItemId === 'string' && info.menuItemId.startsWith(CUSTOM_GROUP_MENU_PREFIX) && tab?.url) {
-    const groupName = info.menuItemId.slice(CUSTOM_GROUP_MENU_PREFIX.length);
-    await handleSaveToCustomGroup(tab, groupName);
+    return;
+  }
+
+  // カスタムグループに保存
+  if (typeof menuItemId === 'string' && tab?.url) {
+    // ページ用メニュー
+    if (menuItemId.startsWith(CUSTOM_GROUP_MENU_PREFIX)) {
+      const groupName = menuItemId.slice(CUSTOM_GROUP_MENU_PREFIX.length);
+      await handleSaveToCustomGroup(tab, groupName);
+      return;
+    }
+    // 拡張アイコン用メニュー
+    if (menuItemId.startsWith(ACTION_CUSTOM_GROUP_MENU_PREFIX)) {
+      const groupName = menuItemId.slice(ACTION_CUSTOM_GROUP_MENU_PREFIX.length);
+      await handleSaveToCustomGroup(tab, groupName);
+      return;
+    }
   }
 }
 
@@ -266,6 +351,8 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
   // 保存対象外のURL（拡張ページ、ブラウザ内部ページなど）ではメニューを非表示
   if (!isSaveableUrl(tab.url)) {
     browser.contextMenus.update(TABBURROW_MENU_ID, { visible: false });
+    // アクションメニューの削除して閉じるを無効化（API制限でvisible制御できない場合があるためenabledで制御）
+    browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { enabled: false });
     return;
   }
   
@@ -274,17 +361,29 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
   
   // タブがストレージに保存されているか確認し、「削除して閉じる」メニューの有効/無効を設定
   const savedTab = await findTabByUrl(tab.url);
-  browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { enabled: savedTab !== null });
+  const isSaved = savedTab !== null;
+  
+  browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { enabled: isSaved });
+  browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { enabled: isSaved });
 }
 
 /**
  * コンテキストメニューのタイトルを更新（言語設定変更時）
  */
 export function updateContextMenuTitles(): void {
+  // 共通・既存
   browser.contextMenus.update('open-tab-manager', { title: t('contextMenu.openManager') });
   browser.contextMenus.update('save-all-including-pinned', { title: t('contextMenu.saveAllIncludingPinned') });
+
+  // ページ用
   browser.contextMenus.update(TABBURROW_MENU_ID, { title: t('contextMenu.tabBurrow') });
+  browser.contextMenus.update(TABBURROW_OPEN_MANAGER_ID, { title: t('contextMenu.openManager') });
   browser.contextMenus.update(PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
   browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
+
+  // 拡張アイコン用
+  browser.contextMenus.update(ACTION_PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
+  browser.contextMenus.update(ACTION_NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
+  browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
 }

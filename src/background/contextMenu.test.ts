@@ -225,6 +225,40 @@ describe('contextMenu', () => {
       expect(deleteTab).not.toHaveBeenCalled();
       expect(browser.tabs.remove).toHaveBeenCalledWith(1);
     });
+
+    it('拡張アイコン用のremove-and-closeメニューでも動作する', async () => {
+      const { findTabByUrl, deleteTab } = await import('../storage.js');
+      const savedTab = { id: 'saved-tab-id', url: 'https://example.com' };
+      vi.mocked(findTabByUrl).mockResolvedValueOnce(savedTab as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'action-remove-and-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(findTabByUrl).toHaveBeenCalledWith('https://example.com');
+      expect(deleteTab).toHaveBeenCalledWith('saved-tab-id');
+      expect(browser.tabs.remove).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe('handleContextMenuClick - open-tab-manager', () => {
+      it('ページ用メニュー（tabburrow-open-manager）でもタブ管理画面が開く', async () => {
+      const { openTabManagerPage } = await import('./tabSaver.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'tabburrow-open-manager',
+        editable: false,
+        modifiers: [],
+      };
+      
+      await handleContextMenuClick(info);
+      expect(openTabManagerPage).toHaveBeenCalled();
+    });
   });
 
   describe('isSaveableUrl', () => {
