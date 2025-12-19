@@ -22,6 +22,9 @@ jobs:
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 完全な履歴を取得（タグ取得に必要）
+          fetch-tags: true
 
       - name: Node.jsをセットアップ
         uses: actions/setup-node@v4
