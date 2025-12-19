@@ -49,6 +49,8 @@ const defaultSettings: Settings = {
   autoBackupIntervalPreset: '24h',
   autoBackupIntervalMinutes: 1440,
   autoBackupKeepCount: 5,
+  defaultViewMode: 'grouped',
+  defaultDisplayDensity: 'normal',
 };
 
 /**

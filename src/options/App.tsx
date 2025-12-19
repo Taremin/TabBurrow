@@ -9,6 +9,7 @@ import { useSettings } from './hooks/useSettings.js';
 import { SettingsSection } from './components/SettingsSection.js';
 import { LanguageSettings } from './components/LanguageSettings.js';
 import { AppearanceSettings } from './components/AppearanceSettings.js';
+import { ViewModeSettings } from './components/ViewModeSettings.js';
 import { SortSettings } from './components/SortSettings.js';
 import { AutoCloseSettings } from './components/AutoCloseSettings.js';
 import { IconClickSettings } from './components/IconClickSettings.js';
@@ -97,6 +98,22 @@ export function App() {
               value={settings.theme}
               savedValue={savedSettings.theme}
               onChange={(value) => updateSetting('theme', value)}
+            />
+          </SettingsSection>
+
+          {/* デフォルト表示モード設定 */}
+          <SettingsSection
+            icon="🗒️"
+            title={t('settings.viewMode.title')}
+            description={t('settings.viewMode.description')}
+          >
+            <ViewModeSettings
+              viewMode={settings.defaultViewMode}
+              displayDensity={settings.defaultDisplayDensity}
+              savedViewMode={savedSettings.defaultViewMode}
+              savedDisplayDensity={savedSettings.defaultDisplayDensity}
+              onViewModeChange={(value) => updateSetting('defaultViewMode', value)}
+              onDisplayDensityChange={(value) => updateSetting('defaultDisplayDensity', value)}
             />
           </SettingsSection>
 

@@ -1,0 +1,84 @@
+/**
+ * TabBurrow - デフォルト表示モード設定コンポーネント
+ */
+
+import { useTranslation } from '../../common/i18nContext.js';
+import type { ViewMode, DisplayDensity } from '../../settings.js';
+
+interface ViewModeSettingsProps {
+  viewMode: ViewMode;
+  displayDensity: DisplayDensity;
+  savedViewMode: ViewMode;
+  savedDisplayDensity: DisplayDensity;
+  onViewModeChange: (value: ViewMode) => void;
+  onDisplayDensityChange: (value: DisplayDensity) => void;
+}
+
+export function ViewModeSettings({
+  viewMode,
+  displayDensity,
+  savedViewMode,
+  savedDisplayDensity,
+  onViewModeChange,
+  onDisplayDensityChange,
+}: ViewModeSettingsProps) {
+  const { t } = useTranslation();
+  const isViewModeModified = viewMode !== savedViewMode;
+  const isDensityModified = displayDensity !== savedDisplayDensity;
+
+  const viewModeOptions: { value: ViewMode; labelKey: string }[] = [
+    { value: 'grouped', labelKey: 'tabManager.viewMode.grouped' },
+    { value: 'flat', labelKey: 'tabManager.viewMode.flat' },
+  ];
+
+  const densityOptions: { value: DisplayDensity; labelKey: string }[] = [
+    { value: 'normal', labelKey: 'tabManager.viewMode.normal' },
+    { value: 'compact', labelKey: 'tabManager.viewMode.compact' },
+  ];
+
+  return (
+    <>
+      {/* グループ化モード */}
+      <div className="form-group">
+        <label className="form-label">{t('settings.viewMode.groupModeLabel')}</label>
+        <div className={`theme-options ${isViewModeModified ? 'modified' : ''}`}>
+          {viewModeOptions.map(option => (
+            <label key={option.value} className="form-radio-label">
+              <input
+                type="radio"
+                name="defaultViewMode"
+                value={option.value}
+                className="form-radio"
+                checked={viewMode === option.value}
+                onChange={() => onViewModeChange(option.value)}
+              />
+              <span className="radio-custom"></span>
+              <span>{t(option.labelKey)}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* 表示密度 */}
+      <div className="form-group">
+        <label className="form-label">{t('settings.viewMode.densityLabel')}</label>
+        <div className={`theme-options ${isDensityModified ? 'modified' : ''}`}>
+          {densityOptions.map(option => (
+            <label key={option.value} className="form-radio-label">
+              <input
+                type="radio"
+                name="defaultDisplayDensity"
+                value={option.value}
+                className="form-radio"
+                checked={displayDensity === option.value}
+                onChange={() => onDisplayDensityChange(option.value)}
+              />
+              <span className="radio-custom"></span>
+              <span>{t(option.labelKey)}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}

@@ -70,6 +70,12 @@
                 "cancel": "Cancel"
             }
         },
+        "viewMode": {
+            "title": "Default View Mode",
+            "description": "Configure the initial view mode when opening the tab manager.",
+            "groupModeLabel": "Group Mode",
+            "densityLabel": "Display Density"
+        },
         "sort": {
             "title": "Sort Order",
             "description": "Configure the display order in the tab manager.",

@@ -36,6 +36,14 @@ export type PinnedTabAction = 'skip' | 'suspend';
 // off: 無効, 1h/6h/12h/24h: プリセット, custom: カスタム
 export type BackupIntervalPreset = 'off' | '1h' | '6h' | '12h' | '24h' | 'custom';
 
+// 表示モードの型定義（タブ管理画面用）
+// grouped: グループ表示, flat: フラット表示
+export type ViewMode = 'grouped' | 'flat';
+
+// 表示密度の型定義（タブ管理画面用）
+// normal: 通常表示, compact: コンパクト表示
+export type DisplayDensity = 'normal' | 'compact';
+
 // 自動クローズルール
 export interface AutoCloseRule {
   id: string;              // ユニークID
@@ -111,6 +119,10 @@ export interface Settings {
   autoBackupEnabled: boolean;                // 自動バックアップ有効/無効
   autoBackupIntervalPreset: BackupIntervalPreset;  // プリセット選択
   autoBackupIntervalMinutes: number;         // カスタム間隔（分）
+
+  // デフォルト表示モード設定
+  defaultViewMode: ViewMode;                 // デフォルトのグループ化モード
+  defaultDisplayDensity: DisplayDensity;     // デフォルトの表示密度
   autoBackupKeepCount: number;               // 保持する世代数（0=無効、-1=無制限）
 }
 
@@ -143,6 +155,10 @@ const DEFAULT_SETTINGS: Settings = {
   autoBackupEnabled: false,          // デフォルトは無効
   autoBackupIntervalPreset: '24h',   // デフォルトは24時間ごと
   autoBackupIntervalMinutes: 1440,   // 24時間 = 1440分
+
+  // デフォルト表示モード設定
+  defaultViewMode: 'grouped',        // デフォルトはグループ表示
+  defaultDisplayDensity: 'normal',   // デフォルトは通常表示
   autoBackupKeepCount: 5,            // デフォルト5世代
 };
 

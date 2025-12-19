@@ -36,7 +36,10 @@
     *   `normal`: 通常通り開く
     *   `lazy`: 読み込み完了後に discard (メモリ解放)
     *   `immediate`: 開いた直後に discard (高速だがアイコンが出ない場合あり)
+*   **defaultViewMode**: タブ管理画面のデフォルトグループ化モード (`grouped` / `flat`)
+*   **defaultDisplayDensity**: タブ管理画面のデフォルト表示密度 (`normal` / `compact`)
 
 ## 設定の同期
 *   UI (`options.ts` や `tabs/App.tsx`) で設定を変更すると `saveSettings()` で保存し、`notifySettingsChanged()` でメッセージを送信。
 *   Background (`background/index.ts`) はメッセージを受け取り、キャッシュされた設定 (`autoClose.ts`) を更新して即座に反映させる。
+

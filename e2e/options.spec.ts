@@ -597,3 +597,107 @@ test.describe('設定画面 - アイコンクリック設定', () => {
     await expect(submitButton).toBeEnabled();
   });
 });
+
+// ======================
+// デフォルト表示モード設定 テスト
+// ======================
+
+test.describe('設定画面 - デフォルト表示モード設定', () => {
+  test('デフォルト表示モード設定セクションが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // デフォルト表示モード設定セクションが存在することを確認
+    const viewModeSection = page.locator('.settings-section').filter({ hasText: /デフォルト表示モード|Default View Mode/ });
+    await expect(viewModeSection).toBeVisible();
+  });
+
+  test('グループ化モードラジオボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // グループ化モードのラジオボタンが存在することを確認
+    const groupedOption = page.locator('input[name="defaultViewMode"][value="grouped"]');
+    const flatOption = page.locator('input[name="defaultViewMode"][value="flat"]');
+    
+    await expect(groupedOption).toBeAttached();
+    await expect(flatOption).toBeAttached();
+    
+    // デフォルトで「グループ表示」が選択されていることを確認
+    await expect(groupedOption).toBeChecked();
+  });
+
+  test('表示密度ラジオボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 表示密度のラジオボタンが存在することを確認
+    const normalOption = page.locator('input[name="defaultDisplayDensity"][value="normal"]');
+    const compactOption = page.locator('input[name="defaultDisplayDensity"][value="compact"]');
+    
+    await expect(normalOption).toBeAttached();
+    await expect(compactOption).toBeAttached();
+    
+    // デフォルトで「通常表示」が選択されていることを確認
+    await expect(normalOption).toBeChecked();
+  });
+
+  test('グループ化モードを切り替えられる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    const groupedOption = page.locator('input[name="defaultViewMode"][value="grouped"]');
+    const flatOption = page.locator('input[name="defaultViewMode"][value="flat"]');
+    
+    // フラット表示を選択（ラベルをクリック）
+    const flatLabel = page.locator('label:has(input[name="defaultViewMode"][value="flat"])');
+    await flatLabel.click();
+    await expect(flatOption).toBeChecked();
+    await expect(groupedOption).not.toBeChecked();
+    
+    // グループ表示に戻す
+    const groupedLabel = page.locator('label:has(input[name="defaultViewMode"][value="grouped"])');
+    await groupedLabel.click();
+    await expect(groupedOption).toBeChecked();
+    await expect(flatOption).not.toBeChecked();
+  });
+
+  test('表示密度を切り替えられる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    const normalOption = page.locator('input[name="defaultDisplayDensity"][value="normal"]');
+    const compactOption = page.locator('input[name="defaultDisplayDensity"][value="compact"]');
+    
+    // コンパクト表示を選択（ラベルをクリック）
+    const compactLabel = page.locator('label:has(input[name="defaultDisplayDensity"][value="compact"])');
+    await compactLabel.click();
+    await expect(compactOption).toBeChecked();
+    await expect(normalOption).not.toBeChecked();
+    
+    // 通常表示に戻す
+    const normalLabel = page.locator('label:has(input[name="defaultDisplayDensity"][value="normal"])');
+    await normalLabel.click();
+    await expect(normalOption).toBeChecked();
+    await expect(compactOption).not.toBeChecked();
+  });
+
+  test('設定変更後に保存ボタンがアクティブになる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // フラット表示を選択（ラベルをクリック）
+    const flatLabel = page.locator('label:has(input[name="defaultViewMode"][value="flat"])');
+    await flatLabel.click();
+    
+    // 保存ボタンがクリック可能になることを確認
+    const submitButton = page.locator(optionsPageSelectors.submitButton);
+    await expect(submitButton).toBeEnabled();
+  });
+});

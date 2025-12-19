@@ -30,13 +30,8 @@ export interface DateRangeFilter {
   endDate: string | null;   // YYYY-MM-DD形式、nullはフィルターなし
 }
 
-// 表示モードの型
-// grouped: グループ表示（デフォルト）, flat: フラット表示
-export type ViewMode = 'grouped' | 'flat';
-
-// 表示密度の型
-// normal: 通常表示, compact: コンパクト表示
-export type DisplayDensity = 'normal' | 'compact';
+// 表示モード・表示密度はsettings.tsからre-export（一元管理）
+export type { ViewMode, DisplayDensity } from '../settings.js';
 
 // グループごとのフィルタ状態（正規表現パターン）
 export interface GroupFilter {

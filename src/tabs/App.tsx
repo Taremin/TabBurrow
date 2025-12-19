@@ -23,8 +23,8 @@ import {
   assignMultipleTabsToGroup,
   removeMultipleTabsFromGroup,
 } from '../storage.js';
-import { getSettings, type GroupSortType, type ItemSortType, type RestoreMode } from '../settings.js';
-import type { SavedTab, DateRangeFilter, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter, SearchOptions } from './types';
+import { getSettings, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity } from '../settings.js';
+import type { SavedTab, DateRangeFilter, CustomGroupMeta, GroupFilter, SearchOptions } from './types';
 import { DEFAULT_SEARCH_OPTIONS } from './types';
 import { formatBytes } from './utils';
 import { Header } from './Header';
@@ -76,8 +76,8 @@ export function App() {
   const [restoreMode, setRestoreMode] = useState<RestoreMode>('lazy');
   const [restoreIntervalMs, setRestoreIntervalMs] = useState(100);
   const [dateRange, setDateRange] = useState<DateRangeFilter>({ startDate: null, endDate: null });
-  const [viewMode, setViewMode] = useState<ViewMode>('grouped');
-  const [displayDensity, setDisplayDensity] = useState<DisplayDensity>('normal');
+  const [viewMode, setViewMode] = useState<ViewMode | undefined>(undefined); // 設定読み込み後に初期化
+  const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined); // 設定読み込み後に初期化
   const [storageInfo, setStorageInfo] = useState(t('tabManager.storageCalculating'));
   const [dialog, setDialog] = useState<DialogState>({
     isOpen: false,
@@ -134,7 +134,7 @@ export function App() {
     }
   }, [updateStats]);
 
-  // 設定の読み込み（ソート・復元設定）
+  // 設定の読み込み（ソート・復元設定・表示モード）
   const loadSettings = useCallback(async () => {
     try {
       const settings = await getSettings();
@@ -142,6 +142,9 @@ export function App() {
       setItemSort(settings.itemSort);
       setRestoreMode(settings.restoreMode);
       setRestoreIntervalMs(settings.restoreIntervalMs);
+      // 初回読み込み時のみデフォルト表示モードを適用（ユーザーが変更後は上書きしない）
+      setViewMode(prev => prev === undefined ? settings.defaultViewMode : prev);
+      setDisplayDensity(prev => prev === undefined ? settings.defaultDisplayDensity : prev);
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -585,8 +588,8 @@ export function App() {
         regexError={regexError}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
-        viewMode={viewMode}
-        displayDensity={displayDensity}
+        viewMode={viewMode ?? 'grouped'}
+        displayDensity={displayDensity ?? 'normal'}
         onViewModeChange={setViewMode}
         onDisplayDensityChange={setDisplayDensity}
         onDeleteAll={handleDeleteAll}
@@ -619,8 +622,8 @@ export function App() {
           <TabList
             tabs={filteredTabs}
             customGroups={customGroups}
-            viewMode={viewMode}
-            displayDensity={displayDensity}
+            viewMode={viewMode ?? 'grouped'}
+            displayDensity={displayDensity ?? 'normal'}
             groupSort={groupSort}
             itemSort={itemSort}
             onDeleteTab={handleDeleteTab}
