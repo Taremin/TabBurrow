@@ -5,6 +5,7 @@
 
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '../common/i18nContext.js';
+import { Bookmark, Folder, Search, AlertTriangle, Pencil } from 'lucide-react';
 
 interface GroupHeaderProps {
   name: string;
@@ -133,13 +134,11 @@ export const GroupHeader = memo(function GroupHeader({
   }, [isAllSelected, isPartiallySelected, groupTabIds, onSelectGroup, onDeselectGroup]);
 
   const isCustomGroup = groupType === 'custom';
-  const icon = isCustomGroup ? '📌' : '📁';
   const hasActiveFilter = filterPattern.trim().length > 0;
 
   return (
     <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''}`}>
       <div className="group-title">
-        {/* 選択モード時のチェックボックス */}
         {isSelectionMode && groupTabIds.length > 0 && (
           <div 
             className="group-checkbox"
@@ -154,7 +153,7 @@ export const GroupHeader = memo(function GroupHeader({
             />
           </div>
         )}
-        <span className="group-icon">{icon}</span>
+        <span className="group-icon">{isCustomGroup ? <Bookmark size={16} /> : <Folder size={16} />}</span>
         <span className="group-domain">{name}</span>
         <span className="group-count">({tabCount})</span>
       </div>
@@ -174,7 +173,7 @@ export const GroupHeader = memo(function GroupHeader({
                 />
                 {!isValidPattern && (
                   <span className="group-filter-error" title={t('tabManager.groupFilter.invalidPattern')}>
-                    ⚠️
+                    <AlertTriangle size={14} />
                   </span>
                 )}
               </div>
@@ -184,7 +183,7 @@ export const GroupHeader = memo(function GroupHeader({
               onClick={toggleFilter}
               title={t('tabManager.groupFilter.placeholder')}
             >
-              🔍
+              <Search size={14} />
             </button>
           </>
         )}
@@ -194,7 +193,7 @@ export const GroupHeader = memo(function GroupHeader({
             title={t('tabManager.customGroup.edit')}
             onClick={handleRename}
           >
-            ✏️
+            <Pencil size={14} />
           </button>
         )}
         <button 

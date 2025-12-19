@@ -75,6 +75,12 @@ describe('autoClose', () => {
         linkCheckConcurrency: 5,
         linkCheckDomainConcurrency: 1,
         linkCheckDomainDelayMs: 100,
+        iconClickApplyRules: true,
+        iconClickPinnedAction: 'skip',
+        autoBackupEnabled: false,
+        autoBackupIntervalPreset: '24h',
+        autoBackupIntervalMinutes: 1440,
+        autoBackupKeepCount: 5,
       };
 
       setCachedSettings(mockSettings);
@@ -102,6 +108,12 @@ describe('autoClose', () => {
         linkCheckConcurrency: 5,
         linkCheckDomainConcurrency: 1,
         linkCheckDomainDelayMs: 100,
+        iconClickApplyRules: true,
+        iconClickPinnedAction: 'skip',
+        autoBackupEnabled: false,
+        autoBackupIntervalPreset: '24h',
+        autoBackupIntervalMinutes: 1440,
+        autoBackupKeepCount: 5,
       };
 
       const settings2: Settings = {
@@ -120,6 +132,12 @@ describe('autoClose', () => {
         linkCheckConcurrency: 5,
         linkCheckDomainConcurrency: 1,
         linkCheckDomainDelayMs: 100,
+        iconClickApplyRules: true,
+        iconClickPinnedAction: 'skip',
+        autoBackupEnabled: false,
+        autoBackupIntervalPreset: '24h',
+        autoBackupIntervalMinutes: 1440,
+        autoBackupKeepCount: 5,
       };
 
       setCachedSettings(settings1);

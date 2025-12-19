@@ -9,6 +9,7 @@ import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext.js';
+import { Globe, Camera, Folder, Trash2, Calendar, Save } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
@@ -276,13 +277,13 @@ export const TabCard = memo(function TabCard({
             {screenshotUrl ? (
               <img src={screenshotUrl} alt="Screenshot" />
             ) : (
-              <div className="tab-screenshot-placeholder">🌐</div>
+              <div className="tab-screenshot-placeholder"><Globe size={24} /></div>
             )}
           </div>
         )}
         {/* コンパクト表示時: スクリーンショットインジケータ（imageRefは使用しない） */}
         {isCompact && tab.screenshot && tab.screenshot.size > 0 && (
-          <div className="tab-screenshot-indicator">📷</div>
+          <div className="tab-screenshot-indicator"><Camera size={14} /></div>
         )}
         <div className={`tab-info ${isCompact ? 'tab-info-compact' : ''}`}>
           <div className="tab-title">
@@ -298,11 +299,10 @@ export const TabCard = memo(function TabCard({
           </div>
           {/* コンパクト表示時: URLを省略表示 */}
           <div className={`tab-url ${isCompact ? 'tab-url-compact' : ''}`}>{tab.url}</div>
-          {/* メタ情報（時刻） */}
           {isCompact ? (
             <div className="tab-meta tab-meta-compact">
-              <span>📅 {formatDateTime(tab.lastAccessed)}</span>
-              <span>💾 {formatDateTime(tab.savedAt)}</span>
+              <span><Calendar size={12} /> {formatDateTime(tab.lastAccessed)}</span>
+              <span><Save size={12} /> {formatDateTime(tab.savedAt)}</span>
             </div>
           ) : (
             <div className="tab-meta">
@@ -312,21 +312,20 @@ export const TabCard = memo(function TabCard({
           )}
         </div>
         <div className="tab-actions">
-          {/* グループ操作ボタン */}
           <button 
             ref={buttonRef}
             className="tab-group-action" 
             title={isInCustomGroup ? t('tabManager.tabCard.removeFromGroup') : t('tabManager.tabCard.moveToGroup')}
             onClick={handleToggleGroupMenu}
           >
-            📁
+            <Folder size={16} />
           </button>
           <button 
             className="tab-delete" 
             title={t('tabManager.tabCard.deleteButton')}
             onClick={handleDelete}
           >
-            🗑️
+            <Trash2 size={16} />
           </button>
         </div>
       </div>

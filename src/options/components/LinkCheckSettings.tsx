@@ -6,6 +6,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { LinkCheckRule, LinkCheckAction } from '../../settings.js';
 import { LinkCheckRuleDialog } from './LinkCheckRuleDialog.js';
+import { Pencil, X } from 'lucide-react';
 
 interface LinkCheckSettingsProps {
   rules: LinkCheckRule[];
@@ -231,7 +232,7 @@ export function LinkCheckSettings({
                 onClick={() => handleEditRule(rule.id)}
                 title={t('linkCheck.settings.editRule')}
               >
-                ✏️
+                <Pencil size={14} />
               </button>
               <button
                 type="button"
@@ -239,7 +240,7 @@ export function LinkCheckSettings({
                 onClick={() => handleDeleteRule(rule.id)}
                 title={t('common.delete')}
               >
-                ×
+                <X size={14} />
               </button>
             </div>
           ))}

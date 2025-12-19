@@ -141,8 +141,8 @@ test.describe('設定画面 - データ管理', () => {
     const tabDataGroup = page.locator('.data-group').first();
     await expect(tabDataGroup).toBeVisible();
     
-    // エクスポートボタン（ファイル）
-    const exportButton = tabDataGroup.locator('.btn').filter({ hasText: /📤/ }).first();
+    // エクスポートボタン（ファイル）- lucide-download クラスを持つボタン
+    const exportButton = tabDataGroup.locator('.btn:has(.lucide-download)').first();
     await expect(exportButton).toBeVisible();
   });
 
@@ -151,8 +151,8 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // テキスト表示ボタン（📋）をクリック
-    const showTextButton = page.locator('.data-group').first().locator('.btn-small').filter({ hasText: /📋/ });
+    // テキスト表示ボタン - 最初の btn-small
+    const showTextButton = page.locator('.data-group').first().locator('.btn-small').first();
     await expect(showTextButton).toBeVisible();
     await showTextButton.click();
     
@@ -179,8 +179,8 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // テキスト表示ボタンをクリック
-    const showTextButton = page.locator('.data-group').first().locator('.btn-small').filter({ hasText: /📋/ });
+    // テキスト表示ボタンをクリック - 最初の btn-small
+    const showTextButton = page.locator('.data-group').first().locator('.btn-small').first();
     await showTextButton.click();
     
     const dialog = page.locator('.dialog-overlay');
@@ -210,8 +210,8 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // テキスト貼り付けボタン（📝）をクリック
-    const pasteTextButton = page.locator('.data-group').first().locator('.btn-small').filter({ hasText: /📝/ });
+    // テキスト貼り付けボタン - lucide-clipboard-paste クラスを持つボタン
+    const pasteTextButton = page.locator('.data-group').first().locator('.btn-small:has(.lucide-clipboard-paste)');
     await expect(pasteTextButton).toBeVisible();
     await pasteTextButton.click();
     
@@ -235,8 +235,8 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // テキスト貼り付けボタンをクリック
-    const pasteTextButton = page.locator('.data-group').first().locator('.btn-small').filter({ hasText: /📝/ });
+    // テキスト貼り付けボタンをクリック - lucide-clipboard-paste クラスを持つボタン
+    const pasteTextButton = page.locator('.data-group').first().locator('.btn-small:has(.lucide-clipboard-paste)');
     await pasteTextButton.click();
     
     const dialog = page.locator('.dialog-overlay');
@@ -261,9 +261,9 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // 設定データグループ（2番目）のテキスト表示ボタン
+    // 設定データグループ（2番目）のテキスト表示ボタン - 最初の btn-small
     const settingsGroup = page.locator('.data-group').nth(1);
-    const showJsonButton = settingsGroup.locator('.btn-small').filter({ hasText: /📋/ });
+    const showJsonButton = settingsGroup.locator('.btn-small').first();
     await expect(showJsonButton).toBeVisible();
     await showJsonButton.click();
     
@@ -290,9 +290,9 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // 設定データグループ（2番目）のテキスト貼り付けボタン
+    // 設定データグループ（2番目）のテキスト貼り付けボタン - lucide-clipboard-paste クラスを持つボタン
     const settingsGroup = page.locator('.data-group').nth(1);
-    const pasteJsonButton = settingsGroup.locator('.btn-small').filter({ hasText: /📝/ });
+    const pasteJsonButton = settingsGroup.locator('.btn-small:has(.lucide-clipboard-paste)');
     await expect(pasteJsonButton).toBeVisible();
     await pasteJsonButton.click();
     
@@ -315,9 +315,9 @@ test.describe('設定画面 - データ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // 設定データグループのテキスト貼り付けボタン
+    // 設定データグループのテキスト貼り付けボタン - lucide-clipboard-paste クラスを持つボタン
     const settingsGroup = page.locator('.data-group').nth(1);
-    const pasteJsonButton = settingsGroup.locator('.btn-small').filter({ hasText: /📝/ });
+    const pasteJsonButton = settingsGroup.locator('.btn-small:has(.lucide-clipboard-paste)');
     await pasteJsonButton.click();
     
     const dialog = page.locator('.dialog-overlay');
@@ -349,9 +349,9 @@ test.describe('設定画面 - データ管理', () => {
     // クリップボードAPIを使用するための権限を付与
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     
-    // 設定のテキスト表示ボタンをクリック
+    // 設定のテキスト表示ボタンをクリック - 最初の btn-small
     const settingsGroup = page.locator('.data-group').nth(1);
-    const showJsonButton = settingsGroup.locator('.btn-small').filter({ hasText: /📋/ });
+    const showJsonButton = settingsGroup.locator('.btn-small').first();
     await showJsonButton.click();
     
     const dialog = page.locator('.dialog-overlay');

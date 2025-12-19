@@ -43,6 +43,12 @@ const defaultSettings: Settings = {
   linkCheckConcurrency: 5,
   linkCheckDomainConcurrency: 1,
   linkCheckDomainDelayMs: 100,
+  iconClickApplyRules: true,
+  iconClickPinnedAction: 'skip',
+  autoBackupEnabled: false,
+  autoBackupIntervalPreset: '24h',
+  autoBackupIntervalMinutes: 1440,
+  autoBackupKeepCount: 5,
 };
 
 /**

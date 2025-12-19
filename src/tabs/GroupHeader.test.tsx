@@ -24,13 +24,17 @@ describe('GroupHeader', () => {
   it('ドメイングループにはフォルダアイコンが表示される', () => {
     render(<GroupHeader {...defaultProps} groupType="domain" />);
     
-    expect(screen.getByText('📁')).toBeInTheDocument();
+    // Lucideアイコンはクラス名で確認
+    const icon = document.querySelector('.lucide-folder');
+    expect(icon).toBeInTheDocument();
   });
 
-  it('カスタムグループにはピンアイコンが表示される', () => {
+  it('カスタムグループにはブックマークアイコンが表示される', () => {
     render(<GroupHeader {...defaultProps} groupType="custom" />);
     
-    expect(screen.getByText('📌')).toBeInTheDocument();
+    // Lucideアイコンはクラス名で確認
+    const icon = document.querySelector('.lucide-bookmark');
+    expect(icon).toBeInTheDocument();
   });
 
   it('ドメイングループにはdomain-groupクラスが適用される', () => {
@@ -80,7 +84,9 @@ describe('GroupHeader', () => {
       />
     );
     
-    expect(screen.getByText('✏️')).toBeInTheDocument();
+    // Lucideアイコンはクラス名で確認
+    const icon = document.querySelector('.lucide-pencil');
+    expect(icon).toBeInTheDocument();
   });
 
   it('ドメイングループでは編集ボタンが表示されない', () => {
@@ -93,7 +99,9 @@ describe('GroupHeader', () => {
       />
     );
     
-    expect(screen.queryByText('✏️')).not.toBeInTheDocument();
+    // ドメイングループでは編集ボタンつまり group-edit クラスがない
+    const editButton = document.querySelector('.group-edit');
+    expect(editButton).not.toBeInTheDocument();
   });
 });
 

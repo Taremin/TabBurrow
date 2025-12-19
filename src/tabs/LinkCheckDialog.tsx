@@ -9,6 +9,7 @@ import { t } from '../i18n.js';
 import type { LinkCheckAction } from '../settings.js';
 import { deleteMultipleTabs, assignMultipleTabsToGroup, getAllCustomGroups } from '../storage.js';
 import type { CustomGroupMeta } from '../dbSchema.js';
+import { CheckCircle, XCircle, AlertTriangle, Minus, Clock, X } from 'lucide-react';
 
 // ======================
 // 型定義
@@ -368,22 +369,21 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
   };
 
   // アクションのアイコン
-  const getActionIcon = (action: LinkCheckAction): string => {
+  const getActionIcon = (action: LinkCheckAction): React.ReactNode => {
     switch (action) {
-      case 'alive': return '✅';
-      case 'dead': return '❌';
-      case 'warning': return '⚠️';
-      default: return '➖';
+      case 'alive': return <CheckCircle size={18} className="icon-alive" />;
+      case 'dead': return <XCircle size={18} className="icon-dead" />;
+      case 'warning': return <AlertTriangle size={18} className="icon-warning" />;
+      default: return <Minus size={18} />;
     }
   };
 
   return (
     <div className="link-check-overlay" onClick={handleClose}>
       <div className="link-check-dialog" onClick={e => e.stopPropagation()}>
-        {/* ヘッダー */}
         <div className="link-check-header">
           <h2>{t('linkCheck.title')}</h2>
-          <button className="link-check-close" onClick={handleClose}>×</button>
+          <button className="link-check-close" onClick={handleClose}><X size={20} /></button>
         </div>
 
         {/* 進捗セクション */}
@@ -400,10 +400,10 @@ export function LinkCheckDialog({ isOpen, onClose, onTabsDeleted }: LinkCheckDia
             {progress.checked}/{progress.total} ({progressPercent}%)
           </div>
           <div className="link-check-stats">
-            <span className="stat-alive">✅ {t('linkCheck.alive')}: {progress.alive}</span>
-            <span className="stat-warning">⚠️ {t('linkCheck.warning')}: {progress.warning}</span>
-            <span className="stat-dead">❌ {t('linkCheck.dead')}: {progress.dead}</span>
-            <span className="stat-remaining">⏳ {t('linkCheck.remaining')}: {progress.total - progress.checked}</span>
+            <span className="stat-alive"><CheckCircle size={14} /> {t('linkCheck.alive')}: {progress.alive}</span>
+            <span className="stat-warning"><AlertTriangle size={14} /> {t('linkCheck.warning')}: {progress.warning}</span>
+            <span className="stat-dead"><XCircle size={14} /> {t('linkCheck.dead')}: {progress.dead}</span>
+            <span className="stat-remaining"><Clock size={14} /> {t('linkCheck.remaining')}: {progress.total - progress.checked}</span>
           </div>
         </div>
 

@@ -22,6 +22,7 @@ import { notifySettingsChanged } from '../../settings.js';
 import { ImportModeDialog } from './ImportModeDialog.js';
 import { TextExportDialog } from './TextExportDialog.js';
 import { TextImportDialog } from './TextImportDialog.js';
+import { Database, Download, Upload, FileJson, ClipboardPaste } from 'lucide-react';
 
 interface DataManagementProps {
   onSettingsImported: () => void;
@@ -173,7 +174,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
     <>
       <section className="settings-section data-management">
         <h2 className="section-title">
-          <span className="section-icon">📦</span>
+          <span className="section-icon"><Database size={20} /></span>
           <span>{t('settings.dataManagement.title')}</span>
         </h2>
 
@@ -189,7 +190,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary"
               onClick={handleExportTabs}
             >
-              <span>📤</span>
+              <Download size={16} />
               <span>{t('settings.dataManagement.exportTabs')}</span>
             </button>
             <button
@@ -197,7 +198,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary"
               onClick={handleImportTabs}
             >
-              <span>📥</span>
+              <Upload size={16} />
               <span>{t('settings.dataManagement.importTabs')}</span>
             </button>
           </div>
@@ -208,7 +209,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary btn-small"
               onClick={handleShowTabsText}
             >
-              <span>📋</span>
+              <FileJson size={14} />
               <span>{t('settings.dataManagement.showTextButton')}</span>
             </button>
             <button
@@ -216,7 +217,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary btn-small"
               onClick={() => setIsTabsImportDialogOpen(true)}
             >
-              <span>📝</span>
+              <ClipboardPaste size={14} />
               <span>{t('settings.dataManagement.pasteTextButton')}</span>
             </button>
           </div>
@@ -234,7 +235,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary"
               onClick={handleExportSettings}
             >
-              <span>📤</span>
+              <Download size={16} />
               <span>{t('settings.dataManagement.exportSettings')}</span>
             </button>
             <button
@@ -242,7 +243,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary"
               onClick={handleImportSettings}
             >
-              <span>📥</span>
+              <Upload size={16} />
               <span>{t('settings.dataManagement.importSettings')}</span>
             </button>
           </div>
@@ -253,7 +254,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary btn-small"
               onClick={handleShowSettingsJson}
             >
-              <span>📋</span>
+              <FileJson size={14} />
               <span>{t('settings.dataManagement.showJsonButton')}</span>
             </button>
             <button
@@ -261,7 +262,7 @@ export function DataManagement({ onSettingsImported }: DataManagementProps) {
               className="btn btn-secondary btn-small"
               onClick={() => setIsSettingsImportDialogOpen(true)}
             >
-              <span>📝</span>
+              <ClipboardPaste size={14} />
               <span>{t('settings.dataManagement.pasteJsonButton')}</span>
             </button>
           </div>

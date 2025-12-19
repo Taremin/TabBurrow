@@ -2,6 +2,7 @@ import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions } from './types';
 import { useTranslation } from '../common/i18nContext.js';
 import { DateRangeFilterComponent } from './DateRangeFilter';
+import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2 } from 'lucide-react';
 
 interface HeaderProps {
   tabCount: number;
@@ -256,13 +257,13 @@ export const Header = memo(function Header({
                 className="btn btn-secondary btn-small"
                 onClick={onToggleSelectionMode}
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
           ) : (
             <>
               <div className="search-container search-container-compact">
-                <span className="search-icon">🔍</span>
+                <span className="search-icon"><Search size={16} /></span>
                 <input
                   type="text"
                   className={`search-input search-input-compact ${regexError ? 'search-input-error' : ''}`}
@@ -272,7 +273,7 @@ export const Header = memo(function Header({
                 />
                 {localQuery && (
                   <button className="clear-search" onClick={handleClearSearch}>
-                    ✕
+                    <X size={14} />
                   </button>
                 )}
                 <div className="search-options">
@@ -312,14 +313,14 @@ export const Header = memo(function Header({
                 disabled={!hasAnyTabs}
                 data-testid="selection-mode-toggle"
               >
-                <span>☑</span>
+                <ListChecks size={18} />
               </button>
               <button 
                 className={`btn btn-icon btn-filter ${showDateFilter || hasActiveDateFilter ? 'active' : ''}`}
                 onClick={toggleDateFilter}
                 title={t('tabManager.dateFilter.toggleButton')}
               >
-                <span>📅</span>
+                <Calendar size={18} />
                 {hasActiveDateFilter && <span className="filter-badge"></span>}
               </button>
               <div className="view-mode-dropdown" ref={viewModeMenuRef}>
@@ -329,7 +330,7 @@ export const Header = memo(function Header({
                   title={t('tabManager.viewMode.toggleButton')}
                   data-testid="view-mode-toggle"
                 >
-                  <span>{displayDensity === 'compact' ? '≡' : (viewMode === 'grouped' ? '📊' : '📋')}</span>
+                  {displayDensity === 'compact' ? <AlignJustify size={18} /> : (viewMode === 'grouped' ? <LayoutList size={18} /> : <List size={18} />)}
                 </button>
                 {showViewModeMenu && (
                   <div className="view-mode-menu">
@@ -339,13 +340,13 @@ export const Header = memo(function Header({
                         className={`view-mode-menu-item ${viewMode === 'grouped' ? 'active' : ''}`}
                         onClick={() => handleViewModeSelect('grouped')}
                       >
-                        📊 {t('tabManager.viewMode.grouped')}
+                        <LayoutList size={16} /> {t('tabManager.viewMode.grouped')}
                       </button>
                       <button
                         className={`view-mode-menu-item ${viewMode === 'flat' ? 'active' : ''}`}
                         onClick={() => handleViewModeSelect('flat')}
                       >
-                        📋 {t('tabManager.viewMode.flat')}
+                        <List size={16} /> {t('tabManager.viewMode.flat')}
                       </button>
                     </div>
                     <div className="view-mode-menu-divider" />
@@ -361,7 +362,7 @@ export const Header = memo(function Header({
                         className={`view-mode-menu-item ${displayDensity === 'compact' ? 'active' : ''}`}
                         onClick={() => handleDensitySelect('compact')}
                       >
-                        ≡ {t('tabManager.viewMode.compact')}
+                        <AlignJustify size={16} /> {t('tabManager.viewMode.compact')}
                       </button>
                     </div>
                   </div>
@@ -373,10 +374,10 @@ export const Header = memo(function Header({
                 disabled={!hasAnyTabs}
                 title={t('linkCheck.button')}
               >
-                <span>🔗</span>
+                <Activity size={18} />
               </button>
               <a href="options.html" className="btn btn-icon btn-secondary" title={t('tabManager.header.settingsButton')}>
-                <span>⚙️</span>
+                <Settings size={18} />
               </a>
               <button 
                 className="btn btn-icon btn-primary"
@@ -384,7 +385,7 @@ export const Header = memo(function Header({
                 disabled={!hasAnyTabs}
                 title={t('tabManager.header.openAllButton')}
               >
-                <span>📂</span>
+                <ExternalLink size={18} />
               </button>
               <button 
                 className="btn btn-icon btn-danger"
@@ -392,7 +393,7 @@ export const Header = memo(function Header({
                 disabled={!hasAnyTabs}
                 title={t('tabManager.header.deleteAllButton')}
               >
-                <span>🗑️</span>
+                <Trash2 size={18} />
               </button>
             </>
           )}
