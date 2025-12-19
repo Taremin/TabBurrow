@@ -18,7 +18,7 @@ describe('settings', () => {
       const settings = getDefaultSettings();
       
       expect(settings.autoCloseEnabled).toBe(false);
-      expect(settings.autoCloseSeconds).toBe(300);
+      expect(settings.autoCloseSeconds).toBe(1800);
       expect(settings.autoCloseRules).toEqual([]);
       expect(settings.locale).toBe('auto');
       expect(settings.theme).toBe('system');
