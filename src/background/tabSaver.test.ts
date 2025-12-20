@@ -1,9 +1,10 @@
 /**
  * tabSaver.ts のユニットテスト
  * 純粋関数をテスト（Chrome API依存部分は除外）
+ * 注: extractDomainのテストはsrc/utils/url.test.tsに移動済み
  */
 import { describe, it, expect } from 'vitest';
-import { extractDomain, createSavedTab } from './tabSaver.js';
+import { createSavedTab } from './tabSaver.js';
 
 // テスト用のモックタブを作成するヘルパー関数
 function createMockTab(overrides: Partial<chrome.tabs.Tab> = {}): chrome.tabs.Tab {
@@ -25,34 +26,6 @@ function createMockTab(overrides: Partial<chrome.tabs.Tab> = {}): chrome.tabs.Ta
 }
 
 describe('tabSaver', () => {
-  describe('extractDomain', () => {
-    it('通常のURLからドメインを抽出する', () => {
-      expect(extractDomain('https://github.com/user/repo')).toBe('github.com');
-    });
-
-    it('サブドメインを含むURLからドメインを抽出する', () => {
-      expect(extractDomain('https://docs.google.com/document')).toBe('docs.google.com');
-    });
-
-    it('ポート番号を含むURLからドメインを抽出する', () => {
-      expect(extractDomain('http://localhost:3000/path')).toBe('localhost');
-    });
-
-    it('IPアドレスのURLからホストを抽出する', () => {
-      expect(extractDomain('http://192.168.1.1/admin')).toBe('192.168.1.1');
-    });
-
-    it('無効なURLの場合は"unknown"を返す', () => {
-      expect(extractDomain('invalid-url')).toBe('unknown');
-      expect(extractDomain('')).toBe('unknown');
-    });
-
-    it('file://スキームのURLからパスを取得しようとする', () => {
-      // file://の場合、hostnameは空文字列になる
-      const result = extractDomain('file:///C:/path/to/file.html');
-      expect(result).toBe('');
-    });
-  });
 
   describe('createSavedTab', () => {
     it('タブ情報からSavedTabオブジェクトを作成する', () => {

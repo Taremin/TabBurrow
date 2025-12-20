@@ -5,6 +5,7 @@
 
 import { getAllTabs, saveTabs, deleteAllTabs, type SavedTab } from './storage.js';
 import { getSettings, saveSettings, type Settings } from './settings.js';
+import { extractDomain } from './utils/url.js';
 
 // エクスポートデータのバージョン
 const EXPORT_VERSION = 1;
@@ -255,16 +256,7 @@ export function generateSettingsExportFilename(): string {
  */
 export type ExportFormat = 'json' | 'urlList' | 'markdown';
 
-/**
- * URLからドメインを抽出
- */
-function extractDomain(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return 'unknown';
-  }
-}
+
 
 /**
  * タブデータをURLリスト形式にフォーマット

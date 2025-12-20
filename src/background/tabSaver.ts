@@ -8,18 +8,7 @@ import type { Tabs } from 'webextension-polyfill';
 import { saveTabs, type SavedTab } from '../storage.js';
 import { getScreenshot } from '../screenshotCache.js';
 import { captureTab, resizeScreenshot } from './screenshot.js';
-
-/**
- * URLからドメインを抽出
- */
-export function extractDomain(url: string): string {
-  try {
-    const urlObj = new URL(url);
-    return urlObj.hostname;
-  } catch {
-    return 'unknown';
-  }
-}
+import { extractDomain } from '../utils/url.js';
 
 /**
  * タブのスクリーンショットを取得（アクティブタブかキャッシュから）

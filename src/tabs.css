@@ -716,16 +716,48 @@ body {
   }
 }
 
+/* ダイアログヘッダー（アイコン + タイトル） */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
 .dialog-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.dialog-icon svg {
+  width: 28px;
+  height: 28px;
 }
 
 .dialog-title {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 8px;
   color: var(--text-primary);
+  margin: 0;
+}
+
+/* アラートアイコンの色 */
+.alert-icon-warning {
+  color: #f59e0b;
+}
+
+.alert-icon-success {
+  color: #10b981;
+}
+
+.alert-icon-error {
+  color: #ef4444;
+}
+
+.alert-icon-info {
+  color: #3b82f6;
 }
 
 .dialog-message {
@@ -1456,6 +1488,19 @@ body {
   color: var(--text-muted);
 }
 
+/* リンクチェック結果 アイコン色 */
+.icon-alive {
+  color: var(--success-color);
+}
+
+.icon-warning {
+  color: #f59e0b;
+}
+
+.icon-dead {
+  color: var(--danger-color);
+}
+
 .link-check-error {
   padding: 12px 20px;
   background: var(--danger-light);
@@ -1635,6 +1680,17 @@ body {
 
 .link-check-actions .btn-close:hover {
   background: var(--accent-hover);
+}
+
+.link-check-actions .btn-resume {
+  background: var(--accent-light);
+  color: var(--accent-color);
+  margin-left: auto;
+}
+
+.link-check-actions .btn-resume:hover {
+  background: var(--accent-color);
+  color: white;
 }
 
 .link-check-actions button:disabled {

@@ -7,7 +7,8 @@ import browser from '../browserApi.js';
 import type { Menus, Tabs } from 'webextension-polyfill';
 import { saveTabs, saveTabsForCustomGroup, getAllCustomGroups, createCustomGroup, findTabByUrl, deleteTab, type SavedTab } from '../storage.js';
 import { t } from '../i18n.js';
-import { extractDomain, openTabManagerPage, getTabScreenshot, saveAndCloseTabs } from './tabSaver.js';
+import { openTabManagerPage, getTabScreenshot, saveAndCloseTabs } from './tabSaver.js';
+import { extractDomain } from '../utils/url.js';
 import { getSettings, saveSettings, escapeRegexPattern, matchAutoCloseRule, type AutoCloseRule } from '../settings.js';
 
 // メニューIDの定数

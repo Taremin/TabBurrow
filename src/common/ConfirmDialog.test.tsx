@@ -52,7 +52,10 @@ describe('ConfirmDialog', () => {
   it('警告アイコンが表示される', () => {
     render(<ConfirmDialog {...defaultProps} />);
     
-    expect(screen.getByText('⚠️')).toBeInTheDocument();
+    // Lucide AlertTriangleアイコンを含む要素を確認
+    const iconContainer = document.querySelector('.dialog-icon');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer?.querySelector('svg')).toBeInTheDocument();
   });
 
   it('ESCキーでonCancelが呼ばれる', () => {

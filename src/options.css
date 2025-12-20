@@ -595,16 +595,48 @@ body {
     }
 }
 
+/* ダイアログヘッダー（アイコン + タイトル） */
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
 .dialog-icon {
-    font-size: 3rem;
-    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.dialog-icon svg {
+    width: 28px;
+    height: 28px;
 }
 
 .dialog-title {
     font-size: 1.25rem;
     font-weight: 600;
-    margin-bottom: 8px;
     color: var(--text-primary);
+    margin: 0;
+}
+
+/* アラートアイコンの色 */
+.alert-icon-warning {
+    color: #f59e0b;
+}
+
+.alert-icon-success {
+    color: #10b981;
+}
+
+.alert-icon-error {
+    color: #ef4444;
+}
+
+.alert-icon-info {
+    color: #3b82f6;
 }
 
 .dialog-message {

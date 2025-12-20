@@ -6,6 +6,7 @@
 import { getAllTabs } from '../storage.js';
 import { getSettings, type LinkCheckAction, type LinkCheckRule } from '../settings.js';
 import type { SavedTab } from '../dbSchema.js';
+import { extractDomain } from '../utils/url.js';
 
 // ======================
 // インターフェース定義
@@ -362,16 +363,7 @@ function createRoundRobinOrder(tabsByDomain: Map<string, SavedTab[]>): SavedTab[
   return result;
 }
 
-/**
- * URLからドメインを抽出
- */
-function extractDomain(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return 'unknown';
-  }
-}
+
 
 /**
  * 単一URLのチェック

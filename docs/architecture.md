@@ -28,12 +28,19 @@ TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機
     *   `TabCard.tsx`: 個々のタブカード表示。
     *   `GroupHeader.tsx`: グループヘッダー（一括操作ボタン含む）。
     *   `Header.tsx`: 検索バー、統計情報、検索オプション。
-    *   `ConfirmDialog.tsx`: 確認ダイアログ。
     *   `LinkCheckDialog.tsx`: リンクチェックダイアログ。
     *   `DateRangeFilter.tsx`: 日付範囲フィルタ。
 *   **`options/`**: 設定画面（Reactアプリケーション）。
     *   `App.tsx`: 設定画面メイン。
     *   `components/`: 各種設定コンポーネント。
+*   **`common/`**: 共通コンポーネントとフック。
+    *   `ConfirmDialog.tsx`: 確認ダイアログ。
+    *   `AlertDialog.tsx`: 通知ダイアログ。
+    *   `PromptDialog.tsx`: 入力ダイアログ。
+    *   `hooks/useDialog.ts`: ダイアログ共通ロジック（ESCキー、オーバーレイクリック）。
+    *   `hooks/useClickOutside.ts`: 外部クリック検出フック。
+*   **`utils/`**: 共通ユーティリティ関数。
+    *   `url.ts`: URL関連ユーティリティ（extractDomainなど）。
 *   **ルートファイル**:
     *   `storage.ts`: IndexedDBラッパー。
     *   `dbSchema.ts`: IndexedDBスキーマ定義。

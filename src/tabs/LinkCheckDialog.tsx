@@ -10,7 +10,7 @@ import type { LinkCheckAction } from '../settings.js';
 import { deleteMultipleTabs, assignMultipleTabsToGroup, getAllCustomGroups } from '../storage.js';
 import type { CustomGroupMeta } from '../dbSchema.js';
 import { CheckCircle, XCircle, AlertTriangle, Minus, Clock, X } from 'lucide-react';
-import { ConfirmDialog } from './ConfirmDialog.js';
+import { ConfirmDialog } from '../common/ConfirmDialog.js';
 import { PromptDialog } from '../common/PromptDialog.js';
 
 // ======================

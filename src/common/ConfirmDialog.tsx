@@ -2,8 +2,10 @@
  * TabBurrow - 確認ダイアログコンポーネント
  */
 
-import { memo, useCallback, useEffect } from 'react';
-import { useTranslation } from '../common/i18nContext.js';
+import { memo } from 'react';
+import { useTranslation } from './i18nContext.js';
+import { useDialog } from './hooks/useDialog.js';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -26,24 +28,7 @@ export const ConfirmDialog = memo(function ConfirmDialog({
   confirmButtonStyle = 'danger',
 }: ConfirmDialogProps) {
   const { t } = useTranslation();
-
-  // ESCキーでダイアログを閉じる
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onCancel();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onCancel]);
-
-  // オーバーレイクリックで閉じる
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onCancel();
-    }
-  }, [onCancel]);
+  const { handleOverlayClick } = useDialog({ isOpen, onClose: onCancel });
 
   if (!isOpen) return null;
 
@@ -54,8 +39,10 @@ export const ConfirmDialog = memo(function ConfirmDialog({
       onClick={handleOverlayClick}
     >
       <div className="dialog">
-        <div className="dialog-icon">⚠️</div>
-        <h3 className="dialog-title">{title}</h3>
+        <div className="dialog-header">
+          <span className="dialog-icon"><AlertTriangle className="alert-icon-warning" /></span>
+          <h3 className="dialog-title">{title}</h3>
+        </div>
         <p className="dialog-message">{message}</p>
         <div className="dialog-actions">
           <button className="btn btn-secondary" onClick={onCancel}>

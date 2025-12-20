@@ -6,7 +6,8 @@
 import browser from '../browserApi.js';
 import type { Alarms, Tabs } from 'webextension-polyfill';
 import { getSettings, matchAutoCloseRule, type Settings } from '../settings.js';
-import { saveAndCloseTabs, extractDomain, getTabScreenshot } from './tabSaver.js';
+import { saveAndCloseTabs, getTabScreenshot } from './tabSaver.js';
+import { extractDomain } from '../utils/url.js';
 import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../storage.js';
 
 // 自動収納のアラーム名

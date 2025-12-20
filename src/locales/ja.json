@@ -350,6 +350,7 @@
         "moveToGroup": "グループに移動",
         "cancel": "キャンセル",
         "close": "閉じる",
+        "resume": "再開",
         "statusCode": "ステータス",
         "confirmDeleteTitle": "選択したタブを削除",
         "confirmDeleteMessage": "{count}件のタブを削除しますか？",

@@ -29,7 +29,7 @@ import { DEFAULT_SEARCH_OPTIONS } from './types';
 import { formatBytes } from './utils';
 import { Header } from './Header';
 import { TabList } from './TabList';
-import { ConfirmDialog } from './ConfirmDialog';
+import { ConfirmDialog } from '../common/ConfirmDialog.js';
 import { LinkCheckDialog } from './LinkCheckDialog';
 import { PromptDialog } from '../common/PromptDialog.js';
 import { useTranslation } from '../common/i18nContext.js';

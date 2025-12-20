@@ -5,6 +5,7 @@
 
 import { memo, useCallback, useEffect, useState, useRef } from 'react';
 import { useTranslation } from './i18nContext.js';
+import { useDialog } from './hooks/useDialog.js';
 
 interface PromptDialogProps {
   isOpen: boolean;
@@ -32,6 +33,20 @@ export const PromptDialog = memo(function PromptDialog({
   const [value, setValue] = useState(defaultValue);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // 確認ボタン
+  const handleConfirm = useCallback(() => {
+    if (value.trim()) {
+      onConfirm(value.trim());
+    }
+  }, [value, onConfirm]);
+
+  // useDialogフックでESCキー、Enterキー、オーバーレイクリックを処理
+  const { handleOverlayClick } = useDialog({ 
+    isOpen, 
+    onClose: onCancel,
+    onEnter: handleConfirm,
+  });
+
   // ダイアログが開いたときに初期値をセットしてフォーカス
   useEffect(() => {
     if (isOpen) {
@@ -43,34 +58,6 @@ export const PromptDialog = memo(function PromptDialog({
       });
     }
   }, [isOpen, defaultValue]);
-
-  // ESCキーでダイアログを閉じる
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === 'Escape') {
-        onCancel();
-      } else if (e.key === 'Enter') {
-        handleConfirm();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onCancel, value]);
-
-  // オーバーレイクリックで閉じる
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onCancel();
-    }
-  }, [onCancel]);
-
-  // 確認ボタン
-  const handleConfirm = useCallback(() => {
-    if (value.trim()) {
-      onConfirm(value.trim());
-    }
-  }, [value, onConfirm]);
 
   if (!isOpen) return null;
 

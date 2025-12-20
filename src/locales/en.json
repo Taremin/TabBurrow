@@ -350,6 +350,7 @@
         "moveToGroup": "Move to Group",
         "cancel": "Cancel",
         "close": "Close",
+        "resume": "Resume",
         "statusCode": "Status",
         "confirmDeleteTitle": "Delete Selected Tabs",
         "confirmDeleteMessage": "Delete {count} tabs?",
