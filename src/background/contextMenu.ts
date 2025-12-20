@@ -418,6 +418,9 @@ async function handleExcludeFromAutoClose(tab: Tabs.Tab): Promise<void> {
     
     console.log(`自動収納除外ルールを追加: ${pattern}`);
     
+    // コンテキストメニューの状態を即時更新（タブ切替なしでメニューを無効化）
+    await updateContextMenuVisibility(tab);
+    
     // 設定変更を通知
     browser.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
   } catch (error) {
