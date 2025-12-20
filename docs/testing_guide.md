@@ -84,8 +84,12 @@ npm run e2e:debug
 ```
 e2e/
 ├── extension.spec.ts   # 拡張機能基本テスト
+├── i18n.spec.ts        # 翻訳キー表示テスト
+├── linkCheck.spec.ts   # リンクチェック機能テスト
 ├── options.spec.ts     # 設定画面テスト
-└── fixtures/           # テスト用フィクスチャ
+├── tabs.spec.ts        # タブ管理画面テスト
+├── helpers.ts          # テスト用ヘルパー関数
+└── fixtures.ts         # テスト用フィクスチャ
 ```
 
 ### 注意事項
@@ -94,3 +98,18 @@ e2e/
   ```bash
   npx playwright test e2e/extension.spec.ts:10
   ```
+
+## i18n（国際化）テスト
+
+### 翻訳キー整合性チェック
+```bash
+npm run i18n:check
+```
+日本語(ja.json)を基準として、他言語ファイルに欠落キーがないかチェックします。
+
+### 翻訳キー表示テスト (`e2e/i18n.spec.ts`)
+各ページ（tabs.html, options.html, credits.html）で翻訳キー（例: `tabManager.title`）がそのまま表示されていないことを確認するE2Eテストです。
+
+**テスト戦略:**
+- **E2Eテスト**: 日本語（基準言語）で画面上に翻訳キーが表示されていないことを確認
+- **多言語対応**: `npm run i18n:check` で言語間のキー整合性を担保

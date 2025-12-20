@@ -347,3 +347,68 @@ export async function clearTestData(page: Page): Promise<void> {
   }, { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME });
 }
 
+/**
+ * 翻訳キーのパターン
+ * 例: "tabManager.title", "settings.language.description"
+ * ドット区切りで2階層以上の英数字パターンを検出
+ */
+const TRANSLATION_KEY_PATTERN = /\b[a-z][a-zA-Z0-9]*\.[a-z][a-zA-Z0-9]*(?:\.[a-z][a-zA-Z0-9]*)+\b/g;
+
+/**
+ * 翻訳キーとして除外するパターン（誤検出防止）
+ */
+const EXCLUDE_PATTERNS = [
+  // バージョン番号（例: 1.2.3）
+  /^\d+\.\d+\.\d+$/,
+  // ファイル名にありがちなパターン（例: index.js, app.tsx）
+  /\.(js|ts|jsx|tsx|css|html|json|md|png|jpg|svg)$/i,
+  // URLパス
+  /^https?:\/\//,
+  // npmパッケージ名（ハイフンを含む）
+  /-/,
+  // ドメイン名パターン（.io, .org, .com, .net などで終わる）
+  /\.(io|org|com|net|co|dev|app|jp)$/i,
+  // www始まりのドメイン名
+  /^www\./i,
+];
+
+
+/**
+ * 翻訳キーらしき文字列かどうかを判定
+ */
+function isLikelyTranslationKey(text: string): boolean {
+  // 除外パターンにマッチする場合は翻訳キーではない
+  for (const pattern of EXCLUDE_PATTERNS) {
+    if (pattern.test(text)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * ページ内に翻訳キーが表示されていないかチェック
+ * 翻訳キーが見つかった場合は配列で返す（空配列なら問題なし）
+ */
+export async function findTranslationKeysInPage(page: Page): Promise<string[]> {
+  // ページ内の全テキストを取得
+  const textContent = await page.evaluate(() => {
+    // body要素のテキストを取得（script, styleタグは除外）
+    const body = document.body;
+    if (!body) return '';
+    
+    // script, style, noscriptタグを一時的に除外
+    const excludedElements = body.querySelectorAll('script, style, noscript');
+    excludedElements.forEach(el => el.remove());
+    
+    return body.innerText || '';
+  });
+  
+  // 翻訳キーパターンにマッチするものを抽出
+  const matches = textContent.match(TRANSLATION_KEY_PATTERN) || [];
+  
+  // 誤検出を除外してユニークな値を返す
+  const uniqueKeys = [...new Set(matches)].filter(isLikelyTranslationKey);
+  
+  return uniqueKeys;
+}
