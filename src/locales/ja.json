@@ -319,7 +319,9 @@
         "newGroup": "新規グループ...",
         "saveAllIncludingPinned": "固定タブも含めてすべて収納",
         "tabBurrow": "TabBurrow",
-        "removeAndClose": "タブ管理から削除して閉じる"
+        "removeAndClose": "タブ管理から削除して閉じる",
+        "excludeFromAutoClose": "このURLを自動収納の対象外にする",
+        "excludePrompt": "除外パターンを入力（正規表現）"
     },
     "manifest": {
         "description": "タブを保存して管理する拡張機能",

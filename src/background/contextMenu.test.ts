@@ -63,6 +63,18 @@ vi.mock('./tabSaver.js', () => ({
   saveAndCloseTabs: vi.fn().mockResolvedValue(undefined),
 }));
 
+// settings.jsのモック
+vi.mock('../settings.js', () => ({
+  getSettings: vi.fn().mockResolvedValue({
+    autoCloseEnabled: true,
+    autoCloseRules: [],
+    autoCloseRuleOrder: 'asc',
+  }),
+  saveSettings: vi.fn().mockResolvedValue(undefined),
+  escapeRegexPattern: (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+  matchAutoCloseRule: vi.fn().mockReturnValue(null),
+}));
+
 // テスト用のモックタブを作成するヘルパー関数
 function createMockTab(overrides: Partial<Tabs.Tab> = {}): Tabs.Tab {
   return {
@@ -284,6 +296,88 @@ describe('contextMenu', () => {
 
     it('edge URLは保存対象外', () => {
       expect(isSaveableUrl('edge://settings/')).toBe(false);
+    });
+  });
+
+  describe('handleContextMenuClick - exclude-from-auto-close', () => {
+    it('exclude-from-auto-closeメニューでpromptが表示される', async () => {
+      const info: Menus.OnClickData = {
+        menuItemId: 'exclude-from-auto-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path?query=1' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(browser.scripting.executeScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 1 },
+          args: expect.arrayContaining([
+            expect.stringContaining('example\\.com'), // エスケープされたパターン
+          ]),
+        })
+      );
+    });
+
+    it('拡張アイコン用のexclude-from-auto-closeメニューでも動作する', async () => {
+      const info: Menus.OnClickData = {
+        menuItemId: 'action-exclude-from-auto-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(browser.scripting.executeScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 1 },
+        })
+      );
+    });
+
+    it('promptでパターンが入力されたら設定にルールを追加する', async () => {
+      const { getSettings, saveSettings } = await import('../settings.js');
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: 'example\\.com' }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'exclude-from-auto-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(getSettings).toHaveBeenCalled();
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          autoCloseRules: expect.arrayContaining([
+            expect.objectContaining({
+              action: 'exclude',
+              pattern: 'example\\.com',
+              targetType: 'fullUrl',
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('promptがキャンセルされた場合はルールを追加しない', async () => {
+      const { saveSettings } = await import('../settings.js');
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'exclude-from-auto-close',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveSettings).not.toHaveBeenCalled();
     });
   });
 });

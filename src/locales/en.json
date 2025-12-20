@@ -319,7 +319,9 @@
         "newGroup": "New Group...",
         "saveAllIncludingPinned": "Stash All (Including Pinned)",
         "tabBurrow": "TabBurrow",
-        "removeAndClose": "Remove from Tab Manager and Close"
+        "removeAndClose": "Remove from Tab Manager and Close",
+        "excludeFromAutoClose": "Exclude this URL from auto stash",
+        "excludePrompt": "Enter exclusion pattern (regex)"
     },
     "manifest": {
         "description": "Save and manage browser tabs",

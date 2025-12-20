@@ -13,7 +13,7 @@ import { applyLocaleSetting } from '../i18n.js';
 // モジュールのインポート
 import { saveAndCloseTabs, openTabManagerPage } from './tabSaver.js';
 import { initAutoClose, handleAutoCloseAlarm } from './autoClose.js';
-import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus } from './contextMenu.js';
+import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus, initContextMenuVisibility } from './contextMenu.js';
 import { setupTabEventListeners } from './tabEvents.js';
 import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker.js';
 import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup.js';
@@ -112,6 +112,11 @@ browser.runtime.onInstalled.addListener(async () => {
     console.log('[onInstalled] Updating custom group menus...');
     await updateCustomGroupMenus();
     console.log('[onInstalled] Custom group menus updated');
+    
+    // コンテキストメニューの初期状態を設定
+    console.log('[onInstalled] Initializing context menu visibility...');
+    await initContextMenuVisibility();
+    console.log('[onInstalled] Context menu visibility initialized');
 
     // 設定を読み込んで自動収納を初期化
     console.log('[onInstalled] Initializing auto close...');
@@ -124,6 +129,23 @@ browser.runtime.onInstalled.addListener(async () => {
     console.log('[onInstalled] Auto backup initialized');
   } catch (error) {
     console.error('[onInstalled] Error:', error);
+  }
+});
+
+// ブラウザ起動時（Service Worker復帰時）の初期化
+browser.runtime.onStartup.addListener(async () => {
+  console.log('[onStartup] TabBurrow が起動しました');
+  
+  try {
+    // 設定を読み込んで言語を初期化
+    const settings = await getSettings();
+    applyLocaleSetting(settings.locale);
+    
+    // コンテキストメニューの初期状態を設定
+    await initContextMenuVisibility();
+    console.log('[onStartup] Context menu visibility initialized');
+  } catch (error) {
+    console.error('[onStartup] Error:', error);
   }
 });
 

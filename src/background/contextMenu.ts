@@ -8,6 +8,7 @@ import type { Menus, Tabs } from 'webextension-polyfill';
 import { saveTabs, saveTabsForCustomGroup, getAllCustomGroups, createCustomGroup, findTabByUrl, deleteTab, type SavedTab } from '../storage.js';
 import { t } from '../i18n.js';
 import { extractDomain, openTabManagerPage, getTabScreenshot, saveAndCloseTabs } from './tabSaver.js';
+import { getSettings, saveSettings, escapeRegexPattern, matchAutoCloseRule, type AutoCloseRule } from '../settings.js';
 
 // メニューIDの定数
 // ページコンテキストメニュー用
@@ -23,6 +24,10 @@ const ACTION_PARENT_MENU_ID = 'action-save-to-custom-group';
 const ACTION_NEW_GROUP_MENU_ID = 'action-create-new-custom-group';
 const ACTION_REMOVE_AND_CLOSE_MENU_ID = 'action-remove-and-close';
 const ACTION_CUSTOM_GROUP_MENU_PREFIX = 'action-save-to-custom-group-';
+
+// 自動収納除外メニュー用
+const EXCLUDE_FROM_AUTO_CLOSE_MENU_ID = 'exclude-from-auto-close';
+const ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID = 'action-exclude-from-auto-close';
 
 /**
  * コンテキストメニューを作成
@@ -70,6 +75,15 @@ export function createContextMenus(): void {
     contexts: ['action'],
   });
 
+  // 5. このURLを自動収納の対象外にする
+  // 初期状態は無効。タブ切替時にupdateContextMenuVisibilityで更新される
+  browser.contextMenus.create({
+    id: ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
+    title: t('contextMenu.excludeFromAutoClose'),
+    contexts: ['action'],
+    enabled: false,
+  });
+
 
   // ==========================================
   // ページコンテキストメニュー (Context: page, frame)
@@ -111,6 +125,14 @@ export function createContextMenus(): void {
     id: REMOVE_AND_CLOSE_MENU_ID,
     parentId: TABBURROW_MENU_ID,
     title: t('contextMenu.removeAndClose'),
+    contexts: ['page', 'frame'],
+  });
+
+  // 1-4. このURLを自動収納の対象外にする
+  browser.contextMenus.create({
+    id: EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
+    parentId: TABBURROW_MENU_ID,
+    title: t('contextMenu.excludeFromAutoClose'),
     contexts: ['page', 'frame'],
   });
 
@@ -182,6 +204,12 @@ export async function handleContextMenuClick(
   // 削除して閉じる
   if ((menuItemId === REMOVE_AND_CLOSE_MENU_ID || menuItemId === ACTION_REMOVE_AND_CLOSE_MENU_ID) && tab?.url) {
     await handleRemoveAndClose(tab);
+    return;
+  }
+
+  // 自動収納の対象外にする
+  if ((menuItemId === EXCLUDE_FROM_AUTO_CLOSE_MENU_ID || menuItemId === ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID) && tab?.url) {
+    await handleExcludeFromAutoClose(tab);
     return;
   }
 
@@ -343,6 +371,61 @@ async function handleRemoveAndClose(tab: Tabs.Tab): Promise<void> {
 }
 
 /**
+ * 現在のURLを自動収納の対象外にするルールを追加
+ */
+async function handleExcludeFromAutoClose(tab: Tabs.Tab): Promise<void> {
+  if (!tab.url || !tab.id) return;
+  
+  try {
+    // URLからパターンを生成（https://などのスキームを除去）
+    const urlObj = new URL(tab.url);
+    const defaultPattern = escapeRegexPattern(urlObj.host + urlObj.pathname + urlObj.search);
+    const promptMessage = t('contextMenu.excludePrompt');
+    
+    // promptダイアログでパターンを確認・編集
+    const results = await browser.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (defaultValue: string, message: string) => prompt(message, defaultValue),
+      args: [defaultPattern, promptMessage],
+    });
+    
+    const pattern = results[0]?.result;
+    if (!pattern || typeof pattern !== 'string' || !pattern.trim()) {
+      return; // キャンセルまたは空の場合
+    }
+    
+    // 正規表現の妥当性をチェック
+    try {
+      new RegExp(pattern);
+    } catch {
+      console.error('無効な正規表現パターン:', pattern);
+      return;
+    }
+    
+    // 設定を取得してルールを追加
+    const settings = await getSettings();
+    const newRule: AutoCloseRule = {
+      id: crypto.randomUUID(),
+      enabled: true,
+      name: pattern.trim(),
+      targetType: 'fullUrl',
+      pattern: pattern.trim(),
+      action: 'exclude',
+    };
+    
+    settings.autoCloseRules.push(newRule);
+    await saveSettings(settings);
+    
+    console.log(`自動収納除外ルールを追加: ${pattern}`);
+    
+    // 設定変更を通知
+    browser.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
+  } catch (error) {
+    console.error('自動収納除外ルールの追加に失敗:', error);
+  }
+}
+
+/**
  * コンテキストメニューの表示/非表示を更新
  */
 export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> {
@@ -353,6 +436,7 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
     browser.contextMenus.update(TABBURROW_MENU_ID, { visible: false });
     // アクションメニューの削除して閉じるを無効化（API制限でvisible制御できない場合があるためenabledで制御）
     browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { enabled: false });
+    browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { enabled: false });
     return;
   }
   
@@ -365,6 +449,22 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
   
   browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { enabled: isSaved });
   browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { enabled: isSaved });
+  
+  // 自動収納対象かどうかを確認し、「対象外にする」メニューの有効/無効を設定
+  const settings = await getSettings();
+  const matchedRule = matchAutoCloseRule(
+    { url: tab.url, title: tab.title },
+    settings.autoCloseRules,
+    settings.autoCloseRuleOrder
+  );
+  
+  // 既に除外ルールが適用されている場合はメニューを無効化
+  const isAlreadyExcluded = matchedRule?.action === 'exclude';
+  // 自動収納が有効で、かつまだ除外されていない場合のみメニューを有効化
+  const shouldEnableExclude = settings.autoCloseEnabled && !isAlreadyExcluded;
+  
+  browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { enabled: shouldEnableExclude });
+  browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { enabled: shouldEnableExclude });
 }
 
 /**
@@ -386,4 +486,22 @@ export function updateContextMenuTitles(): void {
   browser.contextMenus.update(ACTION_PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(ACTION_NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
   browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
+  browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
+  browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
+}
+
+/**
+ * コンテキストメニューの初期状態を設定（起動時に呼び出される）
+ * 現在のアクティブタブに基づいてメニュー項目の有効/無効を設定
+ */
+export async function initContextMenuVisibility(): Promise<void> {
+  try {
+    // 現在のアクティブタブを取得
+    const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (activeTab) {
+      await updateContextMenuVisibility(activeTab);
+    }
+  } catch (error) {
+    console.warn('[contextMenu] 初期メニュー状態の設定に失敗:', error);
+  }
 }
