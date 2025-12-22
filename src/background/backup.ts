@@ -39,7 +39,8 @@ export async function initAutoBackup(): Promise<void> {
     periodInMinutes: intervalMinutes,
   });
   
-  console.log(`[Backup] 自動バックアップを設定しました: ${intervalMinutes}分ごと`);
+  const nextFireTime = new Date(Date.now() + intervalMinutes * 60 * 1000);
+  console.log(`[Backup] 自動バックアップを設定しました: ${intervalMinutes}分ごと（次回実行: ${nextFireTime.toLocaleTimeString()}）`);
 }
 
 /**

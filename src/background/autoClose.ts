@@ -119,7 +119,8 @@ export async function initAutoClose(): Promise<void> {
     browser.alarms.create(AUTO_CLOSE_ALARM_NAME, {
       periodInMinutes: checkInterval / 60,
     });
-    console.log(`自動収納を有効化: ${cachedSettings.autoCloseSeconds}秒後に非アクティブタブを収納します`);
+    const nextCheckTime = new Date(Date.now() + checkInterval * 1000);
+    console.log(`自動収納を有効化: ${cachedSettings.autoCloseSeconds}秒後に非アクティブタブを収納します（次回チェック: ${nextCheckTime.toLocaleTimeString()}）`);
   } else {
     console.log('自動収納を無効化');
   }
