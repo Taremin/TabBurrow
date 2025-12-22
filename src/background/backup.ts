@@ -51,7 +51,8 @@ export async function handleBackupAlarm(alarm: Alarms.Alarm): Promise<void> {
     return;
   }
   
-  console.log('[Backup] バックアップアラームが発火しました');
+  const now = new Date();
+  console.log(`[Backup] バックアップアラームが発火しました（${now.toLocaleTimeString()}）`);
   
   try {
     await triggerBackup();

@@ -134,6 +134,9 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
   
   if (!cachedSettings?.autoCloseEnabled) return;
   
+  const nowDate = new Date();
+  console.log(`[AutoClose] 自動収納チェックを開始（${nowDate.toLocaleTimeString()}）`);
+  
   const now = Date.now();
   const thresholdMs = cachedSettings.autoCloseSeconds * 1000;
   
