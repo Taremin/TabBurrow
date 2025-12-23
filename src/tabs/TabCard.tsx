@@ -136,8 +136,9 @@ export const TabCard = memo(function TabCard({
       setCompactPopupUrl(urlToUse);
     }
     
-    if (!urlToUse) {
-      console.log('[TabCard] No URL to use, returning early');
+    // コンパクトモードの場合、スクリーンショットがなくてもタイトル・URLを表示するためポップアップを出す
+    if (!urlToUse && !isCompact) {
+      console.log('[TabCard] No URL to use and not compact mode, returning early');
       return;
     }
     
@@ -330,17 +331,25 @@ export const TabCard = memo(function TabCard({
         </div>
       </div>
 
-      {/* スクリーンショットポップアップ */}
-      {showPopup && (screenshotUrl || compactPopupUrl) && (
+      {/* スクリーンショットポップアップ（コンパクトモード用：タイトル・URL全文表示） */}
+      {showPopup && (
         <div 
-          className="screenshot-popup"
+          className={`screenshot-popup ${isCompact ? 'compact-popup' : ''}`}
           style={{
             display: 'block',
             left: popupPosition.left,
             top: popupPosition.top,
           }}
         >
-          <img src={screenshotUrl || compactPopupUrl || ''} alt="Screenshot" />
+          {(screenshotUrl || compactPopupUrl) && (
+            <img src={screenshotUrl || compactPopupUrl || ''} alt="Screenshot" />
+          )}
+          {isCompact && (
+            <div className="popup-info">
+              <div className="popup-title">{tab.title}</div>
+              <div className="popup-url">{tab.url}</div>
+            </div>
+          )}
         </div>
       )}
 

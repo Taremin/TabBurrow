@@ -961,6 +961,37 @@ body {
   cursor: zoom-in;
 }
 
+/* コンパクトモード用ポップアップ */
+.screenshot-popup.compact-popup {
+  max-width: 420px;
+}
+
+.screenshot-popup.compact-popup img {
+  margin-bottom: 8px;
+}
+
+/* ポップアップ内の情報表示（タイトル・URL全文） */
+.popup-info {
+  padding: 4px 0;
+  max-width: 400px;
+}
+
+.popup-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  word-break: break-word;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.popup-url {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  word-break: break-all;
+  line-height: 1.3;
+}
+
 /* 日時フィルター */
 .date-filter-container {
   display: flex;

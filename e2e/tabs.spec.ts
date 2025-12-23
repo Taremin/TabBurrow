@@ -305,10 +305,71 @@ test.describe('コンパクト表示機能', () => {
     const popupImage = screenshotPopup.locator('img');
     await expect(popupImage).toBeVisible();
     
+    // ポップアップ内にタイトルとURLの全文が表示されることを確認
+    const popupInfo = screenshotPopup.locator('.popup-info');
+    await expect(popupInfo).toBeVisible();
+    
+    const popupTitle = popupInfo.locator('.popup-title');
+    await expect(popupTitle).toHaveText('Tab with Screenshot');
+    
+    const popupUrl = popupInfo.locator('.popup-url');
+    await expect(popupUrl).toHaveText('https://example.com/with-screenshot');
+    
     // マウスを離すとポップアップが消えることを確認
     await page.mouse.move(0, 0);
     await page.waitForTimeout(300);
     await expect(screenshotPopup).not.toBeVisible();
+  });
+
+  test('コンパクト表示でスクリーンショットのないタブにホバーしてもタイトル・URLが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // スクリーンショットなしのテストタブを追加（長いタイトルとURL）
+    await createTestTabData(page, {
+      url: 'https://example.com/very/long/path/to/resource?query=parameter&another=value',
+      title: 'This is a very long title that would normally be truncated in compact mode',
+      screenshot: false,
+    });
+    
+    // リロード
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(1);
+    
+    // ドロップダウンメニューを開いてコンパクト表示に切替
+    const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
+    await viewModeToggle.click();
+    await page.waitForTimeout(300);
+    // コンパクト表示を選択
+    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.waitForTimeout(500);
+    
+    // タブカードにホバー
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    await tabCard.hover();
+    await page.waitForTimeout(500);
+    
+    // ポップアップが表示されることを確認（スクリーンショットなしでもタイトル・URL表示のため）
+    const screenshotPopup = page.locator('.screenshot-popup');
+    await expect(screenshotPopup).toBeVisible({ timeout: 3000 });
+    
+    // ポップアップ内にタイトルとURLの全文が表示されることを確認
+    const popupInfo = screenshotPopup.locator('.popup-info');
+    await expect(popupInfo).toBeVisible();
+    
+    const popupTitle = popupInfo.locator('.popup-title');
+    await expect(popupTitle).toHaveText('This is a very long title that would normally be truncated in compact mode');
+    
+    const popupUrl = popupInfo.locator('.popup-url');
+    await expect(popupUrl).toHaveText('https://example.com/very/long/path/to/resource?query=parameter&another=value');
   });
 
   test('コンパクト表示から通常表示に切り替えた際にサムネイルが表示される', async ({ context, extensionId }) => {
