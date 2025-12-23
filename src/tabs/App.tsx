@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import browser from '../browserApi.js';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
+import { platform } from '../platform.js';
 import type { Tabs } from 'webextension-polyfill';
 import {
   getAllTabs,
@@ -621,7 +622,7 @@ export function App() {
         onBulkDelete={handleBulkDelete}
         onBulkMoveToGroup={handleBulkMoveToGroup}
         onBulkRemoveFromGroup={handleBulkRemoveFromGroup}
-        onBulkOpenAsTabGroup={handleBulkOpenAsTabGroup}
+        onBulkOpenAsTabGroup={platform.supportsTabGroups ? handleBulkOpenAsTabGroup : undefined}
         customGroups={customGroups}
       />
 
@@ -646,7 +647,7 @@ export function App() {
             onDeleteTab={handleDeleteTab}
             onDeleteGroup={handleDeleteGroup}
             onOpenGroup={handleOpenGroup}
-            onOpenGroupAsTabGroup={handleOpenGroupAsTabGroup}
+            onOpenGroupAsTabGroup={platform.supportsTabGroups ? handleOpenGroupAsTabGroup : undefined}
             onOpenTab={handleOpenTab}
             onRenameGroup={handleRenameGroup}
             onRequestRename={handleRequestRename}

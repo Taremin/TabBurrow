@@ -13,7 +13,7 @@ npm run watch:firefox
 
 ### 本番用
 ```bash
-# 両ブラウザ向けビルド
+# 両ブラウザ向けビルド（Chrome + Firefox Desktop）
 npm run build
 
 # Chrome専用ビルド
@@ -21,6 +21,9 @@ npm run build:chrome
 
 # Firefox専用ビルド
 npm run build:firefox
+
+# Firefox Android専用ビルド
+npm run build:firefox-android
 
 # 出力先をクリア
 npm run clean
@@ -37,18 +40,24 @@ dist/
 │   ├── options.html
 │   ├── options.js
 │   └── locales/
-└── firefox/             # Firefox用ビルド
-    ├── manifest.json    # Firefox固有の設定
+├── firefox/             # Firefox Desktop用ビルド
+│   ├── manifest.json    # Firefox固有の設定
+│   └── ...
+└── firefox-android/     # Firefox Android用ビルド
+    ├── manifest.json    # tabGroups権限なし、名前=TabBurrow Lite
     └── ...
 ```
 
 ## マニフェストの違い
 
-| 項目 | Chrome | Firefox |
-|------|--------|---------|
-| ソースファイル | `manifest.json` | `manifest.firefox.json` |
-| background | `service_worker` | `scripts` |
-| browser_specific_settings | なし | `gecko.id`を指定 |
+| 項目 | Chrome | Firefox Desktop | Firefox Android |
+|------|--------|-----------------|-----------------|
+| ソースファイル | `manifest.chrome.json` | `manifest.firefox.json` | `manifest.firefox-android.json` |
+| 拡張機能名 | TabBurrow | TabBurrow | TabBurrow Lite |
+| background | `service_worker` | `scripts` | `scripts` |
+| browser_specific_settings | なし | `gecko.id` | `gecko_android.id` |
+| tabGroups権限 | あり | あり | **なし**（非対応） |
+| 下限バージョン | - | 142.0 | 128.0 |
 
 ## 型チェック
 ```bash

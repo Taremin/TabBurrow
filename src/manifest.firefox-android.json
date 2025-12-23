@@ -1,0 +1,43 @@
+{
+    "manifest_version": 3,
+    "name": "TabBurrow Lite",
+    "version": "1.0.0",
+    "description": "タブを保存して管理する拡張機能（Firefox Android版）",
+    "browser_specific_settings": {
+        "gecko_android": {
+            "id": "tabburrow-lite@taremin.github.io",
+            "strict_min_version": "128.0"
+        }
+    },
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "storage",
+        "contextMenus",
+        "alarms",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        },
+        "default_title": "タブを保存"
+    },
+    "background": {
+        "scripts": [
+            "background/index.js"
+        ],
+        "type": "module"
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "options_page": "options.html"
+}

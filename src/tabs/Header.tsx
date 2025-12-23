@@ -31,7 +31,7 @@ interface HeaderProps {
   onBulkDelete: () => void;
   onBulkMoveToGroup: (groupName: string) => void;
   onBulkRemoveFromGroup: () => void;
-  onBulkOpenAsTabGroup: () => void;
+  onBulkOpenAsTabGroup?: () => void;
   customGroups: CustomGroupMeta[];
 }
 
@@ -245,14 +245,16 @@ export const Header = memo(function Header({
               >
                 {t('tabManager.selection.bulkDelete')}
               </button>
-              <button 
-                className="btn btn-secondary btn-small"
-                onClick={onBulkOpenAsTabGroup}
-                disabled={selectedCount === 0}
-                title={t('tabManager.selection.openAsTabGroup')}
-              >
-                {t('tabManager.selection.openAsTabGroup')}
-              </button>
+              {onBulkOpenAsTabGroup && (
+                <button 
+                  className="btn btn-secondary btn-small"
+                  onClick={onBulkOpenAsTabGroup}
+                  disabled={selectedCount === 0}
+                  title={t('tabManager.selection.openAsTabGroup')}
+                >
+                  {t('tabManager.selection.openAsTabGroup')}
+                </button>
+              )}
               <button 
                 className="btn btn-secondary btn-small"
                 onClick={onToggleSelectionMode}

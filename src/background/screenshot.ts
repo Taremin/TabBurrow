@@ -126,8 +126,14 @@ export async function resizeScreenshot(dataURL: string): Promise<Blob> {
 /**
  * 現在のタブのスクリーンショットを取得
  * キューを使用してレート制限を回避
+ * captureVisibleTab未対応（Firefox Android等）の場合はnullを返す
  */
 export async function captureTab(windowId: number): Promise<string | null> {
+  // captureVisibleTabが未対応の場合はスキップ
+  if (typeof browser.tabs.captureVisibleTab !== 'function') {
+    console.log('[screenshot] captureVisibleTab未対応のため、スクリーンショットをスキップ');
+    return null;
+  }
   return screenshotQueue.enqueue(windowId);
 }
 

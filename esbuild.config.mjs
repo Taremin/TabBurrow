@@ -9,12 +9,16 @@ const VERSION = packageJson.version;
 // コマンドライン引数を解析
 const args = process.argv.slice(2);
 const isWatch = args.includes('--watch');
-const buildChrome = args.includes('--chrome') || (!args.includes('--firefox') && !args.includes('--chrome'));
-const buildFirefox = args.includes('--firefox') || (!args.includes('--firefox') && !args.includes('--chrome'));
+// 特定のブラウザが指定されていない場合は全ビルド（Firefox Android除く）
+const hasSpecificBrowser = args.includes('--chrome') || args.includes('--firefox') || args.includes('--firefox-android');
+const buildChrome = args.includes('--chrome') || !hasSpecificBrowser;
+const buildFirefox = args.includes('--firefox') || !hasSpecificBrowser;
+const buildFirefoxAndroid = args.includes('--firefox-android');
 
 // 出力ディレクトリ
 const DIST_CHROME = 'dist/chrome';
 const DIST_FIREFOX = 'dist/firefox';
+const DIST_FIREFOX_ANDROID = 'dist/firefox-android';
 
 /**
  * ディレクトリを作成（存在しない場合）
@@ -40,9 +44,14 @@ function cleanDir(dir) {
  */
 function copyStaticFiles(distDir, browser) {
     // manifest.jsonをコピー（ブラウザ別）
-    const manifestSrc = browser === 'firefox'
-        ? 'src/manifest.firefox.json'
-        : 'src/manifest.chrome.json';
+    let manifestSrc;
+    if (browser === 'firefox-android') {
+        manifestSrc = 'src/manifest.firefox-android.json';
+    } else if (browser === 'firefox') {
+        manifestSrc = 'src/manifest.firefox.json';
+    } else {
+        manifestSrc = 'src/manifest.chrome.json';
+    }
     copyFileSync(manifestSrc, join(distDir, 'manifest.json'));
 
     // HTML/CSS
@@ -125,6 +134,10 @@ async function main() {
             builds.push(build(DIST_FIREFOX, 'firefox'));
         }
 
+        if (buildFirefoxAndroid) {
+            builds.push(build(DIST_FIREFOX_ANDROID, 'firefox-android'));
+        }
+
         await Promise.all(builds);
 
         if (!isWatch) {
@@ -132,6 +145,7 @@ async function main() {
             console.log('📦 ビルド結果:');
             if (buildChrome) console.log(`   Chrome: ${DIST_CHROME}/`);
             if (buildFirefox) console.log(`   Firefox: ${DIST_FIREFOX}/`);
+            if (buildFirefoxAndroid) console.log(`   Firefox Android: ${DIST_FIREFOX_ANDROID}/`);
         }
     } catch (error) {
         console.error('ビルドエラー:', error);
