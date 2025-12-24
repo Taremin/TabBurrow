@@ -380,4 +380,210 @@ describe('contextMenu', () => {
       expect(saveSettings).not.toHaveBeenCalled();
     });
   });
+
+  describe('handleContextMenuClick - create-group-from-url', () => {
+    it('create-group-from-urlメニューでパターン入力promptが表示される', async () => {
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-url',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path?query=1' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(browser.scripting.executeScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 1 },
+          args: expect.arrayContaining([
+            expect.stringContaining('example\\.com/path'), // エスケープされたパターン
+          ]),
+        })
+      );
+    });
+
+    it('拡張アイコン用のcreate-group-from-urlメニューでも動作する', async () => {
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'action-create-group-from-url',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(browser.scripting.executeScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 1 },
+        })
+      );
+    });
+
+    it('パターンとグループ名が入力されたらsaveToGroupルールを追加する', async () => {
+      const { getSettings, saveSettings } = await import('../settings.js');
+      const { createCustomGroup, getAllCustomGroups } = await import('../storage.js');
+      
+      // 1回目: パターン入力 → 2回目: グループ名入力
+      vi.mocked(browser.scripting.executeScript)
+        .mockResolvedValueOnce([{ result: 'example\\.com/path' }] as any)
+        .mockResolvedValueOnce([{ result: 'My Custom Group' }] as any);
+      vi.mocked(getAllCustomGroups).mockResolvedValueOnce([]);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-url',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(getSettings).toHaveBeenCalled();
+      expect(createCustomGroup).toHaveBeenCalledWith('My Custom Group');
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          autoCloseRules: expect.arrayContaining([
+            expect.objectContaining({
+              action: 'saveToGroup',
+              pattern: 'example\\.com/path',
+              targetType: 'fullUrl',
+              targetGroup: 'My Custom Group',
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('パターン入力がキャンセルされた場合はルールを追加しない', async () => {
+      const { saveSettings } = await import('../settings.js');
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-url',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveSettings).not.toHaveBeenCalled();
+    });
+
+    it('グループ名入力がキャンセルされた場合はルールを追加しない', async () => {
+      const { saveSettings } = await import('../settings.js');
+      vi.mocked(browser.scripting.executeScript)
+        .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
+        .mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-url',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveSettings).not.toHaveBeenCalled();
+    });
+
+    it('既存のカスタムグループがある場合は新規作成しない', async () => {
+      const { createCustomGroup, getAllCustomGroups } = await import('../storage.js');
+      
+      vi.mocked(browser.scripting.executeScript)
+        .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
+        .mockResolvedValueOnce([{ result: 'Existing Group' }] as any);
+      vi.mocked(getAllCustomGroups).mockResolvedValueOnce([{ name: 'Existing Group', createdAt: Date.now(), updatedAt: Date.now() }]);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-url',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(createCustomGroup).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleContextMenuClick - create-group-from-domain', () => {
+    it('create-group-from-domainメニューでドメインのみがデフォルトパターンになる', async () => {
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-domain',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://sub.example.com/path?query=1' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(browser.scripting.executeScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 1 },
+          args: expect.arrayContaining([
+            'sub\\.example\\.com', // ドメインのみ（パスなし）
+          ]),
+        })
+      );
+    });
+
+    it('拡張アイコン用のcreate-group-from-domainメニューでも動作する', async () => {
+      vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'action-create-group-from-domain',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(browser.scripting.executeScript).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: { tabId: 1 },
+        })
+      );
+    });
+
+    it('ドメインからグループ作成でtargetTypeがdomainになる', async () => {
+      const { saveSettings } = await import('../settings.js');
+      const { getAllCustomGroups } = await import('../storage.js');
+      
+      vi.mocked(browser.scripting.executeScript)
+        .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
+        .mockResolvedValueOnce([{ result: 'Domain Group' }] as any);
+      vi.mocked(getAllCustomGroups).mockResolvedValueOnce([]);
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'create-group-from-domain',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com/path' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          autoCloseRules: expect.arrayContaining([
+            expect.objectContaining({
+              action: 'saveToGroup',
+              targetType: 'domain', // ドメイン指定
+              targetGroup: 'Domain Group',
+            }),
+          ]),
+        })
+      );
+    });
+  });
 });

@@ -321,7 +321,11 @@
         "tabBurrow": "TabBurrow",
         "removeAndClose": "Remove from Tab Manager and Close",
         "excludeFromAutoClose": "Exclude this URL from auto stash",
-        "excludePrompt": "Enter exclusion pattern (regex)"
+        "excludePrompt": "Enter exclusion pattern (regex)",
+        "createGroupFromUrl": "Create Group from Current URL...",
+        "createGroupFromDomain": "Create Group from Current Domain...",
+        "createGroupPatternPrompt": "Enter regex pattern for matching",
+        "createGroupNamePrompt": "Enter group name to create"
     },
     "manifest": {
         "description": "Save and manage browser tabs",

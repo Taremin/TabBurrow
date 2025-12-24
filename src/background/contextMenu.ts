@@ -30,6 +30,12 @@ const ACTION_CUSTOM_GROUP_MENU_PREFIX = 'action-save-to-custom-group-';
 const EXCLUDE_FROM_AUTO_CLOSE_MENU_ID = 'exclude-from-auto-close';
 const ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID = 'action-exclude-from-auto-close';
 
+// グループ作成メニュー用
+const CREATE_GROUP_FROM_URL_MENU_ID = 'create-group-from-url';
+const CREATE_GROUP_FROM_DOMAIN_MENU_ID = 'create-group-from-domain';
+const ACTION_CREATE_GROUP_FROM_URL_MENU_ID = 'action-create-group-from-url';
+const ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID = 'action-create-group-from-domain';
+
 /**
  * コンテキストメニューを作成
  */
@@ -85,6 +91,20 @@ export function createContextMenus(): void {
     enabled: false,
   });
 
+  // 6. 現在のURLからグループ作成
+  browser.contextMenus.create({
+    id: ACTION_CREATE_GROUP_FROM_URL_MENU_ID,
+    title: t('contextMenu.createGroupFromUrl'),
+    contexts: ['action'],
+  });
+
+  // 7. 現在のドメインからグループ作成
+  browser.contextMenus.create({
+    id: ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID,
+    title: t('contextMenu.createGroupFromDomain'),
+    contexts: ['action'],
+  });
+
 
   // ==========================================
   // ページコンテキストメニュー (Context: page, frame)
@@ -134,6 +154,22 @@ export function createContextMenus(): void {
     id: EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
     parentId: TABBURROW_MENU_ID,
     title: t('contextMenu.excludeFromAutoClose'),
+    contexts: ['page', 'frame'],
+  });
+
+  // 1-5. 現在のURLからグループ作成
+  browser.contextMenus.create({
+    id: CREATE_GROUP_FROM_URL_MENU_ID,
+    parentId: TABBURROW_MENU_ID,
+    title: t('contextMenu.createGroupFromUrl'),
+    contexts: ['page', 'frame'],
+  });
+
+  // 1-6. 現在のドメインからグループ作成
+  browser.contextMenus.create({
+    id: CREATE_GROUP_FROM_DOMAIN_MENU_ID,
+    parentId: TABBURROW_MENU_ID,
+    title: t('contextMenu.createGroupFromDomain'),
     contexts: ['page', 'frame'],
   });
 
@@ -217,6 +253,18 @@ export async function handleContextMenuClick(
   // 新規グループ作成
   if ((menuItemId === NEW_GROUP_MENU_ID || menuItemId === ACTION_NEW_GROUP_MENU_ID) && tab?.url) {
     await handleCreateNewGroupAndSave(tab);
+    return;
+  }
+
+  // 現在のURLからグループ作成
+  if ((menuItemId === CREATE_GROUP_FROM_URL_MENU_ID || menuItemId === ACTION_CREATE_GROUP_FROM_URL_MENU_ID) && tab?.url) {
+    await handleCreateGroupFromPattern(tab, 'fullUrl');
+    return;
+  }
+
+  // 現在のドメインからグループ作成
+  if ((menuItemId === CREATE_GROUP_FROM_DOMAIN_MENU_ID || menuItemId === ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID) && tab?.url) {
+    await handleCreateGroupFromPattern(tab, 'domain');
     return;
   }
 
@@ -430,6 +478,101 @@ async function handleExcludeFromAutoClose(tab: Tabs.Tab): Promise<void> {
 }
 
 /**
+ * 現在のURL/ドメインからグループ作成ルールを追加
+ * @param tab タブ情報
+ * @param targetType 'fullUrl'（パス含む完全URL）または'domain'（ドメインのみ）
+ */
+async function handleCreateGroupFromPattern(
+  tab: Tabs.Tab, 
+  targetType: 'fullUrl' | 'domain'
+): Promise<void> {
+  if (!tab.url || !tab.id) return;
+  
+  try {
+    // URLからデフォルトパターンを生成
+    const urlObj = new URL(tab.url);
+    let defaultPattern: string;
+    if (targetType === 'domain') {
+      // ドメインのみ
+      defaultPattern = escapeRegexPattern(urlObj.hostname);
+    } else {
+      // フルURL（スキーム除く）
+      defaultPattern = escapeRegexPattern(urlObj.host + urlObj.pathname + urlObj.search);
+    }
+    
+    const patternPromptMessage = t('contextMenu.createGroupPatternPrompt');
+    
+    // 1. パターン入力プロンプト
+    const patternResults = await browser.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (defaultValue: string, message: string) => prompt(message, defaultValue),
+      args: [defaultPattern, patternPromptMessage],
+    });
+    
+    const pattern = patternResults[0]?.result;
+    if (!pattern || typeof pattern !== 'string' || !pattern.trim()) {
+      return; // キャンセルまたは空の場合
+    }
+    
+    // 正規表現の妥当性をチェック
+    try {
+      new RegExp(pattern.trim());
+    } catch {
+      console.error('無効な正規表現パターン:', pattern);
+      return;
+    }
+    
+    const groupNamePromptMessage = t('contextMenu.createGroupNamePrompt');
+    
+    // 2. グループ名入力プロンプト
+    const groupNameResults = await browser.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: (message: string) => prompt(message),
+      args: [groupNamePromptMessage],
+    });
+    
+    const groupName = groupNameResults[0]?.result;
+    if (!groupName || typeof groupName !== 'string' || !groupName.trim()) {
+      return; // キャンセルまたは空の場合
+    }
+    
+    const trimmedGroupName = groupName.trim();
+    const trimmedPattern = pattern.trim();
+    
+    // カスタムグループが存在しない場合は作成
+    const existingGroups = await getAllCustomGroups();
+    const groupExists = existingGroups.some(g => g.name === trimmedGroupName);
+    if (!groupExists) {
+      await createCustomGroup(trimmedGroupName);
+      // メニューを更新
+      await updateCustomGroupMenus();
+    }
+    
+    // 設定を取得してsaveToGroupルールを追加
+    const settings = await getSettings();
+    const newRule: AutoCloseRule = {
+      id: crypto.randomUUID(),
+      enabled: true,
+      name: trimmedPattern,
+      targetType,
+      pattern: trimmedPattern,
+      action: 'saveToGroup',
+      targetGroup: trimmedGroupName,
+    };
+    
+    settings.autoCloseRules.push(newRule);
+    await saveSettings(settings);
+    
+    console.log(`グループ作成ルールを追加: パターン="${trimmedPattern}", グループ="${trimmedGroupName}", 対象="${targetType}"`);
+    
+    // 設定変更を通知
+    browser.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
+  } catch (error) {
+    console.error('グループ作成ルールの追加に失敗:', error);
+  }
+}
+
+/**
  * コンテキストメニューの表示/非表示を更新
  */
 export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> {
@@ -485,13 +628,17 @@ export function updateContextMenuTitles(): void {
   browser.contextMenus.update(PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
   browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
+  browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
+  browser.contextMenus.update(CREATE_GROUP_FROM_URL_MENU_ID, { title: t('contextMenu.createGroupFromUrl') });
+  browser.contextMenus.update(CREATE_GROUP_FROM_DOMAIN_MENU_ID, { title: t('contextMenu.createGroupFromDomain') });
 
   // 拡張アイコン用
   browser.contextMenus.update(ACTION_PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(ACTION_NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
   browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
-  browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
   browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
+  browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { title: t('contextMenu.createGroupFromUrl') });
+  browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, { title: t('contextMenu.createGroupFromDomain') });
 }
 
 /**
