@@ -584,6 +584,9 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
     // アクションメニューの削除して閉じるを無効化（API制限でvisible制御できない場合があるためenabledで制御）
     browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { enabled: false });
     browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { enabled: false });
+    // グループ作成メニューも無効化
+    browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { enabled: false });
+    browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, { enabled: false });
     return;
   }
   
@@ -612,6 +615,10 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
   
   browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { enabled: shouldEnableExclude });
   browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { enabled: shouldEnableExclude });
+  
+  // グループ作成メニューを有効化（保存対象のURLでのみ利用可能）
+  browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { enabled: true });
+  browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, { enabled: true });
 }
 
 /**

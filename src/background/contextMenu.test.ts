@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import browser from '../browserApi.js';
-import { handleContextMenuClick, isSaveableUrl } from './contextMenu.js';
+import { handleContextMenuClick, isSaveableUrl, updateContextMenuVisibility } from './contextMenu.js';
 import type { Menus, Tabs } from 'webextension-polyfill';
 
 // browser APIのモック
@@ -583,6 +583,127 @@ describe('contextMenu', () => {
             }),
           ]),
         })
+      );
+    });
+  });
+
+  describe('updateContextMenuVisibility', () => {
+    it('特殊URL（chrome-extension://）ではグループ作成メニューが無効化される', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'chrome-extension://abcdefg/popup.html',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      // グループ作成メニューが無効化されることを確認
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-url',
+        { enabled: false }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-domain',
+        { enabled: false }
+      );
+    });
+
+    it('特殊URL（chrome://）ではグループ作成メニューが無効化される', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'chrome://extensions/',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-url',
+        { enabled: false }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-domain',
+        { enabled: false }
+      );
+    });
+
+    it('特殊URL（about:）ではグループ作成メニューが無効化される', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'about:blank',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-url',
+        { enabled: false }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-domain',
+        { enabled: false }
+      );
+    });
+
+    it('通常のhttps URLではグループ作成メニューが有効化される', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'https://example.com/page',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-url',
+        { enabled: true }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-domain',
+        { enabled: true }
+      );
+    });
+
+    it('file URLではグループ作成メニューが有効化される', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'file:///C:/test.html',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-url',
+        { enabled: true }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-create-group-from-domain',
+        { enabled: true }
+      );
+    });
+
+    it('特殊URLではTabBurrowページメニューが非表示になる', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'chrome-extension://abcdef/popup.html',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'tabburrow',
+        { visible: false }
+      );
+    });
+
+    it('通常URLではTabBurrowページメニューが表示される', async () => {
+      const tab = createMockTab({
+        id: 1,
+        url: 'https://example.com/',
+      });
+
+      await updateContextMenuVisibility(tab);
+
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'tabburrow',
+        { visible: true }
       );
     });
   });
