@@ -1,0 +1,38 @@
+name: Publish to Firefox Add-ons
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'バージョン（例: v1.0.0）'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js をセットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 依存関係をインストール
+        run: npm ci
+
+      - name: Firefox 用ビルド
+        run: npm run build:firefox
+
+      - name: Firefox Add-ons に公開
+        uses: browser-actions/release-firefox-addon@latest
+        with:
+          addon-id: tabburrow@taremin.github.io
+          addon-path: dist/firefox/
+          auth-api-issuer: ${{ secrets.FIREFOX_API_KEY }}
+          auth-api-secret: ${{ secrets.FIREFOX_API_SECRET }}
+          channel: listed

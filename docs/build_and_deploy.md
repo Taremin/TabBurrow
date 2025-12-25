@@ -104,3 +104,33 @@ npm run typecheck
 2. `about:debugging` を開く
 3. 「この Firefox」→「一時的なアドオンを読み込む」
 4. `dist/firefox/manifest.json` を選択
+
+## ストア公開ワークフロー
+
+手動実行でChrome ウェブストア / Firefox Add-onsに公開できます。
+
+### Chrome Web Store
+**ワークフロー**: `.github/workflows/publish-chrome.yml`
+
+**必要なSecrets**:
+| Secret名 | 説明 |
+|----------|------|
+| `CHROME_EXTENSION_ID` | 拡張機能ID（32文字の英字） |
+| `CHROME_CLIENT_ID` | Google Cloud OAuth 2.0 クライアントID |
+| `CHROME_CLIENT_SECRET` | Google Cloud OAuth 2.0 クライアントシークレット |
+| `CHROME_REFRESH_TOKEN` | OAuth 2.0 Playgroundで取得したリフレッシュトークン |
+
+### Firefox Add-ons
+**ワークフロー**: `.github/workflows/publish-firefox.yml`
+
+**必要なSecrets**:
+| Secret名 | 説明 |
+|----------|------|
+| `FIREFOX_API_KEY` | AMO Developer Hub → API Credentials → JWT issuer |
+| `FIREFOX_API_SECRET` | AMO Developer Hub → API Credentials → JWT secret |
+
+### 公開手順
+1. GitHub Actionsの該当ワークフローを開く
+2. 「Run workflow」をクリック
+3. バージョン（例: `v1.0.0`）を入力して実行
+
