@@ -87,6 +87,9 @@
 
 この拡張機能は Chrome と Firefox に対応しています。
 
+- **Chrome ウェブストア**: [TabBurrow](https://chromewebstore.google.com/detail/tabburrow/cemnhbnnpblfbdamfdhjbkjccdefblpe)
+- **Firefox Add-ons**: [TabBurrow](https://addons.mozilla.org/ja/firefox/addon/tabburrow/)
+
 ### 手動インストール
 
 1. [Releases](https://github.com/Taremin/TabBurrow/releases) ページから最新のビルド済みパッケージをダウンロードし、解凍します。
