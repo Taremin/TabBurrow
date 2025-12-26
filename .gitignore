@@ -25,6 +25,7 @@ npm-debug.log*
 # 一時ファイル
 *.tmp
 *.temp
+tmp/
 
 # スクリーンショット出力
 screenshots/output/
