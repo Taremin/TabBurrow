@@ -242,6 +242,12 @@ export function App() {
     browser.tabs.create({ url });
   }, []);
 
+  // ホイールクリック（中クリック）でタブを開く（画面は維持）
+  const handleMiddleClickTab = useCallback((url: string) => {
+    // active: false でバックグラウンドでタブを開く
+    browser.tabs.create({ url, active: false });
+  }, []);
+
   // タブ削除
   const handleDeleteTab = useCallback(async (id: string) => {
     await deleteTab(id);
@@ -649,6 +655,7 @@ export function App() {
             onOpenGroup={handleOpenGroup}
             onOpenGroupAsTabGroup={platform.supportsTabGroups ? handleOpenGroupAsTabGroup : undefined}
             onOpenTab={handleOpenTab}
+            onMiddleClickTab={handleMiddleClickTab}
             onRenameGroup={handleRenameGroup}
             onRequestRename={handleRequestRename}
             onMoveToGroup={handleMoveToGroup}

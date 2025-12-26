@@ -16,6 +16,7 @@ interface TabCardProps {
   customGroups: CustomGroupMeta[];
   onDelete: (id: string) => void;
   onOpen: (url: string) => void;
+  onMiddleClick?: (url: string) => void; // ホイールクリック（中クリック）
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string) => void;
   // 表示密度
@@ -38,6 +39,7 @@ export const TabCard = memo(function TabCard({
   customGroups,
   onDelete, 
   onOpen,
+  onMiddleClick,
   onMoveToGroup,
   onRemoveFromGroup,
   isCompact = false,
@@ -72,6 +74,30 @@ export const TabCard = memo(function TabCard({
       onOpen(tab.url);
     }
   }, [onOpen, tab.url, tab.id, isSelectionMode, onToggleSelection]);
+
+  // ホイールクリック（中クリック）でタブを開く（画面は維持）
+  const handleAuxClick = useCallback((e: React.MouseEvent) => {
+    // button === 1 はホイールクリック（中クリック）
+    if (e.button !== 1) return;
+    
+    const target = e.target as HTMLElement;
+    if (target.closest('.tab-delete') || target.closest('.tab-group-action') || target.closest('.tab-checkbox')) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (onMiddleClick) {
+      onMiddleClick(tab.url);
+    }
+  }, [onMiddleClick, tab.url]);
+
+  // 中クリック時のブラウザデフォルト動作（自動スクロール）を防止
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // button === 1 はホイールクリック（中クリック）
+    if (e.button === 1) {
+      e.preventDefault(); // 自動スクロールモードを無効化
+    }
+  }, []);
 
   // チェックボックスのトグル
   const handleCheckboxClick = useCallback((e: React.MouseEvent) => {
@@ -252,6 +278,8 @@ export const TabCard = memo(function TabCard({
       <div 
         className={`tab-card ${isRemoving ? 'removing' : ''} ${isSelected ? 'selected' : ''} ${isCompact ? 'tab-card-compact' : ''}`}
         onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onAuxClick={handleAuxClick}
         onMouseEnter={isCompact ? handleMouseEnter : undefined}
         onMouseMove={isCompact ? handleMouseMove : undefined}
         onMouseLeave={isCompact ? handleMouseLeave : undefined}

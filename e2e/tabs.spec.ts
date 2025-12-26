@@ -1108,3 +1108,94 @@ test.describe('すべて開く確認ダイアログ', () => {
     await expect(dialog).not.toBeVisible();
   });
 });
+
+test.describe('ホイールクリックでタブを開く機能', () => {
+  test('ホイールクリックでタブがバックグラウンドで開かれる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/middle-click-test',
+      title: 'Middle Click Test Tab',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブカードが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(1);
+    
+    // 現在のページ数を記録
+    const pagesBefore = context.pages().length;
+    
+    // ホイールクリック（中クリック）と同時に新しいページの作成を待機
+    const tabCard = tabCards.first();
+    const [newPage] = await Promise.all([
+      context.waitForEvent('page'),
+      tabCard.click({ button: 'middle' }),
+    ]);
+    
+    // 新しいタブが追加されたことを確認
+    const pagesAfter = context.pages().length;
+    expect(pagesAfter).toBe(pagesBefore + 1);
+    
+    // 元のページ（TabBurrow）がまだアクティブであることを確認
+    expect(page.url()).toContain('tabs.html');
+    
+    // 新しく開かれたタブが存在することを確認
+    expect(newPage).toBeTruthy();
+  });
+
+  test('ホイールクリック後もTabBurrowの画面が維持される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // 複数のテストタブを追加（同じドメインで管理しやすく）
+    await createTestTabData(page, {
+      url: 'https://example.com/test-page-1',
+      title: 'Test Tab 1',
+    });
+    await createTestTabData(page, {
+      url: 'https://example.com/test-page-2',
+      title: 'Test Tab 2',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブカードが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(2);
+    
+    // ホイールクリック前のページ数を記録
+    const pagesBefore = context.pages().length;
+    
+    // 最初のタブカードをホイールクリック
+    await tabCards.first().click({ button: 'middle' });
+    await page.waitForTimeout(500);
+    
+    // 2番目のタブカードもホイールクリック
+    await tabCards.nth(1).click({ button: 'middle' });
+    await page.waitForTimeout(500);
+    
+    // TabBurrowの画面がまだ表示されていることを確認
+    expect(page.url()).toContain('tabs.html');
+    
+    // タブカードがまだ2つ表示されていることを確認（削除されていない）
+    await expect(tabCards).toHaveCount(2);
+    
+    // 新しいタブが2つ追加されたことを確認（ページ数で検証）
+    const pagesAfter = context.pages().length;
+    expect(pagesAfter).toBe(pagesBefore + 2);
+  });
+});
