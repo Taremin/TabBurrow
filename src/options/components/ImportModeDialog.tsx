@@ -2,8 +2,7 @@
  * TabBurrow - インポートモード選択ダイアログ
  */
 
-import { useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import { DialogOverlay } from '../../common/DialogOverlay.js';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { ImportMode } from '../../exportImport.js';
 
@@ -24,18 +23,8 @@ export function ImportModeDialog({
 }: ImportModeDialogProps) {
   const { t } = useTranslation();
 
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onCancel();
-    }
-  }, [onCancel]);
-
-  if (!isOpen) {
-    return null;
-  }
-
-  return createPortal(
-    <div className="dialog-overlay" onClick={handleOverlayClick}>
+  return (
+    <DialogOverlay isOpen={isOpen} onClose={onCancel}>
       <div className="dialog">
         <div className="dialog-icon">📥</div>
         <h3 className="dialog-title">{t('settings.importDialog.title')}</h3>
@@ -87,7 +76,7 @@ export function ImportModeDialog({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </DialogOverlay>
   );
 }
+

@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import { DialogOverlay } from '../../common/DialogOverlay.js';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { AutoCloseRule } from '../../settings.js';
 
@@ -79,17 +79,6 @@ export function RuleDialog({ isOpen, editingRule, onSave, onClose }: RuleDialogP
     onClose();
   }, [name, targetType, pattern, action, targetGroup, editingRule, onSave, onClose]);
 
-  // オーバーレイクリックで閉じる（ドラッグ操作対応）
-  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  }, [onClose]);
-
-  if (!isOpen) {
-    return null;
-  }
-
   const targetTypeOptions: { value: TargetType; labelKey: string }[] = [
     { value: 'domain', labelKey: 'settings.autoClose.targetType.domain' },
     { value: 'url', labelKey: 'settings.autoClose.targetType.url' },
@@ -105,8 +94,8 @@ export function RuleDialog({ isOpen, editingRule, onSave, onClose }: RuleDialogP
     { value: 'pin', labelKey: 'settings.autoClose.action.pin' },
   ];
 
-  return createPortal(
-    <div className="dialog-overlay" onClick={handleOverlayClick}>
+  return (
+    <DialogOverlay isOpen={isOpen} onClose={onClose}>
       <div className="dialog dialog-wide">
         <h3 className="dialog-title">
           {editingRule ? t('settings.autoClose.editRule') : t('settings.autoClose.addRule')}
@@ -223,7 +212,7 @@ export function RuleDialog({ isOpen, editingRule, onSave, onClose }: RuleDialogP
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </DialogOverlay>
   );
 }
+

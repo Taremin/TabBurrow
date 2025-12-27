@@ -4,7 +4,7 @@
  */
 
 import { memo, useCallback, useState, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import { DialogOverlay } from '../../common/DialogOverlay.js';
 import { useTranslation } from '../../common/i18nContext.js';
 import { detectTextFormat } from '../../exportImport.js';
 
@@ -89,10 +89,8 @@ export const TextImportDialog = memo(function TextImportDialog({
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div className="dialog-overlay" onClick={handleClose}>
+  return (
+    <DialogOverlay isOpen={isOpen} onClose={handleClose}>
       <div
         className="dialog dialog-wide"
         onClick={(e) => e.stopPropagation()}
@@ -144,7 +142,7 @@ export const TextImportDialog = memo(function TextImportDialog({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </DialogOverlay>
   );
 });
+

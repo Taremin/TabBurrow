@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import { DialogOverlay } from '../../common/DialogOverlay.js';
 import browser from '../../browserApi.js';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { BackupIntervalPreset } from '../../settings.js';
@@ -337,61 +337,58 @@ export function BackupSettings({
       </div>
 
       {/* 復元ダイアログ */}
-      {restoreDialog?.isOpen && createPortal(
-        <div className="dialog-overlay" onClick={() => setRestoreDialog(null)}>
-          <div className="dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="dialog-header">
-              <h3 className="dialog-title">{t('settings.backup.restoreDialogTitle')}</h3>
-            </div>
-            <div className="dialog-content">
-              <p>{t('settings.backup.restoreDialogMessage', { date: restoreDialog.date })}</p>
-              
-              <div className="form-group">
-                <label className="form-radio-label">
-                  <input
-                    type="radio"
-                    name="restoreMode"
-                    value="merge"
-                    checked={restoreMode === 'merge'}
-                    onChange={() => setRestoreMode('merge')}
-                  />
-                  <span className="radio-custom"></span>
-                  <span>{t('settings.backup.restoreMode.merge')}</span>
-                </label>
-                <label className="form-radio-label">
-                  <input
-                    type="radio"
-                    name="restoreMode"
-                    value="overwrite"
-                    checked={restoreMode === 'overwrite'}
-                    onChange={() => setRestoreMode('overwrite')}
-                  />
-                  <span className="radio-custom"></span>
-                  <span>{t('settings.backup.restoreMode.overwrite')}</span>
-                </label>
-              </div>
-            </div>
-            <div className="dialog-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setRestoreDialog(null)}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleRestore}
-                disabled={isLoading}
-              >
-                {t('settings.backup.restore')}
-              </button>
+      <DialogOverlay isOpen={!!restoreDialog?.isOpen} onClose={() => setRestoreDialog(null)}>
+        <div className="dialog" onClick={(e) => e.stopPropagation()}>
+          <div className="dialog-header">
+            <h3 className="dialog-title">{t('settings.backup.restoreDialogTitle')}</h3>
+          </div>
+          <div className="dialog-content">
+            <p>{t('settings.backup.restoreDialogMessage', { date: restoreDialog?.date || '' })}</p>
+            
+            <div className="form-group">
+              <label className="form-radio-label">
+                <input
+                  type="radio"
+                  name="restoreMode"
+                  value="merge"
+                  checked={restoreMode === 'merge'}
+                  onChange={() => setRestoreMode('merge')}
+                />
+                <span className="radio-custom"></span>
+                <span>{t('settings.backup.restoreMode.merge')}</span>
+              </label>
+              <label className="form-radio-label">
+                <input
+                  type="radio"
+                  name="restoreMode"
+                  value="overwrite"
+                  checked={restoreMode === 'overwrite'}
+                  onChange={() => setRestoreMode('overwrite')}
+                />
+                <span className="radio-custom"></span>
+                <span>{t('settings.backup.restoreMode.overwrite')}</span>
+              </label>
             </div>
           </div>
-        </div>,
-        document.body
-      )}
+          <div className="dialog-footer">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setRestoreDialog(null)}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleRestore}
+              disabled={isLoading}
+            >
+              {t('settings.backup.restore')}
+            </button>
+          </div>
+        </div>
+      </DialogOverlay>
     </>
   );
 }

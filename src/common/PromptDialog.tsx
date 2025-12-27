@@ -4,9 +4,8 @@
  */
 
 import { memo, useCallback, useEffect, useState, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { DialogOverlay } from './DialogOverlay.js';
 import { useTranslation } from './i18nContext.js';
-import { useDialog } from './hooks/useDialog.js';
 
 interface PromptDialogProps {
   isOpen: boolean;
@@ -44,13 +43,6 @@ export const PromptDialog = memo(function PromptDialog({
     }
   }, [value, onConfirm]);
 
-  // useDialogフックでESCキー、Enterキー、オーバーレイクリックを処理
-  const { handleOverlayClick } = useDialog({ 
-    isOpen, 
-    onClose: onCancel,
-    onEnter: handleConfirm,
-  });
-
   // ダイアログが開いたときに初期値をセットしてフォーカス
   useEffect(() => {
     if (isOpen) {
@@ -63,14 +55,8 @@ export const PromptDialog = memo(function PromptDialog({
     }
   }, [isOpen, defaultValue]);
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div 
-      className="dialog-overlay" 
-      style={{ display: 'flex' }}
-      onClick={handleOverlayClick}
-    >
+  return (
+    <DialogOverlay isOpen={isOpen} onClose={onCancel} onEnter={handleConfirm}>
       <div className="dialog">
         <h3 className="dialog-title">{title}</h3>
         {message && <p className="dialog-message">{message}</p>}
@@ -96,7 +82,6 @@ export const PromptDialog = memo(function PromptDialog({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </DialogOverlay>
   );
 });

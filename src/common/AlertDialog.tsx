@@ -4,9 +4,8 @@
  */
 
 import { memo } from 'react';
-import { createPortal } from 'react-dom';
+import { DialogOverlay } from './DialogOverlay.js';
 import { useTranslation } from './i18nContext.js';
-import { useDialog } from './hooks/useDialog.js';
 import { CheckCircle, XCircle, Info } from 'lucide-react';
 
 type AlertVariant = 'success' | 'error' | 'info';
@@ -33,17 +32,9 @@ export const AlertDialog = memo(function AlertDialog({
   onClose,
 }: AlertDialogProps) {
   const { t } = useTranslation();
-  // ESCキーまたはEnterキーでダイアログを閉じる
-  const { handleOverlayClick } = useDialog({ isOpen, onClose, onEnter: onClose });
 
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div 
-      className="dialog-overlay" 
-      style={{ display: 'flex' }}
-      onClick={handleOverlayClick}
-    >
+  return (
+    <DialogOverlay isOpen={isOpen} onClose={onClose} onEnter={onClose}>
       <div className="dialog">
         <div className="dialog-header">
           <span className="dialog-icon">{variantIcons[variant]}</span>
@@ -56,7 +47,6 @@ export const AlertDialog = memo(function AlertDialog({
           </button>
         </div>
       </div>
-    </div>,
-    document.body
+    </DialogOverlay>
   );
 });

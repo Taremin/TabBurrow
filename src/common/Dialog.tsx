@@ -4,8 +4,7 @@
  */
 
 import { memo, ReactNode } from 'react';
-import { createPortal } from 'react-dom';
-import { useDialog } from './hooks/useDialog.js';
+import { DialogOverlay } from './DialogOverlay.js';
 
 interface DialogProps {
   isOpen: boolean;
@@ -26,16 +25,8 @@ export const Dialog = memo(function Dialog({
   actions,
   width,
 }: DialogProps) {
-  const { handleOverlayClick } = useDialog({ isOpen, onClose });
-
-  if (!isOpen) return null;
-
-  return createPortal(
-    <div 
-      className="dialog-overlay" 
-      style={{ display: 'flex' }}
-      onClick={handleOverlayClick}
-    >
+  return (
+    <DialogOverlay isOpen={isOpen} onClose={onClose}>
       <div className="dialog" style={width ? { maxWidth: width, width: '90%' } : undefined}>
         {(title || icon) && (
           <div className="dialog-header">
@@ -54,7 +45,7 @@ export const Dialog = memo(function Dialog({
           </div>
         )}
       </div>
-    </div>,
-    document.body
+    </DialogOverlay>
   );
 });
+
