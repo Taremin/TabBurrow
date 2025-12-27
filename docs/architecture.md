@@ -33,6 +33,8 @@ TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機
 *   **`options/`**: 設定画面（Reactアプリケーション）。
     *   `App.tsx`: 設定画面メイン。
     *   `components/`: 各種設定コンポーネント。
+        *   `CustomGroupSettings.tsx`: カスタムグループの管理（一覧・作成・編集・削除）。
+        *   `SettingsSection.tsx`: 設定セクションの共通レイアウト。
 *   **`common/`**: 共通コンポーネントとフック。
     *   `ConfirmDialog.tsx`: 確認ダイアログ。
     *   `AlertDialog.tsx`: 通知ダイアログ。

@@ -901,3 +901,180 @@ test.describe('クレジットページ', () => {
     await expect(reactCard.locator('.library-copyright')).toBeVisible();
   });
 });
+
+// ======================
+// カスタムグループ管理 テスト
+// ======================
+
+test.describe('設定画面 - カスタムグループ管理', () => {
+  test('カスタムグループ設定セクションが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // カスタムグループ設定セクションが存在することを確認
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    await expect(customGroupSection).toBeVisible();
+  });
+
+  test('新規グループ作成ボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 新規グループ作成ボタンが存在することを確認
+    const addButton = page.locator('.add-group-button');
+    await expect(addButton).toBeVisible();
+  });
+
+  test('新規グループ作成ボタンをクリックするとダイアログが開く', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 新規グループ作成ボタンをクリック
+    const addButton = page.locator('.add-group-button');
+    await addButton.click();
+    
+    // ダイアログが表示されることを確認
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 入力フィールドが存在することを確認
+    const input = dialog.locator('.dialog-input');
+    await expect(input).toBeVisible();
+    
+    // キャンセルボタンで閉じる
+    await dialog.locator('.btn-secondary').click();
+    await expect(dialog).not.toBeVisible();
+  });
+
+  test('新規グループを作成できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 新規グループ作成ボタンをクリック
+    const addButton = page.locator('.add-group-button');
+    await addButton.click();
+    
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // グループ名を入力
+    const input = dialog.locator('.dialog-input');
+    const groupName = `E2Eテストグループ_${Date.now()}`;
+    await input.fill(groupName);
+    
+    // OKボタンをクリック
+    await dialog.locator('.btn-primary').click();
+    
+    // ダイアログが閉じる
+    await expect(dialog).not.toBeVisible();
+    
+    // 作成されたグループが一覧に表示される
+    const groupItem = page.locator('.custom-group-name').filter({ hasText: groupName });
+    await expect(groupItem).toBeVisible();
+  });
+
+  test('グループ名を編集できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // まず新規グループを作成
+    const addButton = page.locator('.add-group-button');
+    await addButton.click();
+    
+    let dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    const originalName = `編集前_${Date.now()}`;
+    await dialog.locator('.dialog-input').fill(originalName);
+    await dialog.locator('.btn-primary').click();
+    await expect(dialog).not.toBeVisible();
+    
+    // 作成されたグループの編集ボタンをクリック
+    const groupItem = page.locator('.custom-group-item').filter({ hasText: originalName });
+    await expect(groupItem).toBeVisible();
+    
+    const editButton = groupItem.locator('.btn-icon').first();
+    await editButton.click();
+    
+    // 編集ダイアログが開く
+    dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 新しい名前を入力
+    const newName = `編集後_${Date.now()}`;
+    const input = dialog.locator('.dialog-input');
+    await input.fill(newName);
+    await dialog.locator('.btn-primary').click();
+    
+    // ダイアログが閉じる
+    await expect(dialog).not.toBeVisible();
+    
+    // 新しい名前で表示される
+    const renamedGroup = page.locator('.custom-group-name').filter({ hasText: newName });
+    await expect(renamedGroup).toBeVisible();
+  });
+
+  test('グループを削除できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // まず新規グループを作成
+    const addButton = page.locator('.add-group-button');
+    await addButton.click();
+    
+    let dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    const groupName = `削除対象_${Date.now()}`;
+    await dialog.locator('.dialog-input').fill(groupName);
+    await dialog.locator('.btn-primary').click();
+    await expect(dialog).not.toBeVisible();
+    
+    // 作成されたグループの削除ボタンをクリック
+    const groupItem = page.locator('.custom-group-item').filter({ hasText: groupName });
+    await expect(groupItem).toBeVisible();
+    
+    const deleteButton = groupItem.locator('.btn-danger-icon');
+    await deleteButton.click();
+    
+    // 確認ダイアログが表示される
+    dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 削除を実行
+    await dialog.locator('.btn-danger').click();
+    
+    // ダイアログが閉じる
+    await expect(dialog).not.toBeVisible();
+    
+    // グループが一覧から消える
+    await expect(groupItem).not.toBeVisible();
+  });
+
+  test('空のグループ名は作成できない', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 新規グループ作成ボタンをクリック
+    const addButton = page.locator('.add-group-button');
+    await addButton.click();
+    
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 空のまま送信を試みる - OKボタンはdisabledになっているはず
+    const okButton = dialog.locator('.btn-primary');
+    await expect(okButton).toBeDisabled();
+    
+    // キャンセルで閉じる
+    await dialog.locator('.btn-secondary').click();
+    await expect(dialog).not.toBeVisible();
+  });
+});

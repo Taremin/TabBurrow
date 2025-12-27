@@ -4,6 +4,7 @@
  */
 
 import { memo, useCallback, useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from './i18nContext.js';
 import { useDialog } from './hooks/useDialog.js';
 
@@ -17,6 +18,8 @@ interface PromptDialogProps {
   onCancel: () => void;
   // 確認ボタンのカスタマイズ（オプション）
   confirmButtonText?: string;
+  // エラーメッセージ（オプション）
+  error?: string | null;
 }
 
 export const PromptDialog = memo(function PromptDialog({
@@ -28,6 +31,7 @@ export const PromptDialog = memo(function PromptDialog({
   onConfirm,
   onCancel,
   confirmButtonText,
+  error,
 }: PromptDialogProps) {
   const { t } = useTranslation();
   const [value, setValue] = useState(defaultValue);
@@ -61,7 +65,7 @@ export const PromptDialog = memo(function PromptDialog({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div 
       className="dialog-overlay" 
       style={{ display: 'flex' }}
@@ -78,6 +82,7 @@ export const PromptDialog = memo(function PromptDialog({
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder || t('dialog.promptPlaceholder')}
         />
+        {error && <p className="dialog-error">{error}</p>}
         <div className="dialog-actions">
           <button className="btn btn-secondary" onClick={onCancel}>
             {t('common.cancel')}
@@ -91,6 +96,7 @@ export const PromptDialog = memo(function PromptDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 });

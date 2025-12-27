@@ -67,6 +67,13 @@ function copyStaticFiles(distDir, browser) {
     copyFileSync('src/credits.html', join(distDir, 'credits.html'));
     copyFileSync('src/credits.css', join(distDir, 'credits.css'));
 
+    // 共通CSSをコピー
+    const commonDir = join(distDir, 'common');
+    ensureDir(commonDir);
+    if (existsSync('src/common/common.css')) {
+        copyFileSync('src/common/common.css', join(commonDir, 'common.css'));
+    }
+
     // アイコン
     const iconsDir = join(distDir, 'icons');
     ensureDir(iconsDir);

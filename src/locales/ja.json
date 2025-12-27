@@ -204,6 +204,21 @@
             "tabCount": "{count}タブ",
             "confirmDeleteTitle": "バックアップを削除",
             "confirmDeleteMessage": "{date} のバックアップを削除しますか？"
+        },
+        "customGroups": {
+            "title": "カスタムグループ",
+            "description": "タブをまとめるカスタムグループを管理します。",
+            "empty": "カスタムグループはありません",
+            "tabCount": "{count} タブ",
+            "addGroup": "新規グループを作成",
+            "editGroup": "グループ名を編集",
+            "deleteGroup": "グループを削除",
+            "renameDialogTitle": "グループ名を入力",
+            "deleteConfirmTitle": "グループを削除",
+            "deleteConfirmMessage": "「{name}」を削除しますか？グループ内のタブはドメイングループに戻ります。",
+            "createDialogTitle": "新規グループ名を入力",
+            "duplicateError": "同じ名前のグループが既に存在します",
+            "emptyNameError": "グループ名を入力してください"
         }
     },
     "tabManager": {

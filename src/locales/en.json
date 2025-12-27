@@ -204,6 +204,21 @@
             "tabCount": "{count} tabs",
             "confirmDeleteTitle": "Delete backup",
             "confirmDeleteMessage": "Delete backup from {date}?"
+        },
+        "customGroups": {
+            "title": "Custom Groups",
+            "description": "Manage custom groups for organizing tabs.",
+            "empty": "No custom groups",
+            "tabCount": "{count} tabs",
+            "addGroup": "Create New Group",
+            "editGroup": "Edit Group Name",
+            "deleteGroup": "Delete Group",
+            "renameDialogTitle": "Enter group name",
+            "deleteConfirmTitle": "Delete Group",
+            "deleteConfirmMessage": "Delete \"{name}\"? Tabs will be moved back to domain groups.",
+            "createDialogTitle": "Enter new group name",
+            "duplicateError": "A group with this name already exists",
+            "emptyNameError": "Please enter a group name"
         }
     },
     "tabManager": {

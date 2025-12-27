@@ -3,6 +3,7 @@
  */
 
 import { memo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from './i18nContext.js';
 import { useDialog } from './hooks/useDialog.js';
 import { AlertTriangle } from 'lucide-react';
@@ -32,7 +33,7 @@ export const ConfirmDialog = memo(function ConfirmDialog({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div 
       className="dialog-overlay" 
       style={{ display: 'flex' }}
@@ -53,6 +54,7 @@ export const ConfirmDialog = memo(function ConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 });

@@ -5,7 +5,7 @@
 import { ReactNode } from 'react';
 
 interface SettingsSectionProps {
-  icon: string;
+  icon: string | ReactNode;
   title: string;
   description: string;
   children: ReactNode;

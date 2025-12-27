@@ -3,6 +3,8 @@
  * tabs.cssと統一感のあるダークモード対応デザイン
  */
 
+@import './common/common.css';
+
 /* CSS変数（カラーパレット） */
 :root {
     /* ライトモード */
@@ -188,6 +190,9 @@ body {
 .main {
     flex: 1;
     padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
 }
 
 /* 設定フォーム */
@@ -560,99 +565,7 @@ body {
     margin-bottom: 8px;
 }
 
-/* ダイアログ */
-.dialog-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-}
-
-.dialog {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-    box-shadow: var(--shadow-lg);
-    animation: dialogIn 200ms ease;
-}
-
-@keyframes dialogIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-/* ダイアログヘッダー（アイコン + タイトル） */
-.dialog-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.dialog-icon {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.dialog-icon svg {
-    width: 28px;
-    height: 28px;
-}
-
-.dialog-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-/* アラートアイコンの色 */
-.alert-icon-warning {
-    color: #f59e0b;
-}
-
-.alert-icon-success {
-    color: #10b981;
-}
-
-.alert-icon-error {
-    color: #ef4444;
-}
-
-.alert-icon-info {
-    color: #3b82f6;
-}
-
-.dialog-message {
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-}
-
-.dialog-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-}
-
-.dialog-actions .btn {
-    min-width: 100px;
-}
+/* ダイアログの共通スタイルはcommon/common.cssを参照 */
 
 /* インポートモード選択 */
 .import-mode-options {
@@ -1074,4 +987,114 @@ body {
 
 .format-detected strong {
     font-weight: 600;
+}
+
+/* カスタムグループ設定 */
+.custom-groups-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.custom-groups-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.custom-group-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.custom-group-item:hover {
+    border-color: var(--text-muted);
+}
+
+.custom-group-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.custom-group-icon {
+    display: flex;
+    align-items: center;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.custom-group-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-group-count {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.custom-group-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.btn-danger-icon:hover {
+    background: var(--danger-light);
+    color: var(--danger-color);
+}
+
+.add-group-button {
+    align-self: flex-start;
+}
+
+.empty-message {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    text-align: center;
+    padding: 24px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+/* ダイアログエラー表示 */
+.dialog-error {
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 8px;
+    text-align: left;
 }

@@ -17,7 +17,8 @@ import { RestoreSettings } from './components/RestoreSettings.js';
 import { LinkCheckSettings } from './components/LinkCheckSettings.js';
 import { BackupSettings } from './components/BackupSettings.js';
 import { DataManagement } from './components/DataManagement.js';
-import { AlertTriangle } from 'lucide-react';
+import { CustomGroupSettings } from './components/CustomGroupSettings.js';
+import { AlertTriangle, Folder } from 'lucide-react';
 
 export function App() {
   const { t } = useTranslation();
@@ -255,6 +256,15 @@ export function App() {
 
           {/* 保存ボタンはフッターに移動 */}
         </form>
+
+        {/* カスタムグループ設定 */}
+        <SettingsSection
+          icon={<Folder size={20} />}
+          title={t('settings.customGroups.title')}
+          description={t('settings.customGroups.description')}
+        >
+          <CustomGroupSettings />
+        </SettingsSection>
 
         {/* データ管理セクション */}
         <DataManagement onSettingsImported={reload} />
