@@ -331,7 +331,8 @@
         "createGroupFromUrl": "現在のURLからグループ作成...",
         "createGroupFromDomain": "現在のドメインからグループ作成...",
         "createGroupPatternPrompt": "対象とする正規表現パターンを入力",
-        "createGroupNamePrompt": "作成するグループ名を入力"
+        "createGroupNamePrompt": "作成するグループ名を入力",
+        "stashThisPage": "このページを収納する"
     },
     "manifest": {
         "description": "タブを保存して管理する拡張機能",

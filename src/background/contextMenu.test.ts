@@ -200,6 +200,136 @@ describe('contextMenu', () => {
     });
   });
 
+  describe('handleContextMenuClick - stash-this-page', () => {
+    it('stash-this-pageメニューでアクティブタブを収納する', async () => {
+      const { saveTabs } = await import('../storage.js');
+      const { getTabScreenshot } = await import('./tabSaver.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'https://example.com', title: 'Example Page' });
+
+      await handleContextMenuClick(info, tab);
+
+      // スクリーンショット取得が呼ばれる
+      expect(getTabScreenshot).toHaveBeenCalled();
+      // タブが保存される
+      expect(saveTabs).toHaveBeenCalledWith([
+        expect.objectContaining({
+          url: 'https://example.com',
+          title: 'Example Page',
+          domain: 'example.com',
+          group: 'example.com',
+          groupType: 'domain',
+        }),
+      ]);
+      // ブラウザタブが閉じられる
+      expect(browser.tabs.remove).toHaveBeenCalledWith(1);
+    });
+
+    it('拡張アイコン用のstash-this-pageメニューでも動作する', async () => {
+      const { saveTabs } = await import('../storage.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'action-stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 2, url: 'https://test.com', title: 'Test Page' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveTabs).toHaveBeenCalledWith([
+        expect.objectContaining({
+          url: 'https://test.com',
+          title: 'Test Page',
+        }),
+      ]);
+      expect(browser.tabs.remove).toHaveBeenCalledWith(2);
+    });
+
+    it('特殊URL（chrome://）ではタブを収納しない', async () => {
+      const { saveTabs } = await import('../storage.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'chrome://extensions/' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveTabs).not.toHaveBeenCalled();
+      expect(browser.tabs.remove).not.toHaveBeenCalled();
+    });
+
+    it('特殊URL（about:）ではタブを収納しない', async () => {
+      const { saveTabs } = await import('../storage.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'about:blank' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveTabs).not.toHaveBeenCalled();
+      expect(browser.tabs.remove).not.toHaveBeenCalled();
+    });
+
+    it('タブIDがない場合は何もしない', async () => {
+      const { saveTabs } = await import('../storage.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: undefined, url: 'https://example.com' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveTabs).not.toHaveBeenCalled();
+    });
+
+    it('タブURLがない場合は何もしない', async () => {
+      const { saveTabs } = await import('../storage.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: undefined });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveTabs).not.toHaveBeenCalled();
+    });
+
+    it('file:// URLでもタブを収納できる', async () => {
+      const { saveTabs } = await import('../storage.js');
+      
+      const info: Menus.OnClickData = {
+        menuItemId: 'stash-this-page',
+        editable: false,
+        modifiers: [],
+      };
+      const tab = createMockTab({ id: 1, url: 'file:///C:/test.html', title: 'Local File' });
+
+      await handleContextMenuClick(info, tab);
+
+      expect(saveTabs).toHaveBeenCalled();
+      expect(browser.tabs.remove).toHaveBeenCalledWith(1);
+    });
+  });
+
   describe('handleContextMenuClick - remove-and-close', () => {
     it('remove-and-closeメニューで管理対象タブを削除して閉じる', async () => {
       const { findTabByUrl, deleteTab } = await import('../storage.js');
@@ -605,6 +735,11 @@ describe('contextMenu', () => {
         'action-create-group-from-domain',
         { enabled: false }
       );
+      // このページを収納メニューも無効化される
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-stash-this-page',
+        { enabled: false }
+      );
     });
 
     it('特殊URL（chrome://）ではグループ作成メニューが無効化される', async () => {
@@ -621,6 +756,10 @@ describe('contextMenu', () => {
       );
       expect(browser.contextMenus.update).toHaveBeenCalledWith(
         'action-create-group-from-domain',
+        { enabled: false }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-stash-this-page',
         { enabled: false }
       );
     });
@@ -641,6 +780,10 @@ describe('contextMenu', () => {
         'action-create-group-from-domain',
         { enabled: false }
       );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-stash-this-page',
+        { enabled: false }
+      );
     });
 
     it('通常のhttps URLではグループ作成メニューが有効化される', async () => {
@@ -657,6 +800,10 @@ describe('contextMenu', () => {
       );
       expect(browser.contextMenus.update).toHaveBeenCalledWith(
         'action-create-group-from-domain',
+        { enabled: true }
+      );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-stash-this-page',
         { enabled: true }
       );
     });
@@ -677,6 +824,10 @@ describe('contextMenu', () => {
         'action-create-group-from-domain',
         { enabled: true }
       );
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-stash-this-page',
+        { enabled: true }
+      );
     });
 
     it('特殊URLではTabBurrowページメニューが非表示になる', async () => {
@@ -690,6 +841,11 @@ describe('contextMenu', () => {
       expect(browser.contextMenus.update).toHaveBeenCalledWith(
         'tabburrow',
         { visible: false }
+      );
+      // このページを収納メニューも無効化される
+      expect(browser.contextMenus.update).toHaveBeenCalledWith(
+        'action-stash-this-page',
+        { enabled: false }
       );
     });
 

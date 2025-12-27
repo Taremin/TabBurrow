@@ -331,7 +331,8 @@
         "createGroupFromUrl": "Create Group from Current URL...",
         "createGroupFromDomain": "Create Group from Current Domain...",
         "createGroupPatternPrompt": "Enter regex pattern for matching",
-        "createGroupNamePrompt": "Enter group name to create"
+        "createGroupNamePrompt": "Enter group name to create",
+        "stashThisPage": "Stash This Page"
     },
     "manifest": {
         "description": "Save and manage browser tabs",

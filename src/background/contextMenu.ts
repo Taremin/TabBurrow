@@ -36,6 +36,10 @@ const CREATE_GROUP_FROM_DOMAIN_MENU_ID = 'create-group-from-domain';
 const ACTION_CREATE_GROUP_FROM_URL_MENU_ID = 'action-create-group-from-url';
 const ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID = 'action-create-group-from-domain';
 
+// このページを収納メニュー用
+const STASH_THIS_PAGE_MENU_ID = 'stash-this-page';
+const ACTION_STASH_THIS_PAGE_MENU_ID = 'action-stash-this-page';
+
 /**
  * コンテキストメニューを作成
  */
@@ -68,7 +72,14 @@ export function createContextMenus(): void {
     contexts: ['action'],
   });
 
-  // 3. 固定タブも含めてすべて収納（既存）
+  // 3. このページを収納する
+  browser.contextMenus.create({
+    id: ACTION_STASH_THIS_PAGE_MENU_ID,
+    title: t('contextMenu.stashThisPage'),
+    contexts: ['action'],
+  });
+
+  // 4. 固定タブも含めてすべて収納（既存）
   browser.contextMenus.create({
     id: 'save-all-including-pinned',
     title: t('contextMenu.saveAllIncludingPinned'),
@@ -138,6 +149,14 @@ export function createContextMenus(): void {
     id: NEW_GROUP_MENU_ID,
     parentId: PARENT_MENU_ID,
     title: t('contextMenu.newGroup'),
+    contexts: ['page', 'frame'],
+  });
+
+  // 1-3. このページを収納する
+  browser.contextMenus.create({
+    id: STASH_THIS_PAGE_MENU_ID,
+    parentId: TABBURROW_MENU_ID,
+    title: t('contextMenu.stashThisPage'),
     contexts: ['page', 'frame'],
   });
 
@@ -237,6 +256,12 @@ export async function handleContextMenuClick(
     await handleSaveAllIncludingPinned(tab);
     return;
   }
+
+  // このページを収納する
+  if ((menuItemId === STASH_THIS_PAGE_MENU_ID || menuItemId === ACTION_STASH_THIS_PAGE_MENU_ID) && tab?.url) {
+    await handleStashThisPage(tab);
+    return;
+  }
   
   // 削除して閉じる
   if ((menuItemId === REMOVE_AND_CLOSE_MENU_ID || menuItemId === ACTION_REMOVE_AND_CLOSE_MENU_ID) && tab?.url) {
@@ -311,6 +336,51 @@ async function handleSaveAllIncludingPinned(clickedTab?: Tabs.Tab): Promise<void
     activeTabWindowId: clickedTab?.windowId,
     openTabManager: true,
   });
+}
+
+/**
+ * このページを収納する（アクティブタブのみ）
+ */
+async function handleStashThisPage(tab: Tabs.Tab): Promise<void> {
+  if (!tab.url || !tab.id) return;
+  
+  // 保存対象外のURLは処理しない
+  if (!isSaveableUrl(tab.url)) {
+    console.log(`保存対象外のURL: ${tab.url}`);
+    return;
+  }
+  
+  try {
+    const now = Date.now();
+    const screenshot = await getTabScreenshot(tab, {
+      activeTabWindowId: tab.active ? tab.windowId : undefined,
+    });
+    
+    const domain = extractDomain(tab.url);
+    const savedTab: SavedTab = {
+      id: crypto.randomUUID(),
+      url: tab.url,
+      title: tab.title || 'Untitled',
+      domain,
+      group: domain,       // ドメイングループとして保存
+      groupType: 'domain',
+      favIconUrl: tab.favIconUrl || '',
+      screenshot,
+      lastAccessed: tab.lastAccessed || now,
+      savedAt: now,
+    };
+    
+    await saveTabs([savedTab]);
+    console.log(`タブを収納しました: ${tab.url}`);
+    
+    // タブ管理画面に変更を通知
+    browser.runtime.sendMessage({ type: 'tabs-changed' }).catch(() => {});
+    
+    // タブを閉じる
+    await browser.tabs.remove(tab.id);
+  } catch (error) {
+    console.error('タブの収納に失敗:', error);
+  }
 }
 
 /**
@@ -587,6 +657,8 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
     // グループ作成メニューも無効化
     browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { enabled: false });
     browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, { enabled: false });
+    // このページを収納メニューも無効化
+    browser.contextMenus.update(ACTION_STASH_THIS_PAGE_MENU_ID, { enabled: false });
     return;
   }
   
@@ -619,6 +691,9 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
   // グループ作成メニューを有効化（保存対象のURLでのみ利用可能）
   browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { enabled: true });
   browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, { enabled: true });
+  
+  // このページを収納メニューを有効化（保存対象のURLでのみ利用可能）
+  browser.contextMenus.update(ACTION_STASH_THIS_PAGE_MENU_ID, { enabled: true });
 }
 
 /**
@@ -634,6 +709,7 @@ export function updateContextMenuTitles(): void {
   browser.contextMenus.update(TABBURROW_OPEN_MANAGER_ID, { title: t('contextMenu.openManager') });
   browser.contextMenus.update(PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
+  browser.contextMenus.update(STASH_THIS_PAGE_MENU_ID, { title: t('contextMenu.stashThisPage') });
   browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
   browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
   browser.contextMenus.update(CREATE_GROUP_FROM_URL_MENU_ID, { title: t('contextMenu.createGroupFromUrl') });
@@ -642,6 +718,7 @@ export function updateContextMenuTitles(): void {
   // 拡張アイコン用
   browser.contextMenus.update(ACTION_PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
   browser.contextMenus.update(ACTION_NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
+  browser.contextMenus.update(ACTION_STASH_THIS_PAGE_MENU_ID, { title: t('contextMenu.stashThisPage') });
   browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
   browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
   browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { title: t('contextMenu.createGroupFromUrl') });
