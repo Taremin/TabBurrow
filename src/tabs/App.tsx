@@ -7,34 +7,21 @@ import browser from '../browserApi.js';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import { platform } from '../platform.js';
 import type { Tabs } from 'webextension-polyfill';
-import {
-  getAllTabs,
-  searchTabs,
-  deleteTab,
-  deleteTabsByDomain,
-  deleteTabsByGroup,
-  deleteAllTabs,
-  deleteCustomGroup,
-  renameCustomGroup,
-  getAllCustomGroups,
-  createCustomGroup,
-  assignTabToCustomGroup,
-  removeTabFromCustomGroup,
-  getStorageUsage,
-  deleteMultipleTabs,
-  assignMultipleTabsToGroup,
-  removeMultipleTabsFromGroup,
-} from '../storage.js';
 import { getSettings, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity } from '../settings.js';
-import type { SavedTab, DateRangeFilter, CustomGroupMeta, GroupFilter, SearchOptions } from './types';
-import { DEFAULT_SEARCH_OPTIONS } from './types';
-import { formatBytes } from './utils';
-import { Header } from './Header';
-import { TabList } from './TabList';
+import type { GroupFilter, SearchOptions } from './types.js';
+import { DEFAULT_SEARCH_OPTIONS } from './types.js';
+import { Header } from './Header.js';
+import { TabList } from './TabList.js';
 import { ConfirmDialog } from '../common/ConfirmDialog.js';
-import { LinkCheckDialog } from './LinkCheckDialog';
+import { LinkCheckDialog } from './LinkCheckDialog.js';
 import { PromptDialog } from '../common/PromptDialog.js';
 import { useTranslation } from '../common/i18nContext.js';
+
+// Custom Hooks
+import { useTabs } from './hooks/useTabs.js';
+import { useGroups } from './hooks/useGroups.js';
+import { useSearch } from './hooks/useSearch.js';
+import { useSelection } from './hooks/useSelection.js';
 
 interface DialogState {
   isOpen: boolean;
@@ -69,19 +56,60 @@ const waitForTabStatus = (tabId: number, waitFor: 'loading' | 'complete'): Promi
 export function App() {
   const { t } = useTranslation();
 
-  // 状態
-  const [allTabs, setAllTabs] = useState<SavedTab[]>([]);
-  const [filteredTabs, setFilteredTabs] = useState<SavedTab[]>([]);
-  const [customGroups, setCustomGroups] = useState<CustomGroupMeta[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  // Custom Hooks
+  const {
+    allTabs,
+    customGroups,
+    storageInfo,
+    loadTabs,
+    handleDeleteTab,
+    handleDeleteDomainGroup: deleteDomainGroup,
+    handleDeleteAll: deleteAll,
+    handleBulkDelete: bulkDeleteTabs,
+    handleMoveToGroup: moveTabToGroup,
+    handleRemoveFromGroup: removeTabFromGroup,
+    handleBulkMoveToGroup: bulkMoveTabsToGroup,
+    handleBulkRemoveFromGroup: bulkRemoveTabsFromGroup,
+  } = useTabs();
+
+  const {
+    createGroup,
+    deleteCustomGroup: deleteCustomGroupByName,
+    renameGroup,
+  } = useGroups(loadTabs);
+
+  const {
+    searchQuery,
+    searchOptions,
+    setSearchOptions, // handleSearch (filters logic updated internally)
+    onSearchOptionsChange,
+    dateRange,
+    setDateRange,
+    filteredTabs,
+    regexError,
+    handleSearch, // setSearchQuery wrapper
+  } = useSearch(allTabs);
+
+  const {
+    isSelectionMode,
+    selectedTabIds,
+    setSelectedTabIds,
+    toggleSelectionMode: handleToggleSelectionMode,
+    toggleSelection: handleToggleSelection,
+    selectAll,
+    deselectAll: handleDeselectAll,
+    setIsSelectionMode,
+  } = useSelection();
+
+  // Settings State
   const [groupSort, setGroupSort] = useState<GroupSortType>('count-desc');
   const [itemSort, setItemSort] = useState<ItemSortType>('saved-desc');
   const [restoreMode, setRestoreMode] = useState<RestoreMode>('lazy');
   const [restoreIntervalMs, setRestoreIntervalMs] = useState(100);
-  const [dateRange, setDateRange] = useState<DateRangeFilter>({ startDate: null, endDate: null });
-  const [viewMode, setViewMode] = useState<ViewMode | undefined>(undefined); // 設定読み込み後に初期化
-  const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined); // 設定読み込み後に初期化
-  const [storageInfo, setStorageInfo] = useState(t('tabManager.storageCalculating'));
+  const [viewMode, setViewMode] = useState<ViewMode | undefined>(undefined);
+  const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined);
+
+  // UI State
   const [dialog, setDialog] = useState<DialogState>({
     isOpen: false,
     title: '',
@@ -89,68 +117,20 @@ export function App() {
     onConfirm: () => {},
   });
   
-  // 選択モード関連
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedTabIds, setSelectedTabIds] = useState<Set<string>>(new Set());
-  
-  // グループ内フィルタ
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
-
-  // グループ折りたたみ状態
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-
-  // 検索オプション
-  const [searchOptions, setSearchOptions] = useState<SearchOptions>(DEFAULT_SEARCH_OPTIONS);
-  const [regexError, setRegexError] = useState<string | null>(null);
-
-  // リンクチェックダイアログ
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
-
-  // リネームダイアログ
   const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string }>({ isOpen: false, currentName: '' });
-
-  // 新規グループ作成ダイアログ
   const [createGroupDialog, setCreateGroupDialog] = useState<{
     isOpen: boolean;
-    tabIdToMove?: string; // 単一タブ移動時
-    bulkMove?: boolean; // 選択モードでの一括移動時
+    tabIdToMove?: string;
+    bulkMove?: boolean;
   }>({ isOpen: false });
 
-  // タブ数
+  // Tab Count
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
 
-  // 統計情報の更新
-  const updateStats = useCallback(async () => {
-    const usage = await getStorageUsage();
-    if (usage.quota > 0) {
-      const percent = ((usage.used / usage.quota) * 100).toFixed(1);
-      setStorageInfo(t('tabManager.storageUsage', {
-        used: formatBytes(usage.used),
-        quota: formatBytes(usage.quota),
-        percent,
-      }));
-    } else {
-      setStorageInfo(t('tabManager.storageUsageNoQuota', {
-        used: formatBytes(usage.used),
-      }));
-    }
-  }, [t]);
-
-  // タブの読み込み
-  const loadTabs = useCallback(async () => {
-    try {
-      const tabs = await getAllTabs();
-      const groups = await getAllCustomGroups();
-      setAllTabs(tabs);
-      setFilteredTabs(tabs);
-      setCustomGroups(groups);
-      await updateStats();
-    } catch (error) {
-      console.error('タブの読み込みに失敗:', error);
-    }
-  }, [updateStats]);
-
-  // 設定の読み込み（ソート・復元設定・表示モード）
+  // Load Settings
   const loadSettings = useCallback(async () => {
     try {
       const settings = await getSettings();
@@ -158,7 +138,6 @@ export function App() {
       setItemSort(settings.itemSort);
       setRestoreMode(settings.restoreMode);
       setRestoreIntervalMs(settings.restoreIntervalMs);
-      // 初回読み込み時のみデフォルト表示モードを適用（ユーザーが変更後は上書きしない）
       setViewMode(prev => prev === undefined ? settings.defaultViewMode : prev);
       setDisplayDensity(prev => prev === undefined ? settings.defaultDisplayDensity : prev);
     } catch (error) {
@@ -166,157 +145,94 @@ export function App() {
     }
   }, []);
 
-  // 検索
-  const handleSearch = useCallback(async (query: string, options?: SearchOptions) => {
-    setSearchQuery(query);
-    const opts = options || searchOptions;
-    if (!query.trim()) {
-      setFilteredTabs(allTabs);
-      setRegexError(null);
-      return;
-    }
-    try {
-      const results = await searchTabs(query, opts);
-      // 正規表現エラーチェック: useRegexがtrueで結果が空でパターンがある場合
-      if (opts.useRegex && results.length === 0) {
-        try {
-          new RegExp(query);
-          setRegexError(null);
-        } catch {
-          setRegexError(query);
-          setFilteredTabs([]);
-          return;
-        }
-      } else {
-        setRegexError(null);
-      }
-      setFilteredTabs(results);
-    } catch (error) {
-      console.error('検索に失敗:', error);
-    }
-  }, [allTabs, searchOptions]);
-
-  // 検索オプション変更
-  const handleSearchOptionsChange = useCallback((newOptions: SearchOptions) => {
-    setSearchOptions(newOptions);
-    // オプションが変わったら再検索
-    if (searchQuery.trim()) {
-      handleSearch(searchQuery, newOptions);
-    }
-  }, [searchQuery, handleSearch]);
-
-  // 日時フィルタリング
-  const applyDateFilter = useCallback((tabs: SavedTab[]): SavedTab[] => {
-    if (!dateRange.startDate && !dateRange.endDate) {
-      return tabs;
-    }
-
-    return tabs.filter((tab) => {
-      const savedDate = new Date(tab.savedAt);
-      // ローカル時間での日付をYYYY-MM-DD形式に変換
-      const year = savedDate.getFullYear();
-      const month = String(savedDate.getMonth() + 1).padStart(2, '0');
-      const day = String(savedDate.getDate()).padStart(2, '0');
-      const savedDateStr = `${year}-${month}-${day}`;
-
-      if (dateRange.startDate && savedDateStr < dateRange.startDate) {
-        return false;
-      }
-      if (dateRange.endDate && savedDateStr > dateRange.endDate) {
-        return false;
-      }
-      return true;
-    });
-  }, [dateRange]);
-
-  // 日時フィルター変更時に再フィルタリング
+  // Settings Change Listener
   useEffect(() => {
-    const applyFilters = async () => {
-      let filtered = allTabs;
-
-      // 検索フィルター
-      if (searchQuery.trim()) {
-        filtered = await searchTabs(searchQuery, searchOptions);
+    const listener = (message: unknown) => {
+      const msg = message as { type?: string };
+      if (msg.type === 'settings-changed') {
+        loadSettings();
       }
-
-      // 日時フィルター適用
-      filtered = applyDateFilter(filtered);
-
-      setFilteredTabs(filtered);
     };
+    browser.runtime.onMessage.addListener(listener);
+    return () => browser.runtime.onMessage.removeListener(listener);
+  }, [loadSettings]);
 
-    applyFilters();
-  }, [allTabs, searchQuery, searchOptions, dateRange, applyDateFilter]);
+  // Load Collapsed Groups state
+  useEffect(() => {
+    const loadCollapsed = async () => {
+      try {
+        const result = await browser.storage.local.get('collapsedGroups');
+        if (result.collapsedGroups) {
+          setCollapsedGroups(result.collapsedGroups as Record<string, boolean>);
+        }
+      } catch (error) {
+        console.error('折りたたみ状態の読み込みに失敗:', error);
+      }
+    };
+    loadCollapsed();
+    loadSettings();
+  }, [loadSettings]);
 
-  // タブを開く
+  // Save Collapsed Groups
+  const saveCollapsedGroups = useCallback(async (newState: Record<string, boolean>) => {
+    try {
+      await browser.storage.local.set({ collapsedGroups: newState });
+    } catch (error) {
+      console.error('折りたたみ状態の保存に失敗:', error);
+    }
+  }, []);
+
+  const handleToggleCollapse = useCallback((groupName: string) => {
+    setCollapsedGroups(prev => {
+      const newState = { ...prev, [groupName]: !prev[groupName] };
+      saveCollapsedGroups(newState);
+      return newState;
+    });
+  }, [saveCollapsedGroups]);
+
+  // Actions Wrapper
   const handleOpenTab = useCallback((url: string) => {
     browser.tabs.create({ url });
   }, []);
 
-  // ホイールクリック（中クリック）でタブを開く（画面は維持）
   const handleMiddleClickTab = useCallback((url: string) => {
-    // active: false でバックグラウンドでタブを開く
     browser.tabs.create({ url, active: false });
   }, []);
 
-  // タブ削除
-  const handleDeleteTab = useCallback(async (id: string) => {
-    await deleteTab(id);
-    await loadTabs();
-  }, [loadTabs]);
-
-  // グループ削除
   const handleDeleteGroup = useCallback((groupName: string, groupType: 'domain' | 'custom') => {
     const groupTabs = filteredTabs.filter(t => t.group === groupName);
     
     if (groupType === 'custom') {
-      // カスタムグループ削除（タブはドメイングループに戻る）
       setDialog({
         isOpen: true,
         title: t('tabManager.customGroup.deleteConfirmTitle'),
         message: t('tabManager.customGroup.deleteConfirmMessage', { name: groupName }),
         onConfirm: async () => {
-          await deleteCustomGroup(groupName);
-          await loadTabs();
+          await deleteCustomGroupByName(groupName);
           setDialog(d => ({ ...d, isOpen: false }));
         },
       });
     } else {
-      // ドメイングループ削除（タブも削除）
       setDialog({
         isOpen: true,
         title: t('tabManager.confirmDialog.deleteGroupTitle'),
         message: t('tabManager.confirmDialog.deleteGroupMessage', { domain: groupName, count: groupTabs.length }),
         onConfirm: async () => {
-          await deleteTabsByGroup(groupName);
-          await loadTabs();
+          await deleteDomainGroup(groupName);
           setDialog(d => ({ ...d, isOpen: false }));
         },
       });
     }
-  }, [filteredTabs, loadTabs, t]);
+  }, [filteredTabs, deleteDomainGroup, deleteCustomGroupByName, t]);
 
-  // 復元モードに応じてタブを開く
   const openTabsWithRestoreMode = useCallback(async (urls: string[]) => {
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       const tab = await browser.tabs.create({ url, active: false });
       
-      if (restoreMode === 'immediate') {
-        // 高速サスペンド: loadingを待ってdiscard（URLが確定するまで待つ）
+      if (restoreMode === 'immediate' || restoreMode === 'lazy') {
         if (tab.id) {
-          await waitForTabStatus(tab.id, 'loading');
-          try {
-            await browser.tabs.discard(tab.id);
-          } catch (e) {
-            // discardに失敗しても続行
-            console.warn('タブのdiscardに失敗:', e);
-          }
-        }
-      } else if (restoreMode === 'lazy') {
-        // 遅延サスペンド: 読み込み完了を待ってdiscard
-        if (tab.id) {
-          await waitForTabStatus(tab.id, 'complete');
+          await waitForTabStatus(tab.id, restoreMode === 'immediate' ? 'loading' : 'complete');
           try {
             await browser.tabs.discard(tab.id);
           } catch (e) {
@@ -324,35 +240,28 @@ export function App() {
           }
         }
       }
-      // mode === 'normal' の場合は何もしない（通常読み込み）
       
-      // 最後のタブ以外はインターバルを待つ
       if (restoreIntervalMs > 0 && i < urls.length - 1) {
         await sleep(restoreIntervalMs);
       }
     }
   }, [restoreMode, restoreIntervalMs]);
 
-  // グループ内のタブをすべて開く
   const handleOpenGroup = useCallback(async (groupName: string) => {
     const groupTabs = filteredTabs.filter(t => t.group === groupName);
     const urls = groupTabs.map(tab => tab.url);
     await openTabsWithRestoreMode(urls);
   }, [filteredTabs, openTabsWithRestoreMode]);
 
-  // グループ内のタブをタブグループとして開く
   const handleOpenGroupAsTabGroup = useCallback(async (groupName: string) => {
     const groupTabs_ = filteredTabs.filter(t => t.group === groupName);
     if (groupTabs_.length === 0) return;
     
     try {
-      // タブを作成
       const tabIds: number[] = [];
       for (const tab of groupTabs_) {
         const newTab = await browser.tabs.create({ url: tab.url, active: false });
-        if (newTab.id) {
-          tabIds.push(newTab.id);
-        }
+        if (newTab.id) tabIds.push(newTab.id);
       }
       
       if (tabIds.length > 0) {
@@ -366,7 +275,6 @@ export function App() {
     }
   }, [filteredTabs]);
 
-  // 選択したタブをタブグループとして開く
   const handleBulkOpenAsTabGroup = useCallback(async () => {
     if (selectedTabIds.size === 0) return;
     
@@ -375,9 +283,7 @@ export function App() {
       const tabIds: number[] = [];
       for (const tab of selectedTabs) {
         const newTab = await browser.tabs.create({ url: tab.url, active: false });
-        if (newTab.id) {
-          tabIds.push(newTab.id);
-        }
+        if (newTab.id) tabIds.push(newTab.id);
       }
       
       if (tabIds.length > 0) {
@@ -387,54 +293,39 @@ export function App() {
         await (browser as any).tabGroups.update(groupId, { title: `${selectedTabs.length} tabs`, collapsed: false });
       }
       
-      // 選択モードを解除
       setSelectedTabIds(new Set());
-      setIsSelectionMode(false);
+      // setIsSelectionMode(false); (Hook logic handles selection state)
     } catch (error) {
       console.error('タブグループの作成に失敗:', error);
     }
-  }, [selectedTabIds, filteredTabs]);
+  }, [selectedTabIds, filteredTabs, setSelectedTabIds]);
 
-  // カスタムグループ名を変更
-  const handleRenameGroup = useCallback(async (oldName: string, newName: string) => {
-    try {
-      await renameCustomGroup(oldName, newName);
-      await loadTabs();
-    } catch (error) {
-      console.error('グループ名の変更に失敗:', error);
-    }
-  }, [loadTabs]);
-
-  // リネームリクエスト（PromptDialogを表示）
+  // Rename Logic
   const handleRequestRename = useCallback((currentName: string) => {
     setRenameDialog({ isOpen: true, currentName });
   }, []);
 
-  // リネーム確定
   const handleConfirmRename = useCallback(async (newName: string) => {
     setRenameDialog({ isOpen: false, currentName: '' });
     if (renameDialog.currentName && newName !== renameDialog.currentName) {
-      await handleRenameGroup(renameDialog.currentName, newName);
+      await renameGroup(renameDialog.currentName, newName);
     }
-  }, [renameDialog.currentName, handleRenameGroup]);
+  }, [renameDialog.currentName, renameGroup]);
 
-  // 新規グループ作成リクエスト（ヘッダーのボタンから）
+  // Create/Move Group Logic
   const handleRequestCreateGroup = useCallback(() => {
     setCreateGroupDialog({ isOpen: true });
   }, []);
 
-  // タブを新規グループに移動するリクエスト（TabCardのメニューから）
   const handleRequestMoveToNewGroup = useCallback((tabId: string) => {
     setCreateGroupDialog({ isOpen: true, tabIdToMove: tabId });
   }, []);
 
-  // 選択タブを新規グループに移動するリクエスト（Headerの選択モードから）
   const handleRequestBulkMoveToNewGroup = useCallback(() => {
     if (selectedTabIds.size === 0) return;
     setCreateGroupDialog({ isOpen: true, bulkMove: true });
   }, [selectedTabIds.size]);
 
-  // グループ作成確定
   const handleConfirmCreateGroup = useCallback(async (groupName: string) => {
     const name = groupName.trim();
     if (!name) {
@@ -443,86 +334,30 @@ export function App() {
     }
 
     try {
-      // 既存グループとの重複チェック
       const existingGroup = customGroups.find(g => g.name === name);
       if (!existingGroup) {
-        await createCustomGroup(name);
+        await createGroup(name);
       }
 
-      // タブ移動が必要な場合
       if (createGroupDialog.tabIdToMove) {
-        await assignTabToCustomGroup(createGroupDialog.tabIdToMove, name);
+        await moveTabToGroup(createGroupDialog.tabIdToMove, name);
       } else if (createGroupDialog.bulkMove && selectedTabIds.size > 0) {
-        await assignMultipleTabsToGroup([...selectedTabIds], name);
+        await bulkMoveTabsToGroup([...selectedTabIds], name);
         setSelectedTabIds(new Set());
         setIsSelectionMode(false);
       }
-
-      await loadTabs();
     } catch (error) {
       console.error('グループ作成に失敗:', error);
     }
     
     setCreateGroupDialog({ isOpen: false });
-  }, [createGroupDialog.tabIdToMove, createGroupDialog.bulkMove, selectedTabIds, customGroups, loadTabs]);
+  }, [createGroupDialog, selectedTabIds, customGroups, createGroup, moveTabToGroup, bulkMoveTabsToGroup, setSelectedTabIds]);
 
-  // タブをカスタムグループに移動
-  const handleMoveToGroup = useCallback(async (tabId: string, groupName: string) => {
-    try {
-      await assignTabToCustomGroup(tabId, groupName);
-      await loadTabs();
-    } catch (error) {
-      console.error('グループへの移動に失敗:', error);
-    }
-  }, [loadTabs]);
-
-  // タブをカスタムグループから削除
-  const handleRemoveFromGroup = useCallback(async (tabId: string) => {
-    try {
-      await removeTabFromCustomGroup(tabId);
-      await loadTabs();
-    } catch (error) {
-      console.error('グループからの削除に失敗:', error);
-    }
-  }, [loadTabs]);
-
-  // ===== 選択モード関連 =====
-  
-  // 選択モードの切り替え
-  const handleToggleSelectionMode = useCallback(() => {
-    setIsSelectionMode(prev => {
-      if (prev) {
-        // モード終了時に選択をクリア
-        setSelectedTabIds(new Set());
-      }
-      return !prev;
-    });
-  }, []);
-
-  // タブ選択のトグル
-  const handleToggleSelection = useCallback((id: string) => {
-    setSelectedTabIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
-  // 全選択
+  // Bulk Actions
   const handleSelectAll = useCallback(() => {
-    setSelectedTabIds(new Set(filteredTabs.map(tab => tab.id)));
-  }, [filteredTabs]);
+    selectAll(filteredTabs.map(tab => tab.id));
+  }, [filteredTabs, selectAll]);
 
-  // 選択解除
-  const handleDeselectAll = useCallback(() => {
-    setSelectedTabIds(new Set());
-  }, []);
-
-  // 一括削除
   const handleBulkDelete = useCallback(() => {
     const count = selectedTabIds.size;
     if (count === 0) return;
@@ -532,70 +367,45 @@ export function App() {
       title: t('tabManager.selection.confirmDeleteTitle'),
       message: t('tabManager.selection.confirmDeleteMessage', { count }),
       onConfirm: async () => {
-        await deleteMultipleTabs([...selectedTabIds]);
+        await bulkDeleteTabs([...selectedTabIds]);
         setSelectedTabIds(new Set());
         setIsSelectionMode(false);
-        await loadTabs();
         setDialog(d => ({ ...d, isOpen: false }));
       },
     });
-  }, [selectedTabIds, loadTabs, t]);
+  }, [selectedTabIds, bulkDeleteTabs, setSelectedTabIds, t]);
 
-  // 一括グループ移動
-  const handleBulkMoveToGroup = useCallback(async (groupName: string) => {
+  const handleBulkMoveToGroupWrapper = useCallback(async (groupName: string) => {
     if (selectedTabIds.size === 0) return;
-    
-    try {
-      await assignMultipleTabsToGroup([...selectedTabIds], groupName);
-      setSelectedTabIds(new Set());
-      setIsSelectionMode(false);
-      await loadTabs();
-    } catch (error) {
-      console.error('一括グループ移動に失敗:', error);
-    }
-  }, [selectedTabIds, loadTabs]);
+    await bulkMoveTabsToGroup([...selectedTabIds], groupName);
+    setSelectedTabIds(new Set());
+    setIsSelectionMode(false);
+  }, [selectedTabIds, bulkMoveTabsToGroup, setSelectedTabIds, setIsSelectionMode]);
 
-  // 一括でグループから外す
-  const handleBulkRemoveFromGroup = useCallback(async () => {
+  const handleBulkRemoveFromGroupWrapper = useCallback(async () => {
     if (selectedTabIds.size === 0) return;
-    
-    try {
-      await removeMultipleTabsFromGroup([...selectedTabIds]);
-      setSelectedTabIds(new Set());
-      setIsSelectionMode(false);
-      await loadTabs();
-    } catch (error) {
-      console.error('一括グループ解除に失敗:', error);
-    }
-  }, [selectedTabIds, loadTabs]);
+    await bulkRemoveTabsFromGroup([...selectedTabIds]);
+    setSelectedTabIds(new Set());
+    setIsSelectionMode(false);
+  }, [selectedTabIds, bulkRemoveTabsFromGroup, setSelectedTabIds, setIsSelectionMode]);
 
-  // グループ内タブを一括選択
   const handleSelectGroup = useCallback((tabIds: string[]) => {
-    setSelectedTabIds(prev => {
-      const next = new Set(prev);
-      tabIds.forEach(id => next.add(id));
-      return next;
-    });
-  }, []);
+      setSelectedTabIds(prev => {
+          const next = new Set(prev);
+          tabIds.forEach(id => next.add(id));
+          return next;
+      });
+  }, [setSelectedTabIds]);
 
-  // グループ内タブを一括解除
   const handleDeselectGroup = useCallback((tabIds: string[]) => {
-    setSelectedTabIds(prev => {
-      const next = new Set(prev);
-      tabIds.forEach(id => next.delete(id));
-      return next;
-    });
-  }, []);
+      setSelectedTabIds(prev => {
+          const next = new Set(prev);
+          tabIds.forEach(id => next.delete(id));
+          return next;
+      });
+  }, [setSelectedTabIds]);
 
-  // グループフィルタの変更
-  const handleGroupFilterChange = useCallback((groupName: string, pattern: string) => {
-    setGroupFilters(prev => ({
-      ...prev,
-      [groupName]: pattern,
-    }));
-  }, []);
-
-  // すべてのタブを開く（常に確認ダイアログを表示）
+  // Global Actions
   const handleOpenAll = useCallback(() => {
     const count = filteredTabs.length;
     setDialog({
@@ -612,87 +422,26 @@ export function App() {
     });
   }, [filteredTabs, openTabsWithRestoreMode, t]);
 
-  // 全削除
-  const handleDeleteAll = useCallback(() => {
+  const handleDeleteAllConfirm = useCallback(() => {
     setDialog({
       isOpen: true,
       title: t('tabManager.confirmDialog.deleteAllTitle'),
       message: t('tabManager.confirmDialog.deleteAllMessage', { count: allTabs.length }),
       onConfirm: async () => {
-        await deleteAllTabs();
-        await loadTabs();
+        await deleteAll();
         setDialog(d => ({ ...d, isOpen: false }));
       },
     });
-  }, [allTabs.length, loadTabs, t]);
+  }, [allTabs.length, deleteAll, t]);
 
-  // ダイアログを閉じる
   const handleCancelDialog = useCallback(() => {
     setDialog(d => ({ ...d, isOpen: false }));
   }, []);
 
-  // 折りたたみ状態の読み込み
-  const loadCollapsedGroups = useCallback(async () => {
-    try {
-      const result = await browser.storage.local.get('collapsedGroups');
-      if (result.collapsedGroups) {
-        setCollapsedGroups(result.collapsedGroups as Record<string, boolean>);
-      }
-    } catch (error) {
-      console.error('折りたたみ状態の読み込みに失敗:', error);
-    }
+  const handleGroupFilterChange = useCallback((groupName: string, pattern: string) => {
+    setGroupFilters(prev => ({ ...prev, [groupName]: pattern }));
   }, []);
-
-  // 折りたたみ状態の保存
-  const saveCollapsedGroups = useCallback(async (newState: Record<string, boolean>) => {
-    try {
-      await browser.storage.local.set({ collapsedGroups: newState });
-    } catch (error) {
-      console.error('折りたたみ状態の保存に失敗:', error);
-    }
-  }, []);
-
-  // 折りたたみトグル
-  const handleToggleCollapse = useCallback((groupName: string) => {
-    setCollapsedGroups(prev => {
-      const newState = {
-        ...prev,
-        [groupName]: !prev[groupName],
-      };
-      saveCollapsedGroups(newState);
-      return newState;
-    });
-  }, [saveCollapsedGroups]);
-
-  // 初期読み込み
-  useEffect(() => {
-    loadTabs();
-    loadSettings();
-    loadCollapsedGroups();
-  }, [loadTabs, loadSettings, loadCollapsedGroups]);
-
-  // Background Scriptからの変更通知を受信
-  useEffect(() => {
-    const listener = (message: unknown) => {
-      const msg = message as { type?: string };
-      if (msg.type === 'tabs-changed') {
-        loadTabs();
-      }
-      if (msg.type === 'settings-changed') {
-        loadSettings();
-      }
-    };
-    browser.runtime.onMessage.addListener(listener);
-    return () => browser.runtime.onMessage.removeListener(listener);
-  }, [loadTabs, loadSettings]);
-
-  // 検索クエリ変更時に再フィルタリング
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      handleSearch(searchQuery);
-    }
-  }, [allTabs]); // allTabsが変わったときに再検索
-
+  
   return (
     <div className="container">
       <Header
@@ -701,7 +450,7 @@ export function App() {
         searchQuery={searchQuery}
         onSearchChange={handleSearch}
         searchOptions={searchOptions}
-        onSearchOptionsChange={handleSearchOptionsChange}
+        onSearchOptionsChange={onSearchOptionsChange}
         regexError={regexError}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
@@ -709,7 +458,7 @@ export function App() {
         displayDensity={displayDensity ?? 'normal'}
         onViewModeChange={setViewMode}
         onDisplayDensityChange={setDisplayDensity}
-        onDeleteAll={handleDeleteAll}
+        onDeleteAll={handleDeleteAllConfirm}
         onOpenAll={handleOpenAll}
         onLinkCheck={() => setIsLinkCheckOpen(true)}
         hasAnyTabs={allTabs.length > 0}
@@ -719,8 +468,8 @@ export function App() {
         onSelectAll={handleSelectAll}
         onDeselectAll={handleDeselectAll}
         onBulkDelete={handleBulkDelete}
-        onBulkMoveToGroup={handleBulkMoveToGroup}
-        onBulkRemoveFromGroup={handleBulkRemoveFromGroup}
+        onBulkMoveToGroup={handleBulkMoveToGroupWrapper}
+        onBulkRemoveFromGroup={handleBulkRemoveFromGroupWrapper}
         onBulkOpenAsTabGroup={platform.supportsTabGroups ? handleBulkOpenAsTabGroup : undefined}
         customGroups={customGroups}
         onCreateGroup={handleRequestCreateGroup}
@@ -751,10 +500,10 @@ export function App() {
             onOpenGroupAsTabGroup={platform.supportsTabGroups ? handleOpenGroupAsTabGroup : undefined}
             onOpenTab={handleOpenTab}
             onMiddleClickTab={handleMiddleClickTab}
-            onRenameGroup={handleRenameGroup}
+            onRenameGroup={renameGroup}
             onRequestRename={handleRequestRename}
-            onMoveToGroup={handleMoveToGroup}
-            onRemoveFromGroup={handleRemoveFromGroup}
+            onMoveToGroup={moveTabToGroup}
+            onRemoveFromGroup={removeTabFromGroup}
             onRequestMoveToNewGroup={handleRequestMoveToNewGroup}
             isSelectionMode={isSelectionMode}
             selectedTabIds={selectedTabIds}
@@ -797,20 +546,23 @@ export function App() {
         onClose={() => setIsLinkCheckOpen(false)}
         onTabsDeleted={loadTabs}
       />
-
-      {/* リネーム用PromptDialog */}
+      
+      {/* リネームダイアログ (PromptDialog) */}
       <PromptDialog
         isOpen={renameDialog.isOpen}
-        title={t('tabManager.customGroup.renameDialogTitle')}
+        title={t('tabManager.promptDialog.renameGroupTitle')}
+        message={t('tabManager.promptDialog.renameGroupMessage')}
         defaultValue={renameDialog.currentName}
         onConfirm={handleConfirmRename}
         onCancel={() => setRenameDialog({ isOpen: false, currentName: '' })}
       />
 
-      {/* 新規グループ作成用PromptDialog */}
+      {/* 新規グループダイアログ (PromptDialog) */}
       <PromptDialog
         isOpen={createGroupDialog.isOpen}
-        title={t('tabManager.customGroup.createDialogTitle')}
+        title={t('tabManager.promptDialog.createGroupTitle')}
+        message={t('tabManager.promptDialog.createGroupMessage')}
+        placeholder={t('tabManager.promptDialog.createGroupPlaceholder')}
         onConfirm={handleConfirmCreateGroup}
         onCancel={() => setCreateGroupDialog({ isOpen: false })}
       />

@@ -70,9 +70,11 @@ function copyStaticFiles(distDir, browser) {
     // 共通CSSをコピー
     const commonDir = join(distDir, 'common');
     ensureDir(commonDir);
-    if (existsSync('src/common/common.css')) {
-        copyFileSync('src/common/common.css', join(commonDir, 'common.css'));
-    }
+    ['common.css', 'variables.css', 'base.css'].forEach(file => {
+        if (existsSync(`src/common/${file}`)) {
+            copyFileSync(`src/common/${file}`, join(commonDir, file));
+        }
+    });
 
     // アイコン
     const iconsDir = join(distDir, 'icons');

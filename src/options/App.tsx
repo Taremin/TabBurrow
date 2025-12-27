@@ -18,6 +18,8 @@ import { LinkCheckSettings } from './components/LinkCheckSettings.js';
 import { BackupSettings } from './components/BackupSettings.js';
 import { DataManagement } from './components/DataManagement.js';
 import { CustomGroupSettings } from './components/CustomGroupSettings.js';
+import { Dialog } from '../common/Dialog.js';
+import { Layout } from '../common/Layout.js';
 import { AlertTriangle, Folder } from 'lucide-react';
 
 export function App() {
@@ -82,193 +84,191 @@ export function App() {
   };
 
   return (
-    <div className="container">
-      {/* ヘッダー */}
-      <header className="header">
-        <div className="header-left">
-          <h1 className="logo">
-            <span className="logo-icon">⚙️</span>
-            <span>{t('settings.headerTitle')}</span>
-          </h1>
-        </div>
-        <div className="header-right">
-          <a href="tabs.html" className="btn btn-secondary" onClick={handleTabManagerClick}>
-            <span>📋</span>
-            <span>{t('settings.tabManagerLink')}</span>
-          </a>
-        </div>
-      </header>
-
-      {/* メインコンテンツ */}
-      <main className="main">
-        <form id="settingsForm" className="settings-form" onSubmit={handleSubmit}>
-          {/* 言語設定 */}
-          <SettingsSection
-            icon="🌐"
-            title={t('settings.language.title')}
-            description={t('settings.language.description')}
-          >
-            <LanguageSettings
-              value={settings.locale}
-              savedValue={savedSettings.locale}
-              onChange={(value) => updateSetting('locale', value)}
-            />
-          </SettingsSection>
-
-          {/* 外観設定 */}
-          <SettingsSection
-            icon="🎨"
-            title={t('settings.appearance.title')}
-            description={t('settings.appearance.description')}
-          >
-            <AppearanceSettings
-              value={settings.theme}
-              savedValue={savedSettings.theme}
-              onChange={(value) => updateSetting('theme', value)}
-            />
-          </SettingsSection>
-
-          {/* デフォルト表示モード設定 */}
-          <SettingsSection
-            icon="🗒️"
-            title={t('settings.viewMode.title')}
-            description={t('settings.viewMode.description')}
-          >
-            <ViewModeSettings
-              viewMode={settings.defaultViewMode}
-              displayDensity={settings.defaultDisplayDensity}
-              savedViewMode={savedSettings.defaultViewMode}
-              savedDisplayDensity={savedSettings.defaultDisplayDensity}
-              onViewModeChange={(value) => updateSetting('defaultViewMode', value)}
-              onDisplayDensityChange={(value) => updateSetting('defaultDisplayDensity', value)}
-            />
-          </SettingsSection>
-
-          {/* ソート順設定 */}
-          <SettingsSection
-            icon="🔢"
-            title={t('settings.sort.title')}
-            description={t('settings.sort.description')}
-          >
-            <SortSettings
-              groupSort={settings.groupSort}
-              itemSort={settings.itemSort}
-              savedGroupSort={savedSettings.groupSort}
-              savedItemSort={savedSettings.itemSort}
-              onGroupSortChange={(value) => updateSetting('groupSort', value)}
-              onItemSortChange={(value) => updateSetting('itemSort', value)}
-            />
-          </SettingsSection>
-
-          {/* アイコンクリック設定 */}
-          <SettingsSection
-            icon="👁"
-            title={t('settings.iconClick.title')}
-            description={t('settings.iconClick.description')}
-          >
-            <IconClickSettings
-              applyRules={settings.iconClickApplyRules}
-              pinnedAction={settings.iconClickPinnedAction}
-              savedApplyRules={savedSettings.iconClickApplyRules}
-              savedPinnedAction={savedSettings.iconClickPinnedAction}
-              onApplyRulesChange={(value) => updateSetting('iconClickApplyRules', value)}
-              onPinnedActionChange={(value) => updateSetting('iconClickPinnedAction', value)}
-            />
-          </SettingsSection>
-
-          {/* 自動収納設定 */}
-          <SettingsSection
-            icon="⏰"
-            title={t('settings.autoClose.title')}
-            description={t('settings.autoClose.description')}
-          >
-            <AutoCloseSettings
-              enabled={settings.autoCloseEnabled}
-              seconds={settings.autoCloseSeconds}
-              rules={settings.autoCloseRules}
-              ruleOrder={settings.autoCloseRuleOrder}
-              savedEnabled={savedSettings.autoCloseEnabled}
-              savedSeconds={savedSettings.autoCloseSeconds}
-              onEnabledChange={(value) => updateSetting('autoCloseEnabled', value)}
-              onSecondsChange={(value) => updateSetting('autoCloseSeconds', value)}
-              onRulesChange={(value) => updateSetting('autoCloseRules', value)}
-              onRuleOrderChange={(value) => updateSetting('autoCloseRuleOrder', value)}
-            />
-          </SettingsSection>
-
-          {/* タブ復元設定 */}
-          <SettingsSection
-            icon="📂"
-            title={t('settings.restore.title')}
-            description={t('settings.restore.description')}
-          >
-            <RestoreSettings
-              mode={settings.restoreMode}
-              intervalMs={settings.restoreIntervalMs}
-              savedMode={savedSettings.restoreMode}
-              savedIntervalMs={savedSettings.restoreIntervalMs}
-              onModeChange={(value) => updateSetting('restoreMode', value)}
-              onIntervalChange={(value) => updateSetting('restoreIntervalMs', value)}
-            />
-          </SettingsSection>
-
-          {/* リンクチェック設定 */}
-          <SettingsSection
-            icon="🔗"
-            title={t('linkCheck.settings.title')}
-            description={t('linkCheck.settings.rulesHint')}
-          >
-            <LinkCheckSettings
-              rules={settings.linkCheckRules}
-              timeoutMs={settings.linkCheckTimeoutMs}
-              concurrency={settings.linkCheckConcurrency}
-              domainConcurrency={settings.linkCheckDomainConcurrency}
-              domainDelayMs={settings.linkCheckDomainDelayMs}
-              onRulesChange={(value) => updateSetting('linkCheckRules', value)}
-              onTimeoutChange={(value) => updateSetting('linkCheckTimeoutMs', value)}
-              onConcurrencyChange={(value) => updateSetting('linkCheckConcurrency', value)}
-              onDomainConcurrencyChange={(value) => updateSetting('linkCheckDomainConcurrency', value)}
-              onDomainDelayChange={(value) => updateSetting('linkCheckDomainDelayMs', value)}
-            />
-          </SettingsSection>
-
-          {/* バックアップ設定 */}
-          <SettingsSection
-            icon="📀"
-            title={t('settings.backup.title')}
-            description={t('settings.backup.description')}
-          >
-            <BackupSettings
-              enabled={settings.autoBackupEnabled}
-              intervalPreset={settings.autoBackupIntervalPreset}
-              intervalMinutes={settings.autoBackupIntervalMinutes}
-              keepCount={settings.autoBackupKeepCount}
-              savedEnabled={savedSettings.autoBackupEnabled}
-              savedIntervalPreset={savedSettings.autoBackupIntervalPreset}
-              savedIntervalMinutes={savedSettings.autoBackupIntervalMinutes}
-              savedKeepCount={savedSettings.autoBackupKeepCount}
-              onEnabledChange={(value) => updateSetting('autoBackupEnabled', value)}
-              onIntervalPresetChange={(value) => updateSetting('autoBackupIntervalPreset', value)}
-              onIntervalMinutesChange={(value) => updateSetting('autoBackupIntervalMinutes', value)}
-              onKeepCountChange={(value) => updateSetting('autoBackupKeepCount', value)}
-            />
-          </SettingsSection>
-
-          {/* 保存ボタンはフッターに移動 */}
-        </form>
-
-        {/* カスタムグループ設定 */}
+    <Layout
+      headerContent={
+        <>
+          <div className="header-left">
+            <h1 className="logo">
+              <span className="logo-icon">⚙️</span>
+              <span>{t('settings.headerTitle')}</span>
+            </h1>
+          </div>
+          <div className="header-right">
+            <a href="tabs.html" className="btn btn-secondary" onClick={handleTabManagerClick}>
+              <span>📋</span>
+              <span>{t('settings.tabManagerLink')}</span>
+            </a>
+          </div>
+        </>
+      }
+    >
+      <form id="settingsForm" className="settings-form" onSubmit={handleSubmit}>
+        {/* 言語設定 */}
         <SettingsSection
-          icon={<Folder size={20} />}
-          title={t('settings.customGroups.title')}
-          description={t('settings.customGroups.description')}
+          icon="🌐"
+          title={t('settings.language.title')}
+          description={t('settings.language.description')}
         >
-          <CustomGroupSettings />
+          <LanguageSettings
+            value={settings.locale}
+            savedValue={savedSettings.locale}
+            onChange={(value) => updateSetting('locale', value)}
+          />
         </SettingsSection>
 
-        {/* データ管理セクション */}
-        <DataManagement onSettingsImported={reload} />
-      </main>
+        {/* 外観設定 */}
+        <SettingsSection
+          icon="🎨"
+          title={t('settings.appearance.title')}
+          description={t('settings.appearance.description')}
+        >
+          <AppearanceSettings
+            value={settings.theme}
+            savedValue={savedSettings.theme}
+            onChange={(value) => updateSetting('theme', value)}
+          />
+        </SettingsSection>
+
+        {/* デフォルト表示モード設定 */}
+        <SettingsSection
+          icon="🗒️"
+          title={t('settings.viewMode.title')}
+          description={t('settings.viewMode.description')}
+        >
+          <ViewModeSettings
+            viewMode={settings.defaultViewMode}
+            displayDensity={settings.defaultDisplayDensity}
+            savedViewMode={savedSettings.defaultViewMode}
+            savedDisplayDensity={savedSettings.defaultDisplayDensity}
+            onViewModeChange={(value) => updateSetting('defaultViewMode', value)}
+            onDisplayDensityChange={(value) => updateSetting('defaultDisplayDensity', value)}
+          />
+        </SettingsSection>
+
+        {/* ソート順設定 */}
+        <SettingsSection
+          icon="🔢"
+          title={t('settings.sort.title')}
+          description={t('settings.sort.description')}
+        >
+          <SortSettings
+            groupSort={settings.groupSort}
+            itemSort={settings.itemSort}
+            savedGroupSort={savedSettings.groupSort}
+            savedItemSort={savedSettings.itemSort}
+            onGroupSortChange={(value) => updateSetting('groupSort', value)}
+            onItemSortChange={(value) => updateSetting('itemSort', value)}
+          />
+        </SettingsSection>
+
+        {/* アイコンクリック設定 */}
+        <SettingsSection
+          icon="👁"
+          title={t('settings.iconClick.title')}
+          description={t('settings.iconClick.description')}
+        >
+          <IconClickSettings
+            applyRules={settings.iconClickApplyRules}
+            pinnedAction={settings.iconClickPinnedAction}
+            savedApplyRules={savedSettings.iconClickApplyRules}
+            savedPinnedAction={savedSettings.iconClickPinnedAction}
+            onApplyRulesChange={(value) => updateSetting('iconClickApplyRules', value)}
+            onPinnedActionChange={(value) => updateSetting('iconClickPinnedAction', value)}
+          />
+        </SettingsSection>
+
+        {/* 自動収納設定 */}
+        <SettingsSection
+          icon="⏰"
+          title={t('settings.autoClose.title')}
+          description={t('settings.autoClose.description')}
+        >
+          <AutoCloseSettings
+            enabled={settings.autoCloseEnabled}
+            seconds={settings.autoCloseSeconds}
+            rules={settings.autoCloseRules}
+            ruleOrder={settings.autoCloseRuleOrder}
+            savedEnabled={savedSettings.autoCloseEnabled}
+            savedSeconds={savedSettings.autoCloseSeconds}
+            onEnabledChange={(value) => updateSetting('autoCloseEnabled', value)}
+            onSecondsChange={(value) => updateSetting('autoCloseSeconds', value)}
+            onRulesChange={(value) => updateSetting('autoCloseRules', value)}
+            onRuleOrderChange={(value) => updateSetting('autoCloseRuleOrder', value)}
+          />
+        </SettingsSection>
+
+        {/* タブ復元設定 */}
+        <SettingsSection
+          icon="📂"
+          title={t('settings.restore.title')}
+          description={t('settings.restore.description')}
+        >
+          <RestoreSettings
+            mode={settings.restoreMode}
+            intervalMs={settings.restoreIntervalMs}
+            savedMode={savedSettings.restoreMode}
+            savedIntervalMs={savedSettings.restoreIntervalMs}
+            onModeChange={(value) => updateSetting('restoreMode', value)}
+            onIntervalChange={(value) => updateSetting('restoreIntervalMs', value)}
+          />
+        </SettingsSection>
+
+        {/* リンクチェック設定 */}
+        <SettingsSection
+          icon="🔗"
+          title={t('linkCheck.settings.title')}
+          description={t('linkCheck.settings.rulesHint')}
+        >
+          <LinkCheckSettings
+            rules={settings.linkCheckRules}
+            timeoutMs={settings.linkCheckTimeoutMs}
+            concurrency={settings.linkCheckConcurrency}
+            domainConcurrency={settings.linkCheckDomainConcurrency}
+            domainDelayMs={settings.linkCheckDomainDelayMs}
+            onRulesChange={(value) => updateSetting('linkCheckRules', value)}
+            onTimeoutChange={(value) => updateSetting('linkCheckTimeoutMs', value)}
+            onConcurrencyChange={(value) => updateSetting('linkCheckConcurrency', value)}
+            onDomainConcurrencyChange={(value) => updateSetting('linkCheckDomainConcurrency', value)}
+            onDomainDelayChange={(value) => updateSetting('linkCheckDomainDelayMs', value)}
+          />
+        </SettingsSection>
+
+        {/* バックアップ設定 */}
+        <SettingsSection
+          icon="📀"
+          title={t('settings.backup.title')}
+          description={t('settings.backup.description')}
+        >
+          <BackupSettings
+            enabled={settings.autoBackupEnabled}
+            intervalPreset={settings.autoBackupIntervalPreset}
+            intervalMinutes={settings.autoBackupIntervalMinutes}
+            keepCount={settings.autoBackupKeepCount}
+            savedEnabled={savedSettings.autoBackupEnabled}
+            savedIntervalPreset={savedSettings.autoBackupIntervalPreset}
+            savedIntervalMinutes={savedSettings.autoBackupIntervalMinutes}
+            savedKeepCount={savedSettings.autoBackupKeepCount}
+            onEnabledChange={(value) => updateSetting('autoBackupEnabled', value)}
+            onIntervalPresetChange={(value) => updateSetting('autoBackupIntervalPreset', value)}
+            onIntervalMinutesChange={(value) => updateSetting('autoBackupIntervalMinutes', value)}
+            onKeepCountChange={(value) => updateSetting('autoBackupKeepCount', value)}
+          />
+        </SettingsSection>
+
+        {/* 保存ボタンはフッターに移動 */}
+      </form>
+
+      {/* カスタムグループ設定 */}
+      <SettingsSection
+        icon={<Folder size={20} />}
+        title={t('settings.customGroups.title')}
+        description={t('settings.customGroups.description')}
+      >
+        <CustomGroupSettings />
+      </SettingsSection>
+
+      {/* データ管理セクション */}
+      <DataManagement onSettingsImported={reload} />
 
       {/* フッター (Fixed) */}
       <div className="fixed-footer">
@@ -295,36 +295,28 @@ export function App() {
       </div>
 
       {/* 未保存警告ダイアログ */}
-      {showUnsavedWarning && (
-        <div 
-          className="dialog-overlay" 
-          style={{ display: 'flex' }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowUnsavedWarning(false);
-            }
-          }}
-        >
-          <div className="dialog" style={{ maxWidth: '520px' }}>
-            <div className="dialog-header">
-              <span className="dialog-icon"><AlertTriangle className="alert-icon-warning" /></span>
-              <h3 className="dialog-title">{t('settings.unsavedWarning.title')}</h3>
-            </div>
-            <p className="dialog-message">{t('settings.unsavedWarning.message')}</p>
-            <div className="dialog-actions">
-              <button className="btn btn-secondary" onClick={() => setShowUnsavedWarning(false)}>
-                {t('common.cancel')}
-              </button>
-              <button className="btn btn-danger" onClick={handleLeaveWithoutSaving}>
-                {t('settings.unsavedWarning.leaveWithoutSaving')}
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveAndLeave}>
-                {t('settings.unsavedWarning.saveAndLeave')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Dialog
+        isOpen={showUnsavedWarning}
+        onClose={() => setShowUnsavedWarning(false)}
+        title={t('settings.unsavedWarning.title')}
+        icon={<AlertTriangle className="alert-icon-warning" />}
+        width={520}
+        actions={
+          <>
+            <button className="btn btn-secondary" onClick={() => setShowUnsavedWarning(false)}>
+              {t('common.cancel')}
+            </button>
+            <button className="btn btn-danger" onClick={handleLeaveWithoutSaving}>
+              {t('settings.unsavedWarning.leaveWithoutSaving')}
+            </button>
+            <button className="btn btn-primary" onClick={handleSaveAndLeave}>
+              {t('settings.unsavedWarning.saveAndLeave')}
+            </button>
+          </>
+        }
+      >
+        {t('settings.unsavedWarning.message')}
+      </Dialog>
+    </Layout>
   );
 }
