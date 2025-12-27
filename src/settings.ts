@@ -124,6 +124,7 @@ export interface Settings {
   defaultViewMode: ViewMode;                 // デフォルトのグループ化モード
   defaultDisplayDensity: DisplayDensity;     // デフォルトの表示密度
   autoBackupKeepCount: number;               // 保持する世代数（0=無効、-1=無制限）
+  domainGroupAliases: Record<string, string>; // ドメイングループの表示名エイリアス
 }
 
 // デフォルト設定
@@ -160,6 +161,7 @@ const DEFAULT_SETTINGS: Settings = {
   defaultViewMode: 'grouped',        // デフォルトはグループ表示
   defaultDisplayDensity: 'normal',   // デフォルトは通常表示
   autoBackupKeepCount: 5,            // デフォルト5世代
+  domainGroupAliases: {},            // エイリアスなし
 };
 
 const STORAGE_KEY = 'settings';

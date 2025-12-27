@@ -16,7 +16,7 @@ interface GroupHeaderProps {
   onOpenGroupAsTabGroup?: (name: string) => void;
   onRenameGroup?: (oldName: string, newName: string) => void;
   // リネームリクエスト（親でPromptDialogを表示）
-  onRequestRename?: (currentName: string) => void;
+  onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
   // グループ内フィルタ
   filterPattern?: string;
   onFilterChange?: (pattern: string) => void;
@@ -31,6 +31,7 @@ interface GroupHeaderProps {
   // 折りたたみ状態
   isCollapsed?: boolean;
   onToggleCollapse?: (groupName: string) => void;
+  displayName?: string;
 }
 
 /**
@@ -56,6 +57,7 @@ export const GroupHeader = memo(function GroupHeader({
   onDeselectGroup,
   isCollapsed = false,
   onToggleCollapse,
+  displayName,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -107,9 +109,9 @@ export const GroupHeader = memo(function GroupHeader({
   const handleRename = useCallback(() => {
     // 親コンポーネントにリネームリクエストを通知（PromptDialogを表示させる）
     if (onRequestRename) {
-      onRequestRename(name);
+      onRequestRename(name, groupType);
     }
-  }, [name, onRequestRename]);
+  }, [name, groupType, onRequestRename]);
 
   const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (onFilterChange) {
@@ -150,6 +152,8 @@ export const GroupHeader = memo(function GroupHeader({
     }
   }, [name, onToggleCollapse]);
 
+
+
   return (
     <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
       <div 
@@ -178,7 +182,7 @@ export const GroupHeader = memo(function GroupHeader({
           <ChevronDown size={16} />
         </span>
         <span className="group-icon">{isCustomGroup ? <Bookmark size={16} /> : <Folder size={16} />}</span>
-        <span className="group-domain">{name}</span>
+        <span className="group-domain">{displayName || name}</span>
         <span className="group-count">({tabCount})</span>
       </div>
       <div className="group-actions">
@@ -211,7 +215,7 @@ export const GroupHeader = memo(function GroupHeader({
             </button>
           </>
         )}
-        {isCustomGroup && onRenameGroup && (
+        {onRequestRename && (
           <button 
             className="group-edit" 
             title={t('tabManager.customGroup.edit')}

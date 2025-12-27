@@ -219,6 +219,23 @@
             "createDialogTitle": "新規グループ名を入力",
             "duplicateError": "同じ名前のグループが既に存在します",
             "emptyNameError": "グループ名を入力してください"
+        },
+        "domainGroups": {
+            "title": "ドメイングループ設定",
+            "description": "ドメイン名の表示エイリアスを管理します。",
+            "empty": "設定されているエイリアスはありません。",
+            "addAlias": "エイリアスを追加",
+            "editAlias": "エイリアスを編集",
+            "deleteAlias": "エイリアスを削除",
+            "domainPlaceholder": "ドメイン名 (例: example.com)",
+            "aliasPlaceholder": "表示する名前",
+            "createDialogTitle": "エイリアスの追加",
+            "renameDialogTitle": "エイリアスの編集",
+            "deleteConfirmTitle": "エイリアスの削除",
+            "deleteConfirmMessage": "「{domain}」のエイリアス設定を削除しますか？",
+            "emptyDomainError": "ドメイン名を入力してください",
+            "emptyAliasError": "表示名を入力してください",
+            "duplicateError": "そのドメインのエイリアスは既に存在します"
         }
     },
     "tabManager": {
@@ -285,6 +302,13 @@
             "openAllTitle": "すべてのタブを開く",
             "openAllMessage": "{count} 個のタブを開きますか？",
             "openAllConfirm": "開く"
+        },
+        "promptDialog": {
+            "renameGroupTitle": "グループ名の変更",
+            "renameGroupMessage": "新しいグループ名を入力してください",
+            "createGroupTitle": "新規グループ作成",
+            "createGroupMessage": "グループ名を入力してください",
+            "createGroupPlaceholder": "グループ名"
         },
         "dateFilter": {
             "toggleButton": "日時フィルタ",

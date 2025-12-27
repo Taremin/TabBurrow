@@ -18,9 +18,10 @@ import { LinkCheckSettings } from './components/LinkCheckSettings.js';
 import { BackupSettings } from './components/BackupSettings.js';
 import { DataManagement } from './components/DataManagement.js';
 import { CustomGroupSettings } from './components/CustomGroupSettings.js';
+import { DomainGroupSettings } from './components/DomainGroupSettings.js';
 import { Dialog } from '../common/Dialog.js';
 import { Layout } from '../common/Layout.js';
-import { AlertTriangle, Folder } from 'lucide-react';
+import { AlertTriangle, Folder, Tag } from 'lucide-react';
 
 export function App() {
   const { t } = useTranslation();
@@ -257,6 +258,17 @@ export function App() {
 
         {/* 保存ボタンはフッターに移動 */}
       </form>
+
+      <SettingsSection
+        icon={<Tag size={20} />} // Lucide icon import needed? App already imports alert/Folder. Need Tag.
+        title={t('settings.domainGroups.title')}
+        description={t('settings.domainGroups.description')}
+      >
+        <DomainGroupSettings
+          aliases={settings.domainGroupAliases || {}}
+          onAliasesChange={(newAliases) => updateSetting('domainGroupAliases', newAliases)}
+        />
+      </SettingsSection>
 
       {/* カスタムグループ設定 */}
       <SettingsSection

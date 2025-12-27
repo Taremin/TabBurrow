@@ -23,7 +23,8 @@ interface TabListProps {
   onOpenTab: (url: string) => void;
   onMiddleClickTab?: (url: string) => void; // ホイールクリックでタブを開く
   onRenameGroup?: (oldName: string, newName: string) => void;
-  onRequestRename?: (currentName: string) => void;
+  onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
+  domainGroupAliases?: Record<string, string>;
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
@@ -185,6 +186,7 @@ export function TabList({
   onGroupFilterChange,
   collapsedGroups,
   onToggleCollapse,
+  domainGroupAliases = {},
 }: TabListProps) {
   const isCompact = displayDensity === 'compact';
   // グループ化とソート（フィルタ適用）
@@ -256,9 +258,10 @@ export function TabList({
         isCompact={isCompact}
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
+        displayName={group.groupType === 'domain' ? domainGroupAliases[group.name] : undefined}
       />
     );
-  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse]);
+  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases]);
 
   const itemContent = useCallback((index: number) => {
     const tab = flatTabs[index];

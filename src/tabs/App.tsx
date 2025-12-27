@@ -7,7 +7,7 @@ import browser from '../browserApi.js';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import { platform } from '../platform.js';
 import type { Tabs } from 'webextension-polyfill';
-import { getSettings, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity } from '../settings.js';
+import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity } from '../settings.js';
 import type { GroupFilter, SearchOptions } from './types.js';
 import { DEFAULT_SEARCH_OPTIONS } from './types.js';
 import { Header } from './Header.js';
@@ -108,6 +108,7 @@ export function App() {
   const [restoreIntervalMs, setRestoreIntervalMs] = useState(100);
   const [viewMode, setViewMode] = useState<ViewMode | undefined>(undefined);
   const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined);
+  const [domainGroupAliases, setDomainGroupAliases] = useState<Record<string, string>>({});
 
   // UI State
   const [dialog, setDialog] = useState<DialogState>({
@@ -120,7 +121,7 @@ export function App() {
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
-  const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string }>({ isOpen: false, currentName: '' });
+  const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string; groupType?: 'domain' | 'custom' }>({ isOpen: false, currentName: '' });
   const [createGroupDialog, setCreateGroupDialog] = useState<{
     isOpen: boolean;
     tabIdToMove?: string;
@@ -140,6 +141,7 @@ export function App() {
       setRestoreIntervalMs(settings.restoreIntervalMs);
       setViewMode(prev => prev === undefined ? settings.defaultViewMode : prev);
       setDisplayDensity(prev => prev === undefined ? settings.defaultDisplayDensity : prev);
+      setDomainGroupAliases(settings.domainGroupAliases || {});
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -301,16 +303,28 @@ export function App() {
   }, [selectedTabIds, filteredTabs, setSelectedTabIds]);
 
   // Rename Logic
-  const handleRequestRename = useCallback((currentName: string) => {
-    setRenameDialog({ isOpen: true, currentName });
+  const handleRequestRename = useCallback((currentName: string, groupType: 'domain' | 'custom') => {
+    setRenameDialog({ isOpen: true, currentName, groupType });
   }, []);
 
   const handleConfirmRename = useCallback(async (newName: string) => {
     setRenameDialog({ isOpen: false, currentName: '' });
     if (renameDialog.currentName && newName !== renameDialog.currentName) {
-      await renameGroup(renameDialog.currentName, newName);
+      if (renameDialog.groupType === 'custom') {
+        await renameGroup(renameDialog.currentName, newName);
+      } else if (renameDialog.groupType === 'domain') {
+        try {
+          const settings = await getSettings();
+          const newAliases = { ...settings.domainGroupAliases, [renameDialog.currentName]: newName };
+          await saveSettings({ ...settings, domainGroupAliases: newAliases });
+          notifySettingsChanged();
+          setDomainGroupAliases(newAliases);
+        } catch (error) {
+          console.error('エイリアスの保存に失敗:', error);
+        }
+      }
     }
-  }, [renameDialog.currentName, renameGroup]);
+  }, [renameDialog, renameGroup]);
 
   // Create/Move Group Logic
   const handleRequestCreateGroup = useCallback(() => {
@@ -514,6 +528,7 @@ export function App() {
             onGroupFilterChange={handleGroupFilterChange}
             collapsedGroups={collapsedGroups}
             onToggleCollapse={handleToggleCollapse}
+            domainGroupAliases={domainGroupAliases}
           />
         )}
 

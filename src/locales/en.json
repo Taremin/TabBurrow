@@ -219,6 +219,23 @@
             "createDialogTitle": "Enter new group name",
             "duplicateError": "A group with this name already exists",
             "emptyNameError": "Please enter a group name"
+        },
+        "domainGroups": {
+            "title": "Domain Alias Settings",
+            "description": "Manage display aliases for domain names.",
+            "empty": "No aliases configured.",
+            "addAlias": "Add Alias",
+            "editAlias": "Edit Alias",
+            "deleteAlias": "Delete Alias",
+            "domainPlaceholder": "Domain name (e.g. example.com)",
+            "aliasPlaceholder": "Display Name",
+            "createDialogTitle": "Add Alias",
+            "renameDialogTitle": "Edit Alias",
+            "deleteConfirmTitle": "Delete Alias",
+            "deleteConfirmMessage": "Delete alias for \"{domain}\"?",
+            "emptyDomainError": "Please enter a domain name",
+            "emptyAliasError": "Please enter a display name",
+            "duplicateError": "Alias for this domain already exists"
         }
     },
     "tabManager": {
@@ -285,6 +302,13 @@
             "openAllTitle": "Open All Tabs",
             "openAllMessage": "Open {count} tabs?",
             "openAllConfirm": "Open"
+        },
+        "promptDialog": {
+            "renameGroupTitle": "Rename Group",
+            "renameGroupMessage": "Enter new group name",
+            "createGroupTitle": "Create New Group",
+            "createGroupMessage": "Enter group name",
+            "createGroupPlaceholder": "Group Name"
         },
         "dateFilter": {
             "toggleButton": "Date Filter",
