@@ -1199,3 +1199,182 @@ test.describe('ホイールクリックでタブを開く機能', () => {
     expect(pagesAfter).toBe(pagesBefore + 2);
   });
 });
+
+test.describe('カスタムグループ作成機能', () => {
+  test('ヘッダーに「新規グループ作成」ボタンが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // グループ作成ボタンが表示されていることを確認
+    const createGroupButton = page.locator('[data-testid="create-group-button"]');
+    await expect(createGroupButton).toBeVisible();
+  });
+
+  test('新規グループ作成ボタンをクリックするとダイアログが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // グループ作成ボタンをクリック
+    const createGroupButton = page.locator('[data-testid="create-group-button"]');
+    await createGroupButton.click();
+    await page.waitForTimeout(300);
+    
+    // ダイアログが表示されることを確認
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // 入力欄が存在することを確認
+    const input = dialog.locator('input[type="text"]');
+    await expect(input).toBeVisible();
+  });
+
+  test('グループ名を入力して新規グループを作成できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/group-test',
+      title: 'Group Test Page',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // グループ作成ボタンをクリック
+    const createGroupButton = page.locator('[data-testid="create-group-button"]');
+    await createGroupButton.click();
+    await page.waitForTimeout(300);
+    
+    // ダイアログにグループ名を入力
+    const dialog = page.locator('.dialog');
+    const input = dialog.locator('input[type="text"]');
+    await input.fill('My Test Group');
+    
+    // OKボタンをクリック
+    const okButton = dialog.locator('button.btn-primary');
+    await okButton.click();
+    await page.waitForTimeout(500);
+    
+    // ダイアログが閉じることを確認
+    await expect(dialog).not.toBeVisible();
+  });
+
+  test('タブカードのメニューから新規グループを作成してタブを移動できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/move-test',
+      title: 'Move Test Page',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブカードのグループアクションボタンをクリック
+    const groupButton = page.locator('.tab-group-action').first();
+    await groupButton.click();
+    await page.waitForTimeout(300);
+    
+    // 新規グループ作成オプションをクリック
+    const createNewOption = page.locator('.group-menu-item-new');
+    await expect(createNewOption).toBeVisible();
+    await createNewOption.click();
+    await page.waitForTimeout(300);
+    
+    // ダイアログが表示されることを確認
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // グループ名を入力
+    const input = dialog.locator('input[type="text"]');
+    await input.fill('New Group From Tab');
+    
+    // OKボタンをクリック
+    const okButton = dialog.locator('button.btn-primary');
+    await okButton.click();
+    await page.waitForTimeout(500);
+    
+    // ダイアログが閉じてグループが作成されたことを確認
+    await expect(dialog).not.toBeVisible();
+    
+    // 作成したグループ名のヘッダーが表示されることを確認
+    const customGroupHeader = page.locator('.group-header').filter({ hasText: 'New Group From Tab' });
+    await expect(customGroupHeader).toBeVisible();
+  });
+
+  test('選択モードで新規グループに一括移動できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを複数追加
+    await createTestTabData(page, {
+      url: 'https://example.com/bulk-1',
+      title: 'Bulk Move Tab 1',
+    });
+    await createTestTabData(page, {
+      url: 'https://example.com/bulk-2',
+      title: 'Bulk Move Tab 2',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // 選択モードに切り替え
+    const selectionToggle = page.locator('[data-testid="selection-mode-toggle"]');
+    await selectionToggle.click();
+    await page.waitForTimeout(100);
+    
+    // 全選択
+    const selectAllButton = page.locator('button').filter({ hasText: /全選択|Select All/ });
+    await selectAllButton.click();
+    await page.waitForTimeout(100);
+    
+    // グループに移動メニューを開く
+    const moveToGroupButton = page.locator('.selection-group-menu button').first();
+    await moveToGroupButton.click();
+    await page.waitForTimeout(300);
+    
+    // 新規グループ作成オプションをクリック
+    const createNewOption = page.locator('.selection-group-item-new');
+    await expect(createNewOption).toBeVisible();
+    await createNewOption.click();
+    await page.waitForTimeout(300);
+    
+    // ダイアログが表示されることを確認
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // グループ名を入力
+    const input = dialog.locator('input[type="text"]');
+    await input.fill('Bulk Group');
+    
+    // OKボタンをクリック
+    const okButton = dialog.locator('button.btn-primary');
+    await okButton.click();
+    await page.waitForTimeout(500);
+    
+    // ダイアログが閉じることを確認
+    await expect(dialog).not.toBeVisible();
+    
+    // 選択モードが解除されることを確認
+    const selectionToolbar = page.locator('.selection-toolbar');
+    await expect(selectionToolbar).not.toBeVisible();
+  });
+});

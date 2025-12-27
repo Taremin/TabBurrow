@@ -298,7 +298,10 @@
             "rename": "Rename Group",
             "renameDialogTitle": "Enter group name",
             "deleteConfirmTitle": "Delete Custom Group",
-            "deleteConfirmMessage": "Delete group \"{name}\"? Tabs will be moved back to domain groups."
+            "deleteConfirmMessage": "Delete group \"{name}\"? Tabs will be moved back to domain groups.",
+            "createButton": "Create Group",
+            "createDialogTitle": "Enter new group name",
+            "createNew": "Create New Group..."
         },
         "selection": {
             "toggleButton": "Select",

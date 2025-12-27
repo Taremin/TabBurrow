@@ -26,6 +26,7 @@ interface TabListProps {
   onRequestRename?: (currentName: string) => void;
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string) => void;
+  onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
   // 選択モード関連
   isSelectionMode: boolean;
   selectedTabIds: Set<string>;
@@ -171,6 +172,7 @@ export function TabList({
   onRequestRename,
   onMoveToGroup,
   onRemoveFromGroup,
+  onRequestMoveToNewGroup,
   isSelectionMode,
   selectedTabIds,
   onToggleSelection,
@@ -242,7 +244,6 @@ export function TabList({
     );
   }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact]);
 
-  // タブカードのレンダリング
   const itemContent = useCallback((index: number) => {
     const tab = flatTabs[index];
     return (
@@ -255,13 +256,14 @@ export function TabList({
         onMiddleClick={onMiddleClickTab}
         onMoveToGroup={onMoveToGroup}
         onRemoveFromGroup={onRemoveFromGroup}
+        onRequestMoveToNewGroup={onRequestMoveToNewGroup}
         isSelectionMode={isSelectionMode}
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
         isCompact={isCompact}
       />
     );
-  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
+  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
 
   if (tabs.length === 0) {
     return null;
@@ -285,13 +287,14 @@ export function TabList({
         onMiddleClick={onMiddleClickTab}
         onMoveToGroup={onMoveToGroup}
         onRemoveFromGroup={onRemoveFromGroup}
+        onRequestMoveToNewGroup={onRequestMoveToNewGroup}
         isSelectionMode={isSelectionMode}
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
         isCompact={isCompact}
       />
     );
-  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
+  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
 
   return (
     <div className="tab-groups" style={{ height: 'calc(100vh - 180px)' }}>

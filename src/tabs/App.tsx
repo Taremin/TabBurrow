@@ -17,6 +17,7 @@ import {
   deleteCustomGroup,
   renameCustomGroup,
   getAllCustomGroups,
+  createCustomGroup,
   assignTabToCustomGroup,
   removeTabFromCustomGroup,
   getStorageUsage,
@@ -104,6 +105,13 @@ export function App() {
 
   // リネームダイアログ
   const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string }>({ isOpen: false, currentName: '' });
+
+  // 新規グループ作成ダイアログ
+  const [createGroupDialog, setCreateGroupDialog] = useState<{
+    isOpen: boolean;
+    tabIdToMove?: string; // 単一タブ移動時
+    bulkMove?: boolean; // 選択モードでの一括移動時
+  }>({ isOpen: false });
 
   // タブ数
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
@@ -407,6 +415,54 @@ export function App() {
     }
   }, [renameDialog.currentName, handleRenameGroup]);
 
+  // 新規グループ作成リクエスト（ヘッダーのボタンから）
+  const handleRequestCreateGroup = useCallback(() => {
+    setCreateGroupDialog({ isOpen: true });
+  }, []);
+
+  // タブを新規グループに移動するリクエスト（TabCardのメニューから）
+  const handleRequestMoveToNewGroup = useCallback((tabId: string) => {
+    setCreateGroupDialog({ isOpen: true, tabIdToMove: tabId });
+  }, []);
+
+  // 選択タブを新規グループに移動するリクエスト（Headerの選択モードから）
+  const handleRequestBulkMoveToNewGroup = useCallback(() => {
+    if (selectedTabIds.size === 0) return;
+    setCreateGroupDialog({ isOpen: true, bulkMove: true });
+  }, [selectedTabIds.size]);
+
+  // グループ作成確定
+  const handleConfirmCreateGroup = useCallback(async (groupName: string) => {
+    const name = groupName.trim();
+    if (!name) {
+      setCreateGroupDialog({ isOpen: false });
+      return;
+    }
+
+    try {
+      // 既存グループとの重複チェック
+      const existingGroup = customGroups.find(g => g.name === name);
+      if (!existingGroup) {
+        await createCustomGroup(name);
+      }
+
+      // タブ移動が必要な場合
+      if (createGroupDialog.tabIdToMove) {
+        await assignTabToCustomGroup(createGroupDialog.tabIdToMove, name);
+      } else if (createGroupDialog.bulkMove && selectedTabIds.size > 0) {
+        await assignMultipleTabsToGroup([...selectedTabIds], name);
+        setSelectedTabIds(new Set());
+        setIsSelectionMode(false);
+      }
+
+      await loadTabs();
+    } catch (error) {
+      console.error('グループ作成に失敗:', error);
+    }
+    
+    setCreateGroupDialog({ isOpen: false });
+  }, [createGroupDialog.tabIdToMove, createGroupDialog.bulkMove, selectedTabIds, customGroups, loadTabs]);
+
   // タブをカスタムグループに移動
   const handleMoveToGroup = useCallback(async (tabId: string, groupName: string) => {
     try {
@@ -630,6 +686,8 @@ export function App() {
         onBulkRemoveFromGroup={handleBulkRemoveFromGroup}
         onBulkOpenAsTabGroup={platform.supportsTabGroups ? handleBulkOpenAsTabGroup : undefined}
         customGroups={customGroups}
+        onCreateGroup={handleRequestCreateGroup}
+        onRequestBulkMoveToNewGroup={handleRequestBulkMoveToNewGroup}
       />
 
       <main className="main">
@@ -660,6 +718,7 @@ export function App() {
             onRequestRename={handleRequestRename}
             onMoveToGroup={handleMoveToGroup}
             onRemoveFromGroup={handleRemoveFromGroup}
+            onRequestMoveToNewGroup={handleRequestMoveToNewGroup}
             isSelectionMode={isSelectionMode}
             selectedTabIds={selectedTabIds}
             onToggleSelection={handleToggleSelection}
@@ -707,6 +766,14 @@ export function App() {
         defaultValue={renameDialog.currentName}
         onConfirm={handleConfirmRename}
         onCancel={() => setRenameDialog({ isOpen: false, currentName: '' })}
+      />
+
+      {/* 新規グループ作成用PromptDialog */}
+      <PromptDialog
+        isOpen={createGroupDialog.isOpen}
+        title={t('tabManager.customGroup.createDialogTitle')}
+        onConfirm={handleConfirmCreateGroup}
+        onCancel={() => setCreateGroupDialog({ isOpen: false })}
       />
     </div>
   );

@@ -19,6 +19,7 @@ interface TabCardProps {
   onMiddleClick?: (url: string) => void; // ホイールクリック（中クリック）
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string) => void;
+  onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
   // 表示密度
   isCompact?: boolean;
   // 選択モード関連
@@ -42,6 +43,7 @@ export const TabCard = memo(function TabCard({
   onMiddleClick,
   onMoveToGroup,
   onRemoveFromGroup,
+  onRequestMoveToNewGroup,
   isCompact = false,
   isSelectionMode = false,
   isSelected = false,
@@ -416,9 +418,17 @@ export const TabCard = memo(function TabCard({
               ))}
             </>
           )}
-          {customGroups.length === 0 && !isInCustomGroup && (
-            <div className="group-menu-empty">グループなし</div>
-          )}
+          {/* 新規グループ作成 */}
+          <div className="group-menu-divider" />
+          <button
+            className="group-menu-item group-menu-item-new"
+            onClick={() => {
+              onRequestMoveToNewGroup(tab.id);
+              setShowGroupMenu(false);
+            }}
+          >
+            {t('tabManager.customGroup.createNew')}
+          </button>
         </div>,
         document.body
       )}

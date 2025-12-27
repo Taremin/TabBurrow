@@ -2,7 +2,7 @@ import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions } from './types';
 import { useTranslation } from '../common/i18nContext.js';
 import { DateRangeFilterComponent } from './DateRangeFilter';
-import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2 } from 'lucide-react';
+import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus } from 'lucide-react';
 
 interface HeaderProps {
   tabCount: number;
@@ -33,6 +33,9 @@ interface HeaderProps {
   onBulkRemoveFromGroup: () => void;
   onBulkOpenAsTabGroup?: () => void;
   customGroups: CustomGroupMeta[];
+  // グループ作成関連
+  onCreateGroup: () => void;
+  onRequestBulkMoveToNewGroup: () => void;
 }
 
 export const Header = memo(function Header({
@@ -63,6 +66,8 @@ export const Header = memo(function Header({
   onBulkRemoveFromGroup,
   onBulkOpenAsTabGroup,
   customGroups,
+  onCreateGroup,
+  onRequestBulkMoveToNewGroup,
 }: HeaderProps) {
   const { t } = useTranslation();
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -204,40 +209,50 @@ export const Header = memo(function Header({
                   ? t('tabManager.selection.deselectAll') 
                   : t('tabManager.selection.selectAll')}
               </button>
-              {customGroups.length > 0 && (
-                <div className="selection-group-menu" ref={groupMenuRef}>
-                  <button 
-                    className="btn btn-secondary btn-small"
-                    onClick={() => setShowGroupMenu(prev => !prev)}
-                    disabled={selectedCount === 0}
-                  >
-                    {t('tabManager.selection.bulkMoveToGroup')} ▼
-                  </button>
-                  {showGroupMenu && (
-                    <div className="selection-group-dropdown">
-                      {customGroups.map(group => (
-                        <button
-                          key={group.name}
-                          className="selection-group-item"
-                          onClick={() => handleGroupSelect(group.name)}
-                        >
-                          {group.name}
-                        </button>
-                      ))}
-                      <div className="selection-group-divider" />
+              <div className="selection-group-menu" ref={groupMenuRef}>
+                <button 
+                  className="btn btn-secondary btn-small"
+                  onClick={() => setShowGroupMenu(prev => !prev)}
+                  disabled={selectedCount === 0}
+                >
+                  {t('tabManager.selection.bulkMoveToGroup')} ▼
+                </button>
+                {showGroupMenu && (
+                  <div className="selection-group-dropdown">
+                    {/* 既存グループ */}
+                    {customGroups.map(group => (
                       <button
+                        key={group.name}
                         className="selection-group-item"
-                        onClick={() => {
-                          onBulkRemoveFromGroup();
-                          setShowGroupMenu(false);
-                        }}
+                        onClick={() => handleGroupSelect(group.name)}
                       >
-                        {t('tabManager.selection.bulkRemoveFromGroup')}
+                        {group.name}
                       </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                    ))}
+                    {/* 新規グループ作成 */}
+                    <div className="selection-group-divider" />
+                    <button
+                      className="selection-group-item selection-group-item-new"
+                      onClick={() => {
+                        onRequestBulkMoveToNewGroup();
+                        setShowGroupMenu(false);
+                      }}
+                    >
+                      {t('tabManager.customGroup.createNew')}
+                    </button>
+                    {/* グループから外す */}
+                    <button
+                      className="selection-group-item"
+                      onClick={() => {
+                        onBulkRemoveFromGroup();
+                        setShowGroupMenu(false);
+                      }}
+                    >
+                      {t('tabManager.selection.bulkRemoveFromGroup')}
+                    </button>
+                  </div>
+                )}
+              </div>
               <button 
                 className="btn btn-danger btn-small"
                 onClick={onBulkDelete}
@@ -377,6 +392,14 @@ export const Header = memo(function Header({
                 title={t('linkCheck.button')}
               >
                 <Activity size={18} />
+              </button>
+              <button 
+                className="btn btn-icon btn-secondary"
+                onClick={onCreateGroup}
+                title={t('tabManager.customGroup.createButton')}
+                data-testid="create-group-button"
+              >
+                <FolderPlus size={18} />
               </button>
               <a href="options.html" className="btn btn-icon btn-secondary" title={t('tabManager.header.settingsButton')}>
                 <Settings size={18} />

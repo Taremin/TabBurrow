@@ -298,7 +298,10 @@
             "rename": "グループ名を変更",
             "renameDialogTitle": "グループ名を入力",
             "deleteConfirmTitle": "カスタムグループを削除",
-            "deleteConfirmMessage": "「{name}」グループを削除しますか？タブはドメイングループに戻ります。"
+            "deleteConfirmMessage": "「{name}」グループを削除しますか？タブはドメイングループに戻ります。",
+            "createButton": "新規グループ作成",
+            "createDialogTitle": "新規グループ名を入力",
+            "createNew": "新規グループを作成..."
         },
         "selection": {
             "toggleButton": "選択",
