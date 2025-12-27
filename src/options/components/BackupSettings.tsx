@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import browser from '../../browserApi.js';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { BackupIntervalPreset } from '../../settings.js';
@@ -336,7 +337,7 @@ export function BackupSettings({
       </div>
 
       {/* 復元ダイアログ */}
-      {restoreDialog?.isOpen && (
+      {restoreDialog?.isOpen && createPortal(
         <div className="dialog-overlay" onClick={() => setRestoreDialog(null)}>
           <div className="dialog" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-header">
@@ -388,7 +389,8 @@ export function BackupSettings({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

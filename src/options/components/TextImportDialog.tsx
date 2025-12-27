@@ -4,6 +4,7 @@
  */
 
 import { memo, useCallback, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../common/i18nContext.js';
 import { detectTextFormat } from '../../exportImport.js';
 
@@ -90,7 +91,7 @@ export const TextImportDialog = memo(function TextImportDialog({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleClose}>
       <div
         className="dialog dialog-wide"
@@ -143,6 +144,7 @@ export const TextImportDialog = memo(function TextImportDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 });

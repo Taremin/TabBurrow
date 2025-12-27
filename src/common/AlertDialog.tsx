@@ -4,6 +4,7 @@
  */
 
 import { memo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from './i18nContext.js';
 import { useDialog } from './hooks/useDialog.js';
 import { CheckCircle, XCircle, Info } from 'lucide-react';
@@ -37,7 +38,7 @@ export const AlertDialog = memo(function AlertDialog({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div 
       className="dialog-overlay" 
       style={{ display: 'flex' }}
@@ -55,6 +56,7 @@ export const AlertDialog = memo(function AlertDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 });

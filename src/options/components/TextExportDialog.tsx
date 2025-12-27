@@ -4,6 +4,7 @@
  */
 
 import { memo, useCallback, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../common/i18nContext.js';
 import {
   type TabExportData,
@@ -64,7 +65,7 @@ export const TextExportDialog = memo(function TextExportDialog({
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleClose}>
       <div
         className="dialog dialog-wide"
@@ -124,6 +125,7 @@ export const TextExportDialog = memo(function TextExportDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 });

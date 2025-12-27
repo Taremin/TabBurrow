@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { AutoCloseRule } from '../../settings.js';
 
@@ -104,7 +105,7 @@ export function RuleDialog({ isOpen, editingRule, onSave, onClose }: RuleDialogP
     { value: 'pin', labelKey: 'settings.autoClose.action.pin' },
   ];
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleOverlayClick}>
       <div className="dialog dialog-wide">
         <h3 className="dialog-title">
@@ -222,6 +223,7 @@ export function RuleDialog({ isOpen, editingRule, onSave, onClose }: RuleDialogP
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

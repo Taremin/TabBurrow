@@ -1096,3 +1096,225 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
   });
 });
+
+// ======================
+// Dialog Overlay Fullscreen Tests
+// ======================
+
+/**
+ * Helper function to verify dialog overlay CSS covers fullscreen
+ * Checks that overlay has position: fixed and inset: 0 (or equivalent)
+ */
+async function verifyOverlayFullscreen(page: import('@playwright/test').Page, overlay: import('@playwright/test').Locator) {
+  // Get computed styles of the overlay
+  const styles = await overlay.evaluate((el) => {
+    const computed = window.getComputedStyle(el);
+    return {
+      position: computed.position,
+      top: computed.top,
+      right: computed.right,
+      bottom: computed.bottom,
+      left: computed.left,
+    };
+  });
+  
+  // Overlay must be position: fixed
+  expect(styles.position).toBe('fixed');
+  
+  // Overlay must cover the full viewport (inset: 0 means all are 0px)
+  expect(styles.top).toBe('0px');
+  expect(styles.left).toBe('0px');
+  expect(styles.right).toBe('0px');
+  expect(styles.bottom).toBe('0px');
+}
+
+test.describe('Dialog Overlay Fullscreen', () => {
+  test('Auto-close rule dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Find and click auto-close rule add button
+    const autoCloseSection = page.locator('.settings-section').filter({ hasText: /自動収納|Auto Close|Auto Stash/ });
+    
+    // Enable auto-close if checkbox is not checked
+    const enableCheckbox = page.locator('#autoCloseEnabled');
+    if (!(await enableCheckbox.isChecked())) {
+      const enableLabel = page.locator('label:has(#autoCloseEnabled)');
+      await enableLabel.click();
+    }
+    
+    // Click add rule button
+    const addRuleButton = autoCloseSection.locator('.btn-primary.btn-small');
+    await expect(addRuleButton).toBeVisible();
+    await addRuleButton.click();
+    
+    // Dialog overlay should be visible
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible();
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: close dialog
+    await overlay.locator('.btn-secondary').click();
+  });
+
+  test('Link check rule dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Find link check settings section
+    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    
+    // Click add rule button
+    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    await expect(addRuleButton).toBeVisible();
+    await addRuleButton.click();
+    
+    // Dialog overlay should be visible
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible();
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: close dialog
+    await overlay.locator('.btn-secondary').click();
+  });
+
+  test('Unsaved changes warning dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Make a change to trigger unsaved changes warning
+    const currentJa = page.locator('input[name="locale"][value="ja"]');
+    const isJaChecked = await currentJa.isChecked();
+    
+    if (isJaChecked) {
+      await page.locator('label:has(input[name="locale"][value="en"])').click();
+    } else {
+      await page.locator('label:has(input[name="locale"][value="ja"])').click();
+    }
+    
+    // Click tab manager link to trigger warning
+    const tabManagerLink = page.locator(optionsPageSelectors.tabManagerLink);
+    await tabManagerLink.click();
+    
+    // Dialog overlay should be visible
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible();
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: cancel dialog
+    await overlay.locator('.btn-secondary').click();
+  });
+
+  test('Text export dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Click text export button (first btn-small in first data group)
+    const showTextButton = page.locator('.data-group').first().locator('.btn-small').first();
+    await expect(showTextButton).toBeVisible();
+    await showTextButton.click();
+    
+    // Dialog overlay should be visible
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible();
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: close dialog
+    await overlay.locator('.btn-secondary').click();
+  });
+
+  test('Text import dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Click text import button (clipboard-paste icon)
+    const pasteTextButton = page.locator('.data-group').first().locator('.btn-small:has(.lucide-clipboard-paste)');
+    await expect(pasteTextButton).toBeVisible();
+    await pasteTextButton.click();
+    
+    // Dialog overlay should be visible
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible();
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: close dialog
+    await overlay.locator('.btn-secondary').click();
+  });
+
+  test('Custom group create dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Find custom groups section and click add group button
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const addButton = customGroupSection.locator('.add-group-button');
+    await addButton.click();
+    
+    // Dialog overlay should be visible
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible();
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: close dialog
+    await overlay.locator('.btn-secondary').click();
+  });
+
+  test('Import mode dialog overlay covers the entire viewport', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // Click file import button for tabs (shows import mode dialog)
+    const tabDataGroup = page.locator('.data-group').first();
+    const importButton = tabDataGroup.locator('.btn:has(.lucide-upload)').first();
+    
+    // Trigger file import - need to set up file chooser first
+    const [fileChooser] = await Promise.all([
+      page.waitForEvent('filechooser'),
+      importButton.click(),
+    ]);
+    
+    // Create a minimal valid JSON file content
+    const validJsonContent = JSON.stringify({
+      exportedAt: Date.now(),
+      tabs: []
+    });
+    
+    // Upload the file
+    const buffer = Buffer.from(validJsonContent, 'utf-8');
+    await fileChooser.setFiles({
+      name: 'test-import.json',
+      mimeType: 'application/json',
+      buffer: buffer,
+    });
+    
+    // Import mode dialog should appear
+    const overlay = page.locator('.dialog-overlay');
+    await expect(overlay).toBeVisible({ timeout: 5000 });
+    
+    // Verify overlay CSS covers the entire viewport
+    await verifyOverlayFullscreen(page, overlay);
+    
+    // Clean up: cancel import
+    await overlay.locator('.btn-secondary').click();
+  });
+});
+

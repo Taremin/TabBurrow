@@ -3,6 +3,7 @@
  */
 
 import { useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { ImportMode } from '../../exportImport.js';
 
@@ -33,7 +34,7 @@ export function ImportModeDialog({
     return null;
   }
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleOverlayClick}>
       <div className="dialog">
         <div className="dialog-icon">📥</div>
@@ -86,6 +87,7 @@ export function ImportModeDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

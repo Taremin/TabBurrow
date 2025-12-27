@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { LinkCheckRule, LinkCheckAction } from '../../settings.js';
 
@@ -75,7 +76,7 @@ export function LinkCheckRuleDialog({ isOpen, editingRule, onSave, onClose }: Li
     return null;
   }
 
-  return (
+  return createPortal(
     <div className="dialog-overlay" onClick={handleOverlayClick}>
       <div className="dialog dialog-wide">
         <h3 className="dialog-title">
@@ -162,6 +163,7 @@ export function LinkCheckRuleDialog({ isOpen, editingRule, onSave, onClose }: Li
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
