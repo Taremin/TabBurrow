@@ -294,13 +294,13 @@ export function App() {
             }
           }}
         >
-          <div className="dialog">
+          <div className="dialog dialog-wide">
             <div className="dialog-header">
               <span className="dialog-icon">⚠️</span>
               <h3 className="dialog-title">{t('settings.unsavedWarning.title')}</h3>
             </div>
             <p className="dialog-message">{t('settings.unsavedWarning.message')}</p>
-            <div className="dialog-actions" style={{ flexWrap: 'wrap', gap: '8px' }}>
+            <div className="dialog-actions">
               <button className="btn btn-secondary" onClick={() => setShowUnsavedWarning(false)}>
                 {t('common.cancel')}
               </button>
