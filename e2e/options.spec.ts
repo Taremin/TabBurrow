@@ -115,6 +115,124 @@ test.describe('設定画面', () => {
     const submitButton = page.locator(optionsPageSelectors.submitButton);
     await expect(submitButton).toBeEnabled();
   });
+
+  test('設定変更なしでタブ管理画面に遷移すると警告なしで遷移できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // タブ管理リンクをクリック（設定変更なし）
+    const tabManagerLink = page.locator(optionsPageSelectors.tabManagerLink);
+    await tabManagerLink.click();
+    await waitForPageLoad(page);
+    
+    // 警告ダイアログなしで直接遷移することを確認
+    expect(page.url()).toContain('tabs.html');
+  });
+
+  test('設定変更ありでタブ管理画面リンクをクリックすると警告ダイアログが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 言語設定を変更（未保存状態を作る）
+    const currentJa = page.locator('input[name="locale"][value="ja"]');
+    const currentEn = page.locator('input[name="locale"][value="en"]');
+    const isJaChecked = await currentJa.isChecked();
+    if (isJaChecked) {
+      await currentEn.click();
+    } else {
+      await currentJa.click();
+    }
+    
+    // タブ管理リンクをクリック
+    const tabManagerLink = page.locator(optionsPageSelectors.tabManagerLink);
+    await tabManagerLink.click();
+    
+    // 警告ダイアログが表示されることを確認
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // ダイアログに3つのボタンがあることを確認
+    const cancelButton = dialog.locator('.btn-secondary');
+    const leaveButton = dialog.locator('.btn-danger');
+    const saveButton = dialog.locator('.btn-primary');
+    
+    await expect(cancelButton).toBeVisible();
+    await expect(leaveButton).toBeVisible();
+    await expect(saveButton).toBeVisible();
+    
+    // キャンセルボタンでダイアログを閉じる
+    await cancelButton.click();
+    
+    // ダイアログが閉じて設定画面に留まることを確認
+    await expect(dialog).not.toBeVisible();
+    expect(page.url()).toContain('options.html');
+  });
+
+  test('警告ダイアログで「保存せずに移動」を選択すると設定を破棄して遷移する', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 言語設定を変更
+    const currentJa = page.locator('input[name="locale"][value="ja"]');
+    const currentEn = page.locator('input[name="locale"][value="en"]');
+    const isJaChecked = await currentJa.isChecked();
+    if (isJaChecked) {
+      await currentEn.click();
+    } else {
+      await currentJa.click();
+    }
+    
+    // タブ管理リンクをクリック
+    const tabManagerLink = page.locator(optionsPageSelectors.tabManagerLink);
+    await tabManagerLink.click();
+    
+    // 警告ダイアログが表示される
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 「保存せずに移動」ボタンをクリック
+    const leaveButton = dialog.locator('.btn-danger');
+    await leaveButton.click();
+    
+    // タブ管理画面に遷移することを確認
+    await waitForPageLoad(page);
+    expect(page.url()).toContain('tabs.html');
+  });
+
+  test('警告ダイアログで「保存して移動」を選択すると設定を保存してから遷移する', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'options.html'));
+    await waitForPageLoad(page);
+    
+    // 言語設定を変更
+    const currentJa = page.locator('input[name="locale"][value="ja"]');
+    const currentEn = page.locator('input[name="locale"][value="en"]');
+    const isJaChecked = await currentJa.isChecked();
+    if (isJaChecked) {
+      await currentEn.click();
+    } else {
+      await currentJa.click();
+    }
+    
+    // タブ管理リンクをクリック
+    const tabManagerLink = page.locator(optionsPageSelectors.tabManagerLink);
+    await tabManagerLink.click();
+    
+    // 警告ダイアログが表示される
+    const dialog = page.locator('.dialog-overlay');
+    await expect(dialog).toBeVisible();
+    
+    // 「保存して移動」ボタンをクリック
+    const saveButton = dialog.locator('.btn-primary');
+    await saveButton.click();
+    
+    // タブ管理画面に遷移することを確認
+    await waitForPageLoad(page);
+    expect(page.url()).toContain('tabs.html');
+  });
 });
 
 // ======================

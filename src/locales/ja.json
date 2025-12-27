@@ -19,6 +19,12 @@
         "saveSuccess": "✓ 設定を保存しました",
         "saveError": "✗ 保存に失敗しました",
         "importSuccess": "✓ 設定をインポートしました",
+        "unsavedWarning": {
+            "title": "設定が保存されていません",
+            "message": "設定を変更しましたが、まだ保存されていません。保存せずに移動すると、変更は失われます。",
+            "saveAndLeave": "保存して移動",
+            "leaveWithoutSaving": "保存せずに移動"
+        },
         "language": {
             "title": "言語",
             "description": "表示言語を選択します。",

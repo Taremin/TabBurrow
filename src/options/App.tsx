@@ -31,10 +31,35 @@ export function App() {
     reload,
   } = useSettings();
 
+  // 未保存警告ダイアログの状態
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+
   // フォーム送信
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     await save();
+  }, [save]);
+
+  // タブ管理画面リンクのクリックハンドラ
+  const handleTabManagerClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (hasChanges) {
+      e.preventDefault();
+      setShowUnsavedWarning(true);
+    }
+    // hasChangesがfalseの場合はデフォルトの遷移動作
+  }, [hasChanges]);
+
+  // 保存せずに遷移
+  const handleLeaveWithoutSaving = useCallback(() => {
+    setShowUnsavedWarning(false);
+    window.location.href = 'tabs.html';
+  }, []);
+
+  // 保存してから遷移
+  const handleSaveAndLeave = useCallback(async () => {
+    await save();
+    setShowUnsavedWarning(false);
+    window.location.href = 'tabs.html';
   }, [save]);
 
   // 読み込み中
@@ -65,7 +90,7 @@ export function App() {
           </h1>
         </div>
         <div className="header-right">
-          <a href="tabs.html" className="btn btn-secondary">
+          <a href="tabs.html" className="btn btn-secondary" onClick={handleTabManagerClick}>
             <span>📋</span>
             <span>{t('settings.tabManagerLink')}</span>
           </a>
@@ -257,6 +282,38 @@ export function App() {
           </div>
         </div>
       </div>
+
+      {/* 未保存警告ダイアログ */}
+      {showUnsavedWarning && (
+        <div 
+          className="dialog-overlay" 
+          style={{ display: 'flex' }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowUnsavedWarning(false);
+            }
+          }}
+        >
+          <div className="dialog">
+            <div className="dialog-header">
+              <span className="dialog-icon">⚠️</span>
+              <h3 className="dialog-title">{t('settings.unsavedWarning.title')}</h3>
+            </div>
+            <p className="dialog-message">{t('settings.unsavedWarning.message')}</p>
+            <div className="dialog-actions" style={{ flexWrap: 'wrap', gap: '8px' }}>
+              <button className="btn btn-secondary" onClick={() => setShowUnsavedWarning(false)}>
+                {t('common.cancel')}
+              </button>
+              <button className="btn btn-danger" onClick={handleLeaveWithoutSaving}>
+                {t('settings.unsavedWarning.leaveWithoutSaving')}
+              </button>
+              <button className="btn btn-primary" onClick={handleSaveAndLeave}>
+                {t('settings.unsavedWarning.saveAndLeave')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

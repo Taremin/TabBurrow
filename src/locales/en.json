@@ -19,6 +19,12 @@
         "saveSuccess": "✓ Settings saved",
         "saveError": "✗ Failed to save",
         "importSuccess": "✓ Settings imported",
+        "unsavedWarning": {
+            "title": "Unsaved Changes",
+            "message": "You have unsaved changes. If you leave without saving, your changes will be lost.",
+            "saveAndLeave": "Save and Leave",
+            "leaveWithoutSaving": "Leave Without Saving"
+        },
         "language": {
             "title": "Language",
             "description": "Select display language.",
