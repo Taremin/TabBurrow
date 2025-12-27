@@ -468,7 +468,9 @@ body {
 }
 
 .group-icon {
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .group-domain {
@@ -608,6 +610,12 @@ body {
   gap: 12px;
   font-size: 0.7rem;
   color: var(--text-muted);
+}
+
+.tab-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* コンパクト表示用メタ情報 */
@@ -1716,7 +1724,9 @@ body {
 }
 
 .view-mode-menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
   padding: 8px 12px;
@@ -1756,10 +1766,6 @@ body {
   gap: 6px;
 }
 
-.group-header-compact .group-icon {
-  font-size: 0.9rem;
-}
-
 .group-header-compact .group-domain {
   font-size: 0.8rem;
 }
@@ -1776,7 +1782,8 @@ body {
 
 /* コンパクト時のスクリーンショットインジケータ */
 .tab-screenshot-indicator {
-  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
   color: var(--text-muted);
   flex-shrink: 0;
 }
