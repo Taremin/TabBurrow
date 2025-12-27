@@ -273,7 +273,9 @@
         "group": {
             "openButton": "Open Group",
             "openAsTabGroupButton": "Open as Tab Group",
-            "deleteButton": "Delete Group"
+            "deleteButton": "Delete Group",
+            "collapseButton": "Collapse",
+            "expandButton": "Expand"
         },
         "confirmDialog": {
             "deleteGroupTitle": "Delete Group",

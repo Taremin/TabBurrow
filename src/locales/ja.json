@@ -273,7 +273,9 @@
         "group": {
             "openButton": "グループを開く",
             "openAsTabGroupButton": "タブグループとして開く",
-            "deleteButton": "グループ削除"
+            "deleteButton": "グループ削除",
+            "collapseButton": "折りたたむ",
+            "expandButton": "展開する"
         },
         "confirmDialog": {
             "deleteGroupTitle": "グループを削除",

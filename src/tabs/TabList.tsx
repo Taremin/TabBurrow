@@ -36,6 +36,9 @@ interface TabListProps {
   // グループ内フィルタ
   groupFilters: GroupFilter;
   onGroupFilterChange: (groupName: string, pattern: string) => void;
+  // 折りたたみ状態
+  collapsedGroups: Record<string, boolean>;
+  onToggleCollapse: (groupName: string) => void;
 }
 
 /**
@@ -180,6 +183,8 @@ export function TabList({
   onDeselectGroup,
   groupFilters,
   onGroupFilterChange,
+  collapsedGroups,
+  onToggleCollapse,
 }: TabListProps) {
   const isCompact = displayDensity === 'compact';
   // グループ化とソート（フィルタ適用）
@@ -200,9 +205,13 @@ export function TabList({
       const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
       // グループフィルタを適用
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
+      const isCollapsed = collapsedGroups[name] || false;
       groups.push({ name, groupType: 'custom', tabs: filteredTabs });
-      groupCounts.push(filteredTabs.length);
-      flatTabs.push(...filteredTabs);
+      // 折りたたまれている場合はタブ数を0として扱う（表示しない）
+      groupCounts.push(isCollapsed ? 0 : filteredTabs.length);
+      if (!isCollapsed) {
+        flatTabs.push(...filteredTabs);
+      }
     }
     
     // ドメイングループを追加
@@ -210,18 +219,23 @@ export function TabList({
       const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
       // グループフィルタを適用
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
+      const isCollapsed = collapsedGroups[name] || false;
       groups.push({ name, groupType: 'domain', tabs: filteredTabs });
-      groupCounts.push(filteredTabs.length);
-      flatTabs.push(...filteredTabs);
+      // 折りたたまれている場合はタブ数を0として扱う（表示しない）
+      groupCounts.push(isCollapsed ? 0 : filteredTabs.length);
+      if (!isCollapsed) {
+        flatTabs.push(...filteredTabs);
+      }
     }
     
     return { groups, groupCounts, flatTabs };
-  }, [tabs, groupSort, itemSort, groupFilters]);
+  }, [tabs, groupSort, itemSort, groupFilters, collapsedGroups]);
 
   // グループヘッダーのレンダリング
   const groupContent = useCallback((index: number) => {
     const group = groups[index];
     const groupTabIds = group.tabs.map(t => t.id);
+    const isCollapsed = collapsedGroups[group.name] || false;
     return (
       <GroupHeader
         name={group.name}
@@ -240,9 +254,11 @@ export function TabList({
         onSelectGroup={onSelectGroup}
         onDeselectGroup={onDeselectGroup}
         isCompact={isCompact}
+        isCollapsed={isCollapsed}
+        onToggleCollapse={onToggleCollapse}
       />
     );
-  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact]);
+  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse]);
 
   const itemContent = useCallback((index: number) => {
     const tab = flatTabs[index];

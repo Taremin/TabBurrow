@@ -5,7 +5,7 @@
 
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '../common/i18nContext.js';
-import { Bookmark, Folder, Search, AlertTriangle, Pencil } from 'lucide-react';
+import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown } from 'lucide-react';
 
 interface GroupHeaderProps {
   name: string;
@@ -28,6 +28,9 @@ interface GroupHeaderProps {
   selectedTabIds?: Set<string>;
   onSelectGroup?: (tabIds: string[]) => void;
   onDeselectGroup?: (tabIds: string[]) => void;
+  // 折りたたみ状態
+  isCollapsed?: boolean;
+  onToggleCollapse?: (groupName: string) => void;
 }
 
 /**
@@ -51,6 +54,8 @@ export const GroupHeader = memo(function GroupHeader({
   selectedTabIds = new Set(),
   onSelectGroup,
   onDeselectGroup,
+  isCollapsed = false,
+  onToggleCollapse,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -138,23 +143,40 @@ export const GroupHeader = memo(function GroupHeader({
   const isCustomGroup = groupType === 'custom';
   const hasActiveFilter = filterPattern.trim().length > 0;
 
+  // 折りたたみトグルのハンドラ
+  const handleToggleCollapse = useCallback(() => {
+    if (onToggleCollapse) {
+      onToggleCollapse(name);
+    }
+  }, [name, onToggleCollapse]);
+
   return (
-    <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''}`}>
-      <div className="group-title">
+    <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
+      <div 
+        className="group-title"
+        onClick={handleToggleCollapse}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(); }}
+        title={isCollapsed ? t('tabManager.group.expandButton') : t('tabManager.group.collapseButton')}
+      >
         {isSelectionMode && groupTabIds.length > 0 && (
           <div 
             className="group-checkbox"
             title={isAllSelected ? t('tabManager.selection.deselectGroup') : t('tabManager.selection.selectGroup')}
+            onClick={e => e.stopPropagation()}
           >
             <input
               ref={checkboxRef}
               type="checkbox"
               checked={isAllSelected}
               onChange={handleToggleGroupSelection}
-              onClick={e => e.stopPropagation()}
             />
           </div>
         )}
+        <span className={`group-collapse-icon ${isCollapsed ? 'collapsed' : ''}`}>
+          <ChevronDown size={16} />
+        </span>
         <span className="group-icon">{isCustomGroup ? <Bookmark size={16} /> : <Folder size={16} />}</span>
         <span className="group-domain">{name}</span>
         <span className="group-count">({tabCount})</span>

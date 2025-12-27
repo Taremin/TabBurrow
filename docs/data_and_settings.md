@@ -84,3 +84,13 @@
 ## 設定の同期
 *   UI (`options/` や `tabs/App.tsx`) で設定を変更すると `saveSettings()` で保存し、`notifySettingsChanged()` でメッセージを送信。
 *   Background (`background/index.ts`) はメッセージを受け取り、キャッシュされた設定を更新して即座に反映させる。
+
+## UI状態の保存
+
+設定とは別に、UIの一時的な状態も `browser.storage.local` に保存される。
+
+### `collapsedGroups` キー
+グループの折りたたみ状態を保存。
+*   **形式**: `Record<string, boolean>` - グループ名をキー、折りたたみ状態を値とするオブジェクト
+*   **用途**: タブ管理画面でグループを折りたたむと状態が保存され、ページリロード後も復元される
+*   **デフォルト**: 空オブジェクト（すべて展開）

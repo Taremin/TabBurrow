@@ -96,6 +96,9 @@ export function App() {
   // グループ内フィルタ
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
 
+  // グループ折りたたみ状態
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+
   // 検索オプション
   const [searchOptions, setSearchOptions] = useState<SearchOptions>(DEFAULT_SEARCH_OPTIONS);
   const [regexError, setRegexError] = useState<string | null>(null);
@@ -628,11 +631,45 @@ export function App() {
     setDialog(d => ({ ...d, isOpen: false }));
   }, []);
 
+  // 折りたたみ状態の読み込み
+  const loadCollapsedGroups = useCallback(async () => {
+    try {
+      const result = await browser.storage.local.get('collapsedGroups');
+      if (result.collapsedGroups) {
+        setCollapsedGroups(result.collapsedGroups as Record<string, boolean>);
+      }
+    } catch (error) {
+      console.error('折りたたみ状態の読み込みに失敗:', error);
+    }
+  }, []);
+
+  // 折りたたみ状態の保存
+  const saveCollapsedGroups = useCallback(async (newState: Record<string, boolean>) => {
+    try {
+      await browser.storage.local.set({ collapsedGroups: newState });
+    } catch (error) {
+      console.error('折りたたみ状態の保存に失敗:', error);
+    }
+  }, []);
+
+  // 折りたたみトグル
+  const handleToggleCollapse = useCallback((groupName: string) => {
+    setCollapsedGroups(prev => {
+      const newState = {
+        ...prev,
+        [groupName]: !prev[groupName],
+      };
+      saveCollapsedGroups(newState);
+      return newState;
+    });
+  }, [saveCollapsedGroups]);
+
   // 初期読み込み
   useEffect(() => {
     loadTabs();
     loadSettings();
-  }, [loadTabs, loadSettings]);
+    loadCollapsedGroups();
+  }, [loadTabs, loadSettings, loadCollapsedGroups]);
 
   // Background Scriptからの変更通知を受信
   useEffect(() => {
@@ -726,6 +763,8 @@ export function App() {
             onDeselectGroup={handleDeselectGroup}
             groupFilters={groupFilters}
             onGroupFilterChange={handleGroupFilterChange}
+            collapsedGroups={collapsedGroups}
+            onToggleCollapse={handleToggleCollapse}
           />
         )}
 

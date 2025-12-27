@@ -483,6 +483,39 @@ body {
   font-size: 0.75rem;
 }
 
+/* グループ折りたたみアイコン */
+.group-collapse-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+  color: var(--text-muted);
+}
+
+.group-collapse-icon.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* グループタイトルをクリック可能に */
+.group-title {
+  cursor: pointer;
+  user-select: none;
+}
+
+.group-title:hover {
+  opacity: 0.8;
+}
+
+.group-title:focus {
+  outline: none;
+}
+
+.group-title:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 .group-delete {
   background: none;
   border: none;

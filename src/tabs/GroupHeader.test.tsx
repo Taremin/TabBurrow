@@ -284,3 +284,100 @@ describe('GroupHeader - タブグループとして開く', () => {
     expect(onOpenGroupAsTabGroup).toHaveBeenCalledWith('example.com');
   });
 });
+
+describe('GroupHeader - 折りたたみ/展開', () => {
+  const defaultProps = {
+    name: 'example.com',
+    groupType: 'domain' as const,
+    tabCount: 5,
+    onDeleteGroup: vi.fn(),
+    onOpenGroup: vi.fn(),
+  };
+
+  it('折りたたみアイコンが表示される', () => {
+    render(<GroupHeader {...defaultProps} />);
+    
+    const icon = document.querySelector('.group-collapse-icon');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('展開状態では折りたたみアイコンにcollapsedクラスがない', () => {
+    render(<GroupHeader {...defaultProps} isCollapsed={false} />);
+    
+    const icon = document.querySelector('.group-collapse-icon');
+    expect(icon).not.toHaveClass('collapsed');
+  });
+
+  it('折りたたみ状態では折りたたみアイコンにcollapsedクラスがある', () => {
+    render(<GroupHeader {...defaultProps} isCollapsed={true} />);
+    
+    const icon = document.querySelector('.group-collapse-icon');
+    expect(icon).toHaveClass('collapsed');
+  });
+
+  it('グループヘッダーをクリックするとonToggleCollapseが呼ばれる', () => {
+    const onToggleCollapse = vi.fn();
+    render(
+      <GroupHeader
+        {...defaultProps}
+        onToggleCollapse={onToggleCollapse}
+      />
+    );
+    
+    const title = document.querySelector('.group-title');
+    fireEvent.click(title!);
+    
+    expect(onToggleCollapse).toHaveBeenCalledWith('example.com');
+  });
+
+  it('グループヘッダーにクリック可能なroleが設定される', () => {
+    render(<GroupHeader {...defaultProps} />);
+    
+    const title = document.querySelector('.group-title');
+    expect(title).toHaveAttribute('role', 'button');
+    expect(title).toHaveAttribute('tabIndex', '0');
+  });
+
+  it('折りたたみ状態によって適切なツールチップが表示される', () => {
+    const { rerender } = render(
+      <GroupHeader {...defaultProps} isCollapsed={false} />
+    );
+    
+    let title = document.querySelector('.group-title');
+    expect(title).toHaveAttribute('title', 'tabManager.group.collapseButton');
+    
+    rerender(<GroupHeader {...defaultProps} isCollapsed={true} />);
+    title = document.querySelector('.group-title');
+    expect(title).toHaveAttribute('title', 'tabManager.group.expandButton');
+  });
+
+  it('キーボード操作（Enter）でonToggleCollapseが呼ばれる', () => {
+    const onToggleCollapse = vi.fn();
+    render(
+      <GroupHeader
+        {...defaultProps}
+        onToggleCollapse={onToggleCollapse}
+      />
+    );
+    
+    const title = document.querySelector('.group-title');
+    fireEvent.keyDown(title!, { key: 'Enter' });
+    
+    expect(onToggleCollapse).toHaveBeenCalledWith('example.com');
+  });
+
+  it('キーボード操作（Space）でonToggleCollapseが呼ばれる', () => {
+    const onToggleCollapse = vi.fn();
+    render(
+      <GroupHeader
+        {...defaultProps}
+        onToggleCollapse={onToggleCollapse}
+      />
+    );
+    
+    const title = document.querySelector('.group-title');
+    fireEvent.keyDown(title!, { key: ' ' });
+    
+    expect(onToggleCollapse).toHaveBeenCalledWith('example.com');
+  });
+});
