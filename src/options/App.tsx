@@ -295,7 +295,7 @@ export function App() {
             }
           }}
         >
-          <div className="dialog dialog-wide">
+          <div className="dialog" style={{ maxWidth: '520px' }}>
             <div className="dialog-header">
               <span className="dialog-icon"><AlertTriangle className="alert-icon-warning" /></span>
               <h3 className="dialog-title">{t('settings.unsavedWarning.title')}</h3>
