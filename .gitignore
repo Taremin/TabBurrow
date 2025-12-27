@@ -29,3 +29,12 @@ tmp/
 
 # スクリーンショット出力
 screenshots/output/
+
+# Playwright
+playwright-report/
+test-results/
+test-result.txt
+test-output.json
+
+# Commit Messages
+commit/
