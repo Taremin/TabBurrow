@@ -17,6 +17,7 @@ import { RestoreSettings } from './components/RestoreSettings.js';
 import { LinkCheckSettings } from './components/LinkCheckSettings.js';
 import { BackupSettings } from './components/BackupSettings.js';
 import { DataManagement } from './components/DataManagement.js';
+import { AlertTriangle } from 'lucide-react';
 
 export function App() {
   const { t } = useTranslation();
@@ -296,7 +297,7 @@ export function App() {
         >
           <div className="dialog dialog-wide">
             <div className="dialog-header">
-              <span className="dialog-icon">⚠️</span>
+              <span className="dialog-icon"><AlertTriangle className="alert-icon-warning" /></span>
               <h3 className="dialog-title">{t('settings.unsavedWarning.title')}</h3>
             </div>
             <p className="dialog-message">{t('settings.unsavedWarning.message')}</p>
