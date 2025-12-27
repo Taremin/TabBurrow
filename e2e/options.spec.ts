@@ -46,11 +46,14 @@ test.describe('設定画面', () => {
     await waitForPageLoad(page);
     
     // 言語ラジオボタンを見つける（言語設定はradioボタン）
+    // 言語ラジオボタンのラベルを見つける
+    const englishLabel = page.locator('label:has(input[name="locale"][value="en"])');
     const englishOption = page.locator('input[name="locale"][value="en"]');
-    await expect(englishOption).toBeVisible();
     
-    // 英語オプションをクリック
-    await englishOption.click();
+    await expect(englishLabel).toBeVisible();
+    
+    // 英語オプションをクリック（ラベルをクリック）
+    await englishLabel.click();
     
     // 選択が反映されていることを確認
     await expect(englishOption).toBeChecked();
@@ -62,21 +65,24 @@ test.describe('設定画面', () => {
     await waitForPageLoad(page);
     
     // テーマラジオボタンを見つける
+    // テーマラジオボタンのラベルを見つける
+    const lightThemeLabel = page.locator('label:has(input[value="light"])');
+    const darkThemeLabel = page.locator('label:has(input[value="dark"])');
     const lightTheme = page.locator('input[value="light"]');
     const darkTheme = page.locator('input[value="dark"]');
     
     // どちらかが存在することを確認
-    const hasLightTheme = await lightTheme.count() > 0;
-    const hasDarkTheme = await darkTheme.count() > 0;
+    const hasLightTheme = await lightThemeLabel.count() > 0;
+    const hasDarkTheme = await darkThemeLabel.count() > 0;
     
     // テーマ設定が存在する場合はクリックしてテスト
     if (hasLightTheme) {
-      await lightTheme.click();
+      await lightThemeLabel.click();
       await expect(lightTheme).toBeChecked();
     }
     
     if (hasDarkTheme) {
-      await darkTheme.click();
+      await darkThemeLabel.click();
       await expect(darkTheme).toBeChecked();
     }
     
@@ -102,13 +108,15 @@ test.describe('設定画面', () => {
     // 現在の言語設定を確認
     const jaOption = page.locator('input[name="locale"][value="ja"]');
     const enOption = page.locator('input[name="locale"][value="en"]');
+    const jaLabel = page.locator('label:has(input[name="locale"][value="ja"])');
+    const enLabel = page.locator('label:has(input[name="locale"][value="en"])');
     
     // 現在チェックされていないオプションをクリック
     const isJaChecked = await jaOption.isChecked();
     if (isJaChecked) {
-      await enOption.click();
+      await enLabel.click();
     } else {
-      await jaOption.click();
+      await jaLabel.click();
     }
     
     // 保存ボタンがクリック可能になることを確認
@@ -136,13 +144,17 @@ test.describe('設定画面', () => {
     await waitForPageLoad(page);
     
     // 言語設定を変更（未保存状態を作る）
+    // 言語設定を変更（未保存状態を作る）
     const currentJa = page.locator('input[name="locale"][value="ja"]');
     const currentEn = page.locator('input[name="locale"][value="en"]');
+    const jaLabel = page.locator('label:has(input[name="locale"][value="ja"])');
+    const enLabel = page.locator('label:has(input[name="locale"][value="en"])');
+
     const isJaChecked = await currentJa.isChecked();
     if (isJaChecked) {
-      await currentEn.click();
+      await enLabel.click();
     } else {
-      await currentJa.click();
+      await jaLabel.click();
     }
     
     // タブ管理リンクをクリック
@@ -176,13 +188,14 @@ test.describe('設定画面', () => {
     await waitForPageLoad(page);
     
     // 言語設定を変更
+    // 言語設定を変更
     const currentJa = page.locator('input[name="locale"][value="ja"]');
-    const currentEn = page.locator('input[name="locale"][value="en"]');
     const isJaChecked = await currentJa.isChecked();
+    
     if (isJaChecked) {
-      await currentEn.click();
+      await page.locator('label:has(input[name="locale"][value="en"])').click();
     } else {
-      await currentJa.click();
+      await page.locator('label:has(input[name="locale"][value="ja"])').click();
     }
     
     // タブ管理リンクをクリック
@@ -208,13 +221,14 @@ test.describe('設定画面', () => {
     await waitForPageLoad(page);
     
     // 言語設定を変更
+    // 言語設定を変更
     const currentJa = page.locator('input[name="locale"][value="ja"]');
-    const currentEn = page.locator('input[name="locale"][value="en"]');
     const isJaChecked = await currentJa.isChecked();
+    
     if (isJaChecked) {
-      await currentEn.click();
+      await page.locator('label:has(input[name="locale"][value="en"])').click();
     } else {
-      await currentJa.click();
+      await page.locator('label:has(input[name="locale"][value="ja"])').click();
     }
     
     // タブ管理リンクをクリック
@@ -690,13 +704,17 @@ test.describe('設定画面 - アイコンクリック設定', () => {
     const skipOption = page.locator('input[name="pinnedAction"][value="skip"]');
     const suspendOption = page.locator('input[name="pinnedAction"][value="suspend"]');
     
-    // サスペンドオプションを選択（CSSで非表示なのでforceを使用）
-    await suspendOption.click({ force: true });
+    // サスペンドオプションを選択（ラベルをクリック）
+    const suspendLabel = page.locator('label:has(input[name="pinnedAction"][value="suspend"])');
+    await suspendLabel.click();
+    
     await expect(suspendOption).toBeChecked();
     await expect(skipOption).not.toBeChecked();
     
     // スキップオプションに戻す
-    await skipOption.click({ force: true });
+    const skipLabel = page.locator('label:has(input[name="pinnedAction"][value="skip"])');
+    await skipLabel.click();
+    
     await expect(skipOption).toBeChecked();
     await expect(suspendOption).not.toBeChecked();
   });
@@ -706,9 +724,9 @@ test.describe('設定画面 - アイコンクリック設定', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    // 固定タブの扱いを変更（CSSで非表示なのでforceを使用）
-    const suspendOption = page.locator('input[name="pinnedAction"][value="suspend"]');
-    await suspendOption.click({ force: true });
+    // 固定タブの扱いを変更（ラベルをクリック）
+    const suspendLabel = page.locator('label:has(input[name="pinnedAction"][value="suspend"])');
+    await suspendLabel.click();
     
     // 保存ボタンがクリック可能になることを確認
     const submitButton = page.locator(optionsPageSelectors.submitButton);
