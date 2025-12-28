@@ -216,7 +216,7 @@ export const GroupHeader = memo(function GroupHeader({
         {onRequestRename && (
           <button 
             className="group-edit" 
-            title={isCustomGroup ? t('tabManager.customGroup.edit') : t('tabManager.domainGroups.editAlias')}
+            title={isCustomGroup ? t('tabManager.customGroup.edit') : t('settings.domainGroups.editAlias')}
             onClick={handleRename}
           >
             <Pencil size={14} />
