@@ -44,6 +44,13 @@ async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): P
   // 新しくアクティブになったタブの最終アクティブ時刻を更新（自動収納用）
   updateTabLastActiveTime(activeInfo.tabId);
 
+  // 前のタブ（非アクティブになったタブ）の最終アクティブ時刻も更新
+  // これを行わないと、長時間アクティブだったタブを切り替えた直後に
+  // 自動収納のタイマーによって即座に閉じられてしまう可能性がある
+  if (previousTabId !== null) {
+    updateTabLastActiveTime(previousTabId);
+  }
+
   // 新しくアクティブになったタブの情報を取得
   let currentTab: Tabs.Tab | null = null;
   try {

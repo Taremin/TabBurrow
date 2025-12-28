@@ -143,6 +143,25 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
   // 全ウィンドウのタブを取得
   const tabs = await browser.tabs.query({ pinned: false });
   
+  // 開始時の要約ログ
+  console.group(`[AutoClose] チェック対象タブ一覧 (閾値: ${cachedSettings.autoCloseSeconds}秒)`);
+  tabs.forEach(tab => {
+    if (!tab.id || !tab.url) return;
+    const lastActive = tabLastActiveTime.get(tab.id) || 0;
+    const scheduledTime = lastActive + thresholdMs;
+    const remains = Math.max(0, Math.floor((scheduledTime - now) / 1000));
+    const status = tab.active ? 'Active' : (remains === 0 ? 'Due' : `${remains}s remains`);
+    const lastActiveStr = lastActive ? new Date(lastActive).toLocaleTimeString() : 'Unknown';
+    const scheduledStr = new Date(scheduledTime).toLocaleTimeString();
+    
+    // スキームチェック
+    const isTargetScheme = /^(https?|file):\/\//i.test(tab.url);
+    const schemeInfo = isTargetScheme ? '' : ' [非対象スキーム]';
+
+    console.log(`- TabID: ${tab.id}, Status: ${status}, LastActive: ${lastActiveStr}, Due: ${scheduledStr}, URL: ${tab.url}${schemeInfo}`);
+  });
+  console.groupEnd();
+  
   // 各アクションに応じて分類
   const tabsToNormalClose: Tabs.Tab[] = [];            // 通常の収納
   const tabsToSaveToGroup: { tab: Tabs.Tab; groupName: string }[] = [];  // グループに収納
@@ -161,9 +180,12 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
     const lastActive = tabLastActiveTime.get(tab.id) || 0;
     const timeSinceActive = now - lastActive;
     if (timeSinceActive <= thresholdMs) {
+      console.log(`[AutoClose] スキップ (未到達): tabId=${tab.id}, 経過=${Math.floor(timeSinceActive/1000)}s, 閾値=${cachedSettings.autoCloseSeconds}s, url=${tab.url}`);
       continue;  // まだ閾値に達していない
     }
     
+    console.log(`[AutoClose] タイマー超過検出: tabId=${tab.id}, url=${tab.url}`);
+
     // ルールマッチング
     const matchedRule = matchAutoCloseRule(
       { url: tab.url, title: tab.title },
@@ -172,6 +194,7 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
     );
     
     if (matchedRule) {
+      console.log(`[AutoClose] ルール適用: action=${matchedRule.action}, ruleName=${matchedRule.name}`);
       switch (matchedRule.action) {
         case 'exclude':
           // 除外（何もしない）
@@ -198,6 +221,7 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
     }
     
     // ルールにマッチしない場合は通常の収納
+    console.log(`[AutoClose] 通常収納対象に追加: tabId=${tab.id}`);
     tabsToNormalClose.push(tab);
   }
   
