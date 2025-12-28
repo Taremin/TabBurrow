@@ -61,12 +61,14 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.locator('.dialog')).not.toBeVisible();
 
     // グループ名が更新されていることを確認
-    await expect(groupHeader.locator('.group-domain')).toHaveText('My Example Domain');
+    // リネーム後は表示名が変わるので、古い名前でのフィルタリングを外して新しい名前を待つ
+    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Example Domain' }).first();
+    await expect(renamedGroupHeader.locator('.group-domain')).toHaveText('My Example Domain');
 
     // リロードしても維持されるか確認
     await page.reload();
     await waitForPageLoad(page);
-    const reloadedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Example Domain' });
+    const reloadedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Example Domain' }).first();
     await expect(reloadedGroupHeader).toBeVisible();
   });
 
@@ -96,9 +98,6 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.url()).toContain('options.html');
 
     // ドメイングループ設定セクションを探す
-    // タイトルで検索 (日本語ロケールを想定しているがテスト環境によっては英語かも。ここではクラスや構造で探すのが安全だが、テキストで探す)
-    // テストランナーのロケール設定に依存する。fixtures.tsを確認する必要があるが、とりあえずdom要素で探す。
-    // .domain-groups-settings クラスを持つ要素を探す
     const domainSettings = page.locator('.domain-groups-settings');
     await expect(domainSettings).toBeVisible();
 
@@ -123,9 +122,17 @@ test.describe('ドメイングループ名変更', () => {
     // 削除ボタンをクリック
     await aliasItem.locator('button[title*="削除"], button[title*="Delete"]').first().click();
 
-    // 削除確認ダイアログ
-    await expect(page.locator('.confirm-dialog')).toBeVisible();
-    await page.locator('.confirm-dialog .btn-danger').click();
+    // 削除確認ダイアログ (DialogOverlayを使用しているため .dialog-overlay または内部の .dialog を探す)
+    await expect(page.locator('.dialog-overlay .dialog')).toBeVisible();
+    await page.locator('.dialog-overlay .btn-danger').click();
+
+    // 重要：設定を保存するために「更新」ボタンをクリック
+    const saveButton = page.locator('button[type="submit"]');
+    await expect(saveButton).toBeVisible();
+    await saveButton.click();
+    
+    // 保存成功のメッセージを待つ（オプション）
+    // await expect(page.locator('.save-status')).toContainText('成功');
 
     // リストから消えたか確認
     await expect(aliasItem).not.toBeVisible();
@@ -133,9 +140,12 @@ test.describe('ドメイングループ名変更', () => {
     // タブマネージャーに戻って確認
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     await waitForPageLoad(page);
+    await page.reload(); // 確実に最新状態を反映させる
+    await waitForPageLoad(page);
     
-    // 元のドメイン名に戻っているはず
-    await expect(page.locator('.group-header').filter({ hasText: 'example.com' })).toBeVisible();
+    // 元のドメイン名に戻っているはず（.group-domain 要素を直接確認）
+    const groupHeaderFinal = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    await expect(groupHeaderFinal.locator('.group-domain')).toHaveText('example.com');
     await expect(page.locator('.group-header').filter({ hasText: 'Updated Alias' })).not.toBeVisible();
   });
 });

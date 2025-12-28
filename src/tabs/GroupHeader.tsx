@@ -14,7 +14,6 @@ interface GroupHeaderProps {
   onDeleteGroup: (name: string, groupType: 'domain' | 'custom') => void;
   onOpenGroup: (name: string) => void;
   onOpenGroupAsTabGroup?: (name: string) => void;
-  onRenameGroup?: (oldName: string, newName: string) => void;
   // リネームリクエスト（親でPromptDialogを表示）
   onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
   // グループ内フィルタ
@@ -45,7 +44,6 @@ export const GroupHeader = memo(function GroupHeader({
   onDeleteGroup,
   onOpenGroup,
   onOpenGroupAsTabGroup,
-  onRenameGroup,
   onRequestRename,
   filterPattern = '',
   onFilterChange,
@@ -218,7 +216,7 @@ export const GroupHeader = memo(function GroupHeader({
         {onRequestRename && (
           <button 
             className="group-edit" 
-            title={t('tabManager.customGroup.edit')}
+            title={isCustomGroup ? t('tabManager.customGroup.edit') : t('tabManager.domainGroups.editAlias')}
             onClick={handleRename}
           >
             <Pencil size={14} />

@@ -80,7 +80,7 @@ describe('GroupHeader', () => {
       <GroupHeader 
         {...defaultProps} 
         groupType="custom" 
-        onRenameGroup={onRenameGroup} 
+        onRequestRename={onRenameGroup} 
       />
     );
     
@@ -89,17 +89,29 @@ describe('GroupHeader', () => {
     expect(icon).toBeInTheDocument();
   });
 
-  it('ドメイングループでは編集ボタンが表示されない', () => {
-    const onRenameGroup = vi.fn();
+  it('ドメイングループでもonRequestRenameがあれば編集ボタンが表示される', () => {
+    const onRequestRename = vi.fn();
     render(
       <GroupHeader 
         {...defaultProps} 
         groupType="domain" 
-        onRenameGroup={onRenameGroup} 
+        onRequestRename={onRequestRename} 
       />
     );
     
-    // ドメイングループでは編集ボタンつまり group-edit クラスがない
+    const editButton = document.querySelector('.group-edit');
+    expect(editButton).toBeInTheDocument();
+  });
+
+  it('onRequestRenameがない場合は編集ボタンが表示されない', () => {
+    render(
+      <GroupHeader 
+        {...defaultProps} 
+        groupType="custom" 
+        // onRequestRename を渡さない
+      />
+    );
+    
     const editButton = document.querySelector('.group-edit');
     expect(editButton).not.toBeInTheDocument();
   });
