@@ -20,6 +20,7 @@
     "e2e:chrome": "playwright test --project=chromium",
     "e2e:headed": "playwright test --headed",
     "e2e:debug": "playwright test --debug",
+    "debug:e2e": "playwright test --config=playwright.debug.config.ts",
     "screenshot": "playwright test --config=screenshots/playwright.config.ts --project=chromium"
   },
   "dependencies": {

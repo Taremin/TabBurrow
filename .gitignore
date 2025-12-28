@@ -29,6 +29,8 @@ tmp/
 
 # スクリーンショット出力
 screenshots/output/
+debug_scripts/screenshots/*
+!debug_scripts/screenshots/.gitkeep
 
 # Playwright
 playwright-report/
