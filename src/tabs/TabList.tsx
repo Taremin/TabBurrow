@@ -3,8 +3,8 @@
  * react-virtuosoのGroupedVirtuosoを使用
  */
 
-import { useMemo, useCallback } from 'react';
-import { GroupedVirtuoso, Virtuoso } from 'react-virtuoso';
+import { useMemo, useCallback, useRef } from 'react';
+import { GroupedVirtuoso, Virtuoso, GroupedVirtuosoHandle } from 'react-virtuoso';
 import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter } from './types';
 import { TabCard } from './TabCard';
 import { GroupHeader } from './GroupHeader';
@@ -208,6 +208,8 @@ export function TabList({
   showGroupedTabsInDomainGroups = false,
 }: TabListProps) {
   const isCompact = displayDensity === 'compact';
+  const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
+
   // グループ化とソート（フィルタ適用）
   const { groups, groupCounts, flatTabs } = useMemo(() => {
     const { customGroups: cGroups, domainGroups } = groupTabs(tabs, showGroupedTabsInDomainGroups);
@@ -281,6 +283,23 @@ export function TabList({
     );
   }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases]);
 
+  // グループへのナビゲーションハンドラ（タグクリック時）
+  const handleNavigateToGroup = useCallback((groupName: string) => {
+    const groupIndex = groups.findIndex(g => g.name === groupName);
+    if (groupIndex !== -1 && virtuosoRef.current) {
+      // 折りたたまれている場合は展開
+      if (collapsedGroups[groupName]) {
+        onToggleCollapse(groupName);
+      }
+      // グループヘッダーへスクロール
+      virtuosoRef.current.scrollToIndex({
+        index: groupIndex,
+        behavior: 'smooth',
+        align: 'start',
+      });
+    }
+  }, [groups, collapsedGroups, onToggleCollapse]);
+
   const itemContent = useCallback((index: number) => {
     const { tab, groupName, groupType } = flatTabs[index];
     return (
@@ -300,9 +319,10 @@ export function TabList({
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
         isCompact={isCompact}
+        onNavigateToGroup={handleNavigateToGroup}
       />
     );
-  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
+  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, handleNavigateToGroup]);
 
   if (tabs.length === 0) {
     return null;
@@ -347,6 +367,7 @@ export function TabList({
         />
       ) : (
         <GroupedVirtuoso
+          ref={virtuosoRef}
           key="grouped-view"
           groupCounts={groupCounts}
           groupContent={groupContent}

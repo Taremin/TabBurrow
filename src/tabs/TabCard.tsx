@@ -9,7 +9,7 @@ import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext.js';
-import { Globe, Camera, Folder, Trash2, Calendar, Save } from 'lucide-react';
+import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
@@ -29,6 +29,8 @@ interface TabCardProps {
   isSelectionMode?: boolean;
   isSelected?: boolean;
   onToggleSelection?: (id: string) => void;
+  // グループタグ表示用
+  onNavigateToGroup?: (groupName: string) => void;
 }
 
 /**
@@ -53,6 +55,7 @@ export const TabCard = memo(function TabCard({
   isSelectionMode = false,
   isSelected = false,
   onToggleSelection,
+  onNavigateToGroup,
 }: TabCardProps) {
   const { t } = useTranslation();
   const [isRemoving, setIsRemoving] = useState(false);
@@ -69,6 +72,13 @@ export const TabCard = memo(function TabCard({
   });
 
   const isInCustomGroup = tab.groupType === 'custom';
+
+  // 表示するグループタグを計算（現在表示中のグループ以外）
+  const otherGroups = (tab.customGroups || []).filter(g => g !== currentGroupName);
+  const showGroupTags = currentGroupType === 'domain' 
+    ? (tab.customGroups?.length || 0) > 0  // ドメイングループ内: 所属カスタムグループを全て表示
+    : otherGroups.length > 0;  // カスタムグループ内: 他の所属グループのみ表示
+  const groupsToShow = currentGroupType === 'domain' ? (tab.customGroups || []) : otherGroups;
 
   // タブを開くまたは選択をトグル
   const handleClick = useCallback((e: React.MouseEvent) => {
@@ -333,8 +343,35 @@ export const TabCard = memo(function TabCard({
             )}
             <span>{tab.title}</span>
           </div>
-          {/* コンパクト表示時: URLを省略表示 */}
-          <div className={`tab-url ${isCompact ? 'tab-url-compact' : ''}`}>{tab.url}</div>
+          {/* URL行: グループタグ/バッジを含む */}
+          <div className={`tab-url-row ${isCompact ? 'tab-url-row-compact' : ''}`}>
+            <div className={`tab-url ${isCompact ? 'tab-url-compact' : ''}`}>{tab.url}</div>
+            {showGroupTags && (
+              isCompact ? (
+                /* コンパクト表示: バッジ */
+                <span className="group-badge" title={groupsToShow.join(', ')}>
+                  <Tag size={12} />{groupsToShow.length}
+                </span>
+              ) : (
+                /* 通常表示: タグチップ */
+                <div className="group-tags">
+                  {groupsToShow.map(groupName => (
+                    <button
+                      key={groupName}
+                      className="group-tag"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigateToGroup?.(groupName);
+                      }}
+                      title={groupName}
+                    >
+                      {groupName}
+                    </button>
+                  ))}
+                </div>
+              )
+            )}
+          </div>
           {isCompact ? (
             <div className="tab-meta tab-meta-compact">
               <span><Calendar size={12} /> {formatDateTime(tab.lastAccessed)}</span>

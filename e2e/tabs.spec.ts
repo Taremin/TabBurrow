@@ -257,6 +257,52 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
 });
 
 test.describe('コンパクト表示機能', () => {
+  test('コンパクト表示でURL行がタブカードをはみ出さない', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // 長いURLのテストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/very/long/path/that/should/be/truncated/and/not/overflow/the/card',
+      title: 'Long URL Test Tab',
+    });
+    
+    // リロード
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブが表示されていることを確認
+    const tabCards = page.locator(tabsPageSelectors.tabCard);
+    await expect(tabCards).toHaveCount(1);
+    
+    // ドロップダウンメニューを開いてコンパクト表示に切替
+    const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
+    await viewModeToggle.click();
+    await page.waitForTimeout(300);
+    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.waitForTimeout(500);
+    
+    // コンパクト表示のタブカードとURL行の幅を確認
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    const urlRow = tabCard.locator('.tab-url-row');
+    
+    // タブカードの境界ボックスを取得
+    const tabCardBox = await tabCard.boundingBox();
+    expect(tabCardBox).not.toBeNull();
+    
+    // URL行の境界ボックスを取得
+    const urlRowBox = await urlRow.boundingBox();
+    expect(urlRowBox).not.toBeNull();
+    
+    // URL行がタブカードをはみ出していないことを確認
+    // URL行の右端がタブカードの右端を超えていないこと
+    expect(urlRowBox!.x + urlRowBox!.width).toBeLessThanOrEqual(tabCardBox!.x + tabCardBox!.width + 1); // 1px許容
+  });
+
   test('コンパクト表示でスクリーンショット付きタブにホバーするとポップアップが表示される', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
