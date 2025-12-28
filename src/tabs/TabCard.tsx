@@ -18,8 +18,11 @@ interface TabCardProps {
   onOpen: (url: string) => void;
   onMiddleClick?: (url: string) => void; // ホイールクリック（中クリック）
   onMoveToGroup: (tabId: string, groupName: string) => void;
-  onRemoveFromGroup: (tabId: string) => void;
+  onRemoveFromGroup: (tabId: string, groupName?: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
+  // コンテキスト情報
+  currentGroupName?: string;
+  currentGroupType?: 'domain' | 'custom';
   // 表示密度
   isCompact?: boolean;
   // 選択モード関連
@@ -44,6 +47,8 @@ export const TabCard = memo(function TabCard({
   onMoveToGroup,
   onRemoveFromGroup,
   onRequestMoveToNewGroup,
+  currentGroupName,
+  currentGroupType,
   isCompact = false,
   isSelectionMode = false,
   isSelected = false,
@@ -138,9 +143,9 @@ export const TabCard = memo(function TabCard({
 
   // グループから削除
   const handleRemoveFromGroup = useCallback(() => {
-    onRemoveFromGroup(tab.id);
+    onRemoveFromGroup(tab.id, currentGroupName);
     setShowGroupMenu(false);
-  }, [onRemoveFromGroup, tab.id]);
+  }, [onRemoveFromGroup, tab.id, currentGroupName]);
 
   // スクリーンショットホバー
   const [compactPopupUrl, setCompactPopupUrl] = useState<string | null>(null);
@@ -406,16 +411,19 @@ export const TabCard = memo(function TabCard({
           {customGroups.length > 0 && (
             <>
               <div className="group-menu-label">{t('tabManager.tabCard.moveToGroup')}</div>
-              {customGroups.map(group => (
-                <button 
-                  key={group.name}
-                  className="group-menu-item"
-                  onClick={() => handleMoveToGroup(group.name)}
-                  disabled={isInCustomGroup && tab.group === group.name}
-                >
-                  {group.name}
-                </button>
-              ))}
+              {customGroups.map(group => {
+                const isMember = tab.customGroups?.includes(group.name);
+                return (
+                  <button 
+                    key={group.name}
+                    className={`group-menu-item ${isMember ? 'is-member' : ''}`}
+                    onClick={() => isMember ? onRemoveFromGroup(tab.id, group.name) : handleMoveToGroup(group.name)}
+                  >
+                    <span className="group-menu-item-check">{isMember ? '✓' : ''}</span>
+                    <span className="group-menu-item-text">{group.name}</span>
+                  </button>
+                );
+              })}
             </>
           )}
           {/* 新規グループ作成 */}

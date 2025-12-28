@@ -120,3 +120,8 @@ body {
 .form-textarea::placeholder {
     color: var(--text-muted);
 }
+
+/* Lucideアイコン共通 */
+svg.lucide {
+    flex-shrink: 0;
+}

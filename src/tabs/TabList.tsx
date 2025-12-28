@@ -26,7 +26,7 @@ interface TabListProps {
   onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
   domainGroupAliases?: Record<string, string>;
   onMoveToGroup: (tabId: string, groupName: string) => void;
-  onRemoveFromGroup: (tabId: string) => void;
+  onRemoveFromGroup: (tabId: string, groupName?: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
   // 選択モード関連
   isSelectionMode: boolean;
@@ -40,23 +40,41 @@ interface TabListProps {
   // 折りたたみ状態
   collapsedGroups: Record<string, boolean>;
   onToggleCollapse: (groupName: string) => void;
+  // 新規設定
+  showGroupedTabsInDomainGroups?: boolean;
 }
 
 /**
  * タブをグループ別に分類（カスタムグループ + ドメイングループ）
  */
-function groupTabs(tabs: SavedTab[]): { customGroups: Map<string, SavedTab[]>; domainGroups: Map<string, SavedTab[]> } {
+function groupTabs(tabs: SavedTab[], showGroupedTabsInDomainGroups: boolean = false): { customGroups: Map<string, SavedTab[]>; domainGroups: Map<string, SavedTab[]> } {
   const customGroups = new Map<string, SavedTab[]>();
   const domainGroups = new Map<string, SavedTab[]>();
   
   for (const tab of tabs) {
-    if (tab.groupType === 'custom') {
+    let hasCustomGroup = false;
+    
+    // 複数カスタムグループに対応
+    if (tab.customGroups && tab.customGroups.length > 0) {
+      for (const groupName of tab.customGroups) {
+        const existing = customGroups.get(groupName) || [];
+        existing.push(tab);
+        customGroups.set(groupName, existing);
+        hasCustomGroup = true;
+      }
+    } else if (tab.groupType === 'custom' && tab.group) {
+      // 後方互換性：customGroupsがないがgroupTypeがcustomの場合
       const existing = customGroups.get(tab.group) || [];
       existing.push(tab);
       customGroups.set(tab.group, existing);
-    } else {
-      // groupType が 'domain' または未定義の場合
-      const groupKey = tab.group || tab.domain;
+      hasCustomGroup = true;
+    }
+    
+    // ドメイングループへの追加条件：
+    // 1. カスタムグループに所属していない
+    // 2. あるいは、「カスタムグループ所属タブもドメイングループに表示」が有効
+    if (!hasCustomGroup || showGroupedTabsInDomainGroups) {
+      const groupKey = (tab.groupType === 'domain' ? tab.group : null) || tab.domain;
       const existing = domainGroups.get(groupKey) || [];
       existing.push(tab);
       domainGroups.set(groupKey, existing);
@@ -187,11 +205,12 @@ export function TabList({
   collapsedGroups,
   onToggleCollapse,
   domainGroupAliases = {},
+  showGroupedTabsInDomainGroups = false,
 }: TabListProps) {
   const isCompact = displayDensity === 'compact';
   // グループ化とソート（フィルタ適用）
   const { groups, groupCounts, flatTabs } = useMemo(() => {
-    const { customGroups: cGroups, domainGroups } = groupTabs(tabs);
+    const { customGroups: cGroups, domainGroups } = groupTabs(tabs, showGroupedTabsInDomainGroups);
     
     // カスタムグループをソート
     const sortedCustomGroups = sortGroups(cGroups, groupSort);
@@ -200,7 +219,7 @@ export function TabList({
     
     const groups: TabGroup[] = [];
     const groupCounts: number[] = [];
-    const flatTabs: SavedTab[] = [];
+    const flatTabs: { tab: SavedTab; groupName: string; groupType: 'domain' | 'custom' }[] = [];
     
     // カスタムグループを先に追加
     for (const [name, groupTabList] of sortedCustomGroups) {
@@ -212,7 +231,7 @@ export function TabList({
       // 折りたたまれている場合はタブ数を0として扱う（表示しない）
       groupCounts.push(isCollapsed ? 0 : filteredTabs.length);
       if (!isCollapsed) {
-        flatTabs.push(...filteredTabs);
+        flatTabs.push(...filteredTabs.map(tab => ({ tab, groupName: name, groupType: 'custom' as const })));
       }
     }
     
@@ -226,12 +245,12 @@ export function TabList({
       // 折りたたまれている場合はタブ数を0として扱う（表示しない）
       groupCounts.push(isCollapsed ? 0 : filteredTabs.length);
       if (!isCollapsed) {
-        flatTabs.push(...filteredTabs);
+        flatTabs.push(...filteredTabs.map(tab => ({ tab, groupName: name, groupType: 'domain' as const })));
       }
     }
     
     return { groups, groupCounts, flatTabs };
-  }, [tabs, groupSort, itemSort, groupFilters, collapsedGroups]);
+  }, [tabs, groupSort, itemSort, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups]);
 
   // グループヘッダーのレンダリング
   const groupContent = useCallback((index: number) => {
@@ -246,7 +265,6 @@ export function TabList({
         onDeleteGroup={onDeleteGroup}
         onOpenGroup={onOpenGroup}
         onOpenGroupAsTabGroup={onOpenGroupAsTabGroup}
-        onRenameGroup={onRenameGroup}
         onRequestRename={onRequestRename}
         filterPattern={groupFilters[group.name] || ''}
         onFilterChange={(pattern: string) => onGroupFilterChange(group.name, pattern)}
@@ -264,12 +282,14 @@ export function TabList({
   }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases]);
 
   const itemContent = useCallback((index: number) => {
-    const tab = flatTabs[index];
+    const { tab, groupName, groupType } = flatTabs[index];
     return (
       <TabCard
-        key={tab.id}
+        key={`${groupName}-${tab.id}`} // 同じタブが複数グループに表示されるためキーを変更
         tab={tab}
         customGroups={customGroups}
+        currentGroupName={groupName}
+        currentGroupType={groupType}
         onDelete={onDeleteTab}
         onOpen={onOpenTab}
         onMiddleClick={onMiddleClickTab}

@@ -2,7 +2,7 @@ import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions } from './types';
 import { useTranslation } from '../common/i18nContext.js';
 import { DateRangeFilterComponent } from './DateRangeFilter';
-import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus } from 'lucide-react';
+import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus, CheckSquare, Square } from 'lucide-react';
 
 interface HeaderProps {
   tabCount: number;
@@ -36,6 +36,9 @@ interface HeaderProps {
   // グループ作成関連
   onCreateGroup: () => void;
   onRequestBulkMoveToNewGroup: () => void;
+  // カスタムグループ表示設定
+  showGroupedTabsInDomainGroups: boolean;
+  onToggleShowGroupedTabsInDomainGroups: () => void;
 }
 
 export const Header = memo(function Header({
@@ -68,6 +71,8 @@ export const Header = memo(function Header({
   customGroups,
   onCreateGroup,
   onRequestBulkMoveToNewGroup,
+  showGroupedTabsInDomainGroups,
+  onToggleShowGroupedTabsInDomainGroups,
 }: HeaderProps) {
   const { t } = useTranslation();
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -380,6 +385,20 @@ export const Header = memo(function Header({
                         onClick={() => handleDensitySelect('compact')}
                       >
                         <AlignJustify size={16} /> {t('tabManager.viewMode.compact')}
+                      </button>
+                    </div>
+                    <div className="view-mode-menu-divider" />
+                    <div className="view-mode-menu-section">
+                      <div className="view-mode-menu-label">{t('settings.customGroups.title')}</div>
+                      <button
+                        className="view-mode-menu-item"
+                        onClick={() => {
+                          onToggleShowGroupedTabsInDomainGroups();
+                          setShowViewModeMenu(false);
+                        }}
+                      >
+                        {showGroupedTabsInDomainGroups ? <CheckSquare size={16} /> : <Square size={16} />}
+                        {t('settings.customGroups.showInDomainGroups')}
                       </button>
                     </div>
                   </div>

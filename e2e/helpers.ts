@@ -89,7 +89,7 @@ export async function createTestTabData(page: Page, tabData: {
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 3;
+  const DB_VERSION = 4;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -209,7 +209,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 } = {}): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 3;
+  const DB_VERSION = 4;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -306,7 +306,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 export async function clearTestData(page: Page): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 3;
+  const DB_VERSION = 4;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';

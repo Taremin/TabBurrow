@@ -940,8 +940,10 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
+    // カスタムグループ設定セクションを探す
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
     // 新規グループ作成ボタンが存在することを確認
-    const addButton = page.locator('.add-group-button');
+    const addButton = customGroupSection.locator('.add-group-button');
     await expect(addButton).toBeVisible();
   });
 
@@ -950,8 +952,10 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
+    // カスタムグループ設定セクションを探す
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
     // 新規グループ作成ボタンをクリック
-    const addButton = page.locator('.add-group-button');
+    const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
     
     // ダイアログが表示されることを確認
@@ -972,8 +976,10 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
+    // カスタムグループ設定セクションを探す
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
     // 新規グループ作成ボタンをクリック
-    const addButton = page.locator('.add-group-button');
+    const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
     
     const dialog = page.locator('.dialog-overlay');
@@ -991,7 +997,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成されたグループが一覧に表示される
-    const groupItem = page.locator('.custom-group-name').filter({ hasText: groupName });
+    const groupItem = customGroupSection.locator('.custom-group-name').filter({ hasText: groupName });
     await expect(groupItem).toBeVisible();
   });
 
@@ -1000,8 +1006,10 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
+    // カスタムグループ設定セクションを探す
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
     // まず新規グループを作成
-    const addButton = page.locator('.add-group-button');
+    const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
     
     let dialog = page.locator('.dialog-overlay');
@@ -1013,7 +1021,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成されたグループの編集ボタンをクリック
-    const groupItem = page.locator('.custom-group-item').filter({ hasText: originalName });
+    const groupItem = customGroupSection.locator('.custom-group-item').filter({ hasText: originalName });
     await expect(groupItem).toBeVisible();
     
     const editButton = groupItem.locator('.btn-icon').first();
@@ -1033,7 +1041,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 新しい名前で表示される
-    const renamedGroup = page.locator('.custom-group-name').filter({ hasText: newName });
+    const renamedGroup = customGroupSection.locator('.custom-group-name').filter({ hasText: newName });
     await expect(renamedGroup).toBeVisible();
   });
 
@@ -1042,8 +1050,10 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
+    // カスタムグループ設定セクションを探す
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
     // まず新規グループを作成
-    const addButton = page.locator('.add-group-button');
+    const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
     
     let dialog = page.locator('.dialog-overlay');
@@ -1055,7 +1065,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成されたグループの削除ボタンをクリック
-    const groupItem = page.locator('.custom-group-item').filter({ hasText: groupName });
+    const groupItem = customGroupSection.locator('.custom-group-item').filter({ hasText: groupName });
     await expect(groupItem).toBeVisible();
     
     const deleteButton = groupItem.locator('.btn-danger-icon');
@@ -1080,8 +1090,10 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
+    // カスタムグループ設定セクションを探す
+    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
     // 新規グループ作成ボタンをクリック
-    const addButton = page.locator('.add-group-button');
+    const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
     
     const dialog = page.locator('.dialog-overlay');

@@ -2,7 +2,7 @@
 
 ## IndexedDB (`storage.ts`, `dbSchema.ts`)
 
-`TabBurrowDB` (Version 3) を使用。
+`TabBurrowDB` (Version 4) を使用。
 
 ### `tabs` ストア
 保存されたタブのメインデータ。
@@ -16,6 +16,7 @@
 *   **screenshot**: スクリーンショット画像 (Blob/JPEG, 512x512)
 *   **lastAccessed**: 最終アクセス日時（タブから取得）
 *   **savedAt**: 保存日時 (timestamp)
+*   **customGroups**: 所属するカスタムグループ名の配列 (`string[]`, Version 4で追加)
 
 ### `customGroups` ストア
 ユーザー定義のカスタムグループ情報。
@@ -56,6 +57,12 @@
 *   **itemSort**: アイテムソート順
 *   **defaultViewMode**: デフォルトグループ化モード (`'grouped' | 'flat'`)
 *   **defaultDisplayDensity**: デフォルト表示密度 (`'normal' | 'compact'`)
+
+#### カスタムグループ設定
+*   **showGroupedTabsInDomainGroups**: カスタムグループに所属するタブをドメイングループにも表示するか (`boolean`)
+
+#### ドメイングループ設定
+*   **domainGroupAliases**: ドメイン名に対する表示エイリアス (`Record<string, string>`)
 
 #### タブ復元設定
 *   **restoreMode**: 復元時の挙動

@@ -113,6 +113,35 @@ async function openDB(): Promise<IDBDatabase> {
           backupStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
       }
+
+      // バージョン4: 複数カスタムグループ対応
+      if (oldVersion < 4) {
+        const tabStore = transaction.objectStore(STORE_NAME);
+        
+        // customGroups インデックスを作成 (multiEntry: true で配列内要素での検索を可能にする)
+        if (!tabStore.indexNames.contains('customGroups')) {
+          tabStore.createIndex('customGroups', 'customGroups', { unique: false, multiEntry: true });
+        }
+        
+        // 既存データのマイグレーション
+        const cursorRequest = tabStore.openCursor();
+        cursorRequest.onsuccess = (e) => {
+          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+          if (cursor) {
+            const tab = cursor.value;
+            // groupType が custom の場合、group フィールドの内容を customGroups 配列の初期値とする
+            if (!tab.customGroups) {
+              if (tab.groupType === 'custom' && tab.group) {
+                tab.customGroups = [tab.group];
+              } else {
+                tab.customGroups = [];
+              }
+              cursor.update(tab);
+            }
+            cursor.continue();
+          }
+        };
+      }
     };
   });
 }
@@ -545,14 +574,28 @@ export async function renameCustomGroup(oldName: string, newName: string): Promi
       groupStore.delete(oldName);
       
       // タブのグループ名を更新
-      const tabIndex = tabStore.index('group');
-      const tabCursor = tabIndex.openCursor(IDBKeyRange.only(oldName));
+      const tabCursor = tabStore.openCursor();
       tabCursor.onsuccess = (e) => {
         const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
           const tab = cursor.value as SavedTab;
-          tab.group = newName;
-          cursor.update(tab);
+          let changed = false;
+          
+          // レガシーフィールドの更新
+          if (tab.group === oldName) {
+            tab.group = newName;
+            changed = true;
+          }
+          
+          // 新しい配列フィールドの更新
+          if (tab.customGroups && tab.customGroups.includes(oldName)) {
+            tab.customGroups = tab.customGroups.map(g => g === oldName ? newName : g);
+            changed = true;
+          }
+          
+          if (changed) {
+            cursor.update(tab);
+          }
           cursor.continue();
         }
       };
@@ -577,16 +620,30 @@ export async function deleteCustomGroup(name: string): Promise<void> {
     // グループを削除
     groupStore.delete(name);
     
-    // タブをドメイングループに戻す
-    const tabIndex = tabStore.index('group');
-    const tabCursor = tabIndex.openCursor(IDBKeyRange.only(name));
+    // タブを修正
+    const tabCursor = tabStore.openCursor();
     tabCursor.onsuccess = (e) => {
       const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
       if (cursor) {
         const tab = cursor.value as SavedTab;
-        tab.group = tab.domain;
-        tab.groupType = 'domain';
-        cursor.update(tab);
+        let changed = false;
+        
+        // レガシーフィールドの更新
+        if (tab.group === name) {
+          tab.group = tab.domain;
+          tab.groupType = 'domain';
+          changed = true;
+        }
+        
+        // 新しい配列フィールドからの削除
+        if (tab.customGroups && tab.customGroups.includes(name)) {
+          tab.customGroups = tab.customGroups.filter(g => g !== name);
+          changed = true;
+        }
+        
+        if (changed) {
+          cursor.update(tab);
+        }
         cursor.continue();
       }
     };
@@ -610,8 +667,17 @@ export async function assignTabToCustomGroup(tabId: string, groupName: string): 
     request.onsuccess = () => {
       const tab = request.result as SavedTab | undefined;
       if (tab) {
+        // レガシーフィールドの更新
         tab.group = groupName;
         tab.groupType = 'custom';
+        
+        // 新しい配列フィールドの更新
+        if (!tab.customGroups) {
+          tab.customGroups = [groupName];
+        } else if (!tab.customGroups.includes(groupName)) {
+          tab.customGroups.push(groupName);
+        }
+        
         store.put(tab);
       }
     };
@@ -624,7 +690,7 @@ export async function assignTabToCustomGroup(tabId: string, groupName: string): 
 /**
  * タブをドメイングループに戻す
  */
-export async function removeTabFromCustomGroup(tabId: string): Promise<void> {
+export async function removeTabFromCustomGroup(tabId: string, groupName?: string): Promise<void> {
   const db = await openDB();
   
   return new Promise((resolve, reject) => {
@@ -635,8 +701,28 @@ export async function removeTabFromCustomGroup(tabId: string): Promise<void> {
     request.onsuccess = () => {
       const tab = request.result as SavedTab | undefined;
       if (tab) {
-        tab.group = tab.domain;
-        tab.groupType = 'domain';
+        if (groupName) {
+          // 特定のグループから削除
+          if (tab.customGroups) {
+            tab.customGroups = tab.customGroups.filter(g => g !== groupName);
+          }
+          
+          // 表示中のメイングループが削除対象なら、残りのグループのいずれか、またはドメインに戻す
+          if (tab.group === groupName) {
+            if (tab.customGroups && tab.customGroups.length > 0) {
+              tab.group = tab.customGroups[0];
+              tab.groupType = 'custom';
+            } else {
+              tab.group = tab.domain;
+              tab.groupType = 'domain';
+            }
+          }
+        } else {
+          // 全てのカスタムグループから削除
+          tab.group = tab.domain;
+          tab.groupType = 'domain';
+          tab.customGroups = [];
+        }
         store.put(tab);
       }
     };
@@ -683,18 +769,24 @@ export async function assignMultipleTabsToGroup(tabIds: string[], groupName: str
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     
-    let pending = tabIds.length;
-    
     for (const tabId of tabIds) {
       const request = store.get(tabId);
       request.onsuccess = () => {
         const tab = request.result as SavedTab | undefined;
         if (tab) {
+          // レガシーフィールドの更新
           tab.group = groupName;
           tab.groupType = 'custom';
+          
+          // 新しい配列フィールドの更新
+          if (!tab.customGroups) {
+            tab.customGroups = [groupName];
+          } else if (!tab.customGroups.includes(groupName)) {
+            tab.customGroups.push(groupName);
+          }
+          
           store.put(tab);
         }
-        pending--;
       };
     }
 
@@ -706,7 +798,7 @@ export async function assignMultipleTabsToGroup(tabIds: string[], groupName: str
 /**
  * 複数タブをカスタムグループから削除（ドメイングループに戻す）
  */
-export async function removeMultipleTabsFromGroup(tabIds: string[]): Promise<void> {
+export async function removeMultipleTabsFromGroup(tabIds: string[], groupName?: string): Promise<void> {
   if (tabIds.length === 0) return;
   
   const db = await openDB();
@@ -720,8 +812,27 @@ export async function removeMultipleTabsFromGroup(tabIds: string[]): Promise<voi
       request.onsuccess = () => {
         const tab = request.result as SavedTab | undefined;
         if (tab) {
-          tab.group = tab.domain;
-          tab.groupType = 'domain';
+          if (groupName) {
+            // 特定のグループから削除
+            if (tab.customGroups) {
+              tab.customGroups = tab.customGroups.filter(g => g !== groupName);
+            }
+            
+            if (tab.group === groupName) {
+              if (tab.customGroups && tab.customGroups.length > 0) {
+                tab.group = tab.customGroups[0];
+                tab.groupType = 'custom';
+              } else {
+                tab.group = tab.domain;
+                tab.groupType = 'domain';
+              }
+            }
+          } else {
+            // 全てのカスタムグループから削除
+            tab.group = tab.domain;
+            tab.groupType = 'domain';
+            tab.customGroups = [];
+          }
           store.put(tab);
         }
       };

@@ -16,7 +16,15 @@ import {
 } from '../../storage.js';
 import type { CustomGroupMeta, SavedTab } from '../../storage.js';
 
-export function CustomGroupSettings() {
+interface CustomGroupSettingsProps {
+  showGroupedTabsInDomainGroups?: boolean;
+  onShowGroupedTabsInDomainGroupsChange?: (value: boolean) => void;
+}
+
+export function CustomGroupSettings({
+  showGroupedTabsInDomainGroups = false,
+  onShowGroupedTabsInDomainGroupsChange,
+}: CustomGroupSettingsProps) {
   const { t } = useTranslation();
   
   // グループ一覧
@@ -155,6 +163,25 @@ export function CustomGroupSettings() {
 
   return (
     <div className="custom-groups-settings">
+      {/* 設定オプション */}
+      {onShowGroupedTabsInDomainGroupsChange && (
+        <div className="form-group" style={{ marginBottom: '20px' }}>
+          <label className="form-checkbox-label">
+            <input
+              type="checkbox"
+              className="form-checkbox"
+              checked={showGroupedTabsInDomainGroups}
+              onChange={(e) => onShowGroupedTabsInDomainGroupsChange(e.target.checked)}
+            />
+            <span className="checkbox-custom"></span>
+            <span>{t('settings.customGroups.showInDomainGroups')}</span>
+          </label>
+          <div className="form-hint" style={{ marginTop: '4px', marginLeft: '28px' }}>
+            {t('settings.customGroups.showInDomainGroupsHelp')}
+          </div>
+        </div>
+      )}
+
       {/* グループ一覧 */}
       {groups.length === 0 ? (
         <p className="empty-message">{t('settings.customGroups.empty')}</p>

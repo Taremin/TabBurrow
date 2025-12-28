@@ -109,6 +109,7 @@ export function App() {
   const [viewMode, setViewMode] = useState<ViewMode | undefined>(undefined);
   const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined);
   const [domainGroupAliases, setDomainGroupAliases] = useState<Record<string, string>>({});
+  const [showGroupedTabsInDomainGroups, setShowGroupedTabsInDomainGroups] = useState(false);
 
   // UI State
   const [dialog, setDialog] = useState<DialogState>({
@@ -142,6 +143,7 @@ export function App() {
       setViewMode(prev => prev === undefined ? settings.defaultViewMode : prev);
       setDisplayDensity(prev => prev === undefined ? settings.defaultDisplayDensity : prev);
       setDomainGroupAliases(settings.domainGroupAliases || {});
+      setShowGroupedTabsInDomainGroups(settings.showGroupedTabsInDomainGroups);
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -191,6 +193,18 @@ export function App() {
       return newState;
     });
   }, [saveCollapsedGroups]);
+
+  // Toggle showGroupedTabsInDomainGroups and save to settings
+  const handleToggleShowGroupedTabsInDomainGroups = useCallback(async () => {
+    const newValue = !showGroupedTabsInDomainGroups;
+    setShowGroupedTabsInDomainGroups(newValue);
+    try {
+      const settings = await getSettings();
+      await saveSettings({ ...settings, showGroupedTabsInDomainGroups: newValue });
+    } catch (error) {
+      console.error('設定の保存に失敗:', error);
+    }
+  }, [showGroupedTabsInDomainGroups]);
 
   // Actions Wrapper
   const handleOpenTab = useCallback((url: string) => {
@@ -488,6 +502,8 @@ export function App() {
         customGroups={customGroups}
         onCreateGroup={handleRequestCreateGroup}
         onRequestBulkMoveToNewGroup={handleRequestBulkMoveToNewGroup}
+        showGroupedTabsInDomainGroups={showGroupedTabsInDomainGroups}
+        onToggleShowGroupedTabsInDomainGroups={handleToggleShowGroupedTabsInDomainGroups}
       />
 
       <main className="main">
@@ -529,6 +545,7 @@ export function App() {
             collapsedGroups={collapsedGroups}
             onToggleCollapse={handleToggleCollapse}
             domainGroupAliases={domainGroupAliases}
+            showGroupedTabsInDomainGroups={showGroupedTabsInDomainGroups}
           />
         )}
 

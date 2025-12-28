@@ -247,8 +247,8 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
     // ドロップダウンメニューを開いてグループ表示に戻す
     await viewModeToggle.click();
     await page.waitForTimeout(300);
-    // グループ表示ボタンをクリック
-    await page.locator('.view-mode-menu-item').filter({ hasText: /グループ表示|Grouped/i }).click();
+    // グループ表示ボタンをクリック（最初の一致を選択）
+    await page.locator('.view-mode-menu-item').filter({ hasText: /グループ表示|Grouped/ }).first().click();
     await page.waitForTimeout(500);
     
     // グループヘッダーが復帰

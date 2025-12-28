@@ -11,7 +11,7 @@
 export const DB_NAME = 'TabBurrowDB';
 
 /** データベースバージョン */
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;
 
 /** タブストア名 */
 export const TABS_STORE_NAME = 'tabs';
@@ -39,6 +39,7 @@ export interface SavedTab {
   domain: string;       // ドメイン（後方互換性のため保持）
   group: string;        // グループ名（ドメインまたはカスタムグループ名）
   groupType: GroupType; // グループタイプ
+  customGroups?: string[]; // カスタムグループ名の配列
   favIconUrl: string;   // ファビコンURL
   screenshot: Blob;     // 512x512スクリーンショット (JPEG)
   lastAccessed: number; // 最終アクセス日時（タブから取得）

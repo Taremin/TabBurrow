@@ -99,8 +99,8 @@ export function useTabs() {
   }, [loadTabs]);
 
   // グループから外す
-  const handleRemoveFromGroup = useCallback(async (tabId: string) => {
-    await removeTabFromCustomGroup(tabId);
+  const handleRemoveFromGroup = useCallback(async (tabId: string, groupName?: string) => {
+    await removeTabFromCustomGroup(tabId, groupName);
     await loadTabs();
   }, [loadTabs]);
 
@@ -111,8 +111,8 @@ export function useTabs() {
   }, [loadTabs]);
 
   // 複数グループ解除
-  const handleBulkRemoveFromGroup = useCallback(async (ids: string[]) => {
-    await removeMultipleTabsFromGroup(ids);
+  const handleBulkRemoveFromGroup = useCallback(async (ids: string[], groupName?: string) => {
+    await removeMultipleTabsFromGroup(ids, groupName);
     await loadTabs();
   }, [loadTabs]);
 

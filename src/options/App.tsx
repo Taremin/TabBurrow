@@ -270,13 +270,15 @@ export function App() {
         />
       </SettingsSection>
 
-      {/* カスタムグループ設定 */}
       <SettingsSection
         icon={<Folder size={20} />}
         title={t('settings.customGroups.title')}
         description={t('settings.customGroups.description')}
       >
-        <CustomGroupSettings />
+        <CustomGroupSettings
+          showGroupedTabsInDomainGroups={settings.showGroupedTabsInDomainGroups}
+          onShowGroupedTabsInDomainGroupsChange={(value) => updateSetting('showGroupedTabsInDomainGroups', value)}
+        />
       </SettingsSection>
 
       {/* データ管理セクション */}
