@@ -250,6 +250,7 @@ export async function checkLinks(
             const result = await checkSingleUrl(
               tab.url,
               settings.linkCheckTimeoutMs,
+              settings.linkCheckUseGetFallback,
               signal
             );
             
@@ -371,6 +372,7 @@ function createRoundRobinOrder(tabsByDomain: Map<string, SavedTab[]>): SavedTab[
 async function checkSingleUrl(
   url: string,
   timeoutMs: number,
+  useGetFallback: boolean,
   signal: AbortSignal
 ): Promise<SingleUrlCheckResult> {
   try {
@@ -388,17 +390,61 @@ async function checkSingleUrl(
     signal.addEventListener('abort', abortHandler);
 
     try {
-      // HEADリクエストを送信
-      const response = await fetch(url, {
+      // 1. HEADリクエストを試行
+      let response = await fetch(url, {
         method: 'HEAD',
         signal: combinedSignal,
         redirect: 'follow',
       });
       
+      // 2. HEADで失敗（不適切なステータスコード）かつGETフォールバックが有効な場合
+      // 4xx, 5xx の場合にGETを試みる（特に405 Method Not Allowedや、ユーザー指摘の404対策）
+      if (useGetFallback && response.status >= 400) {
+        try {
+          // GETリクエストを送信
+          // 負荷軽減のため、ヘッダー受信後にAbortする（bodyは取得しない）
+          const getAbortController = new AbortController();
+          const getCombinedSignal = signal.aborted 
+            ? signal 
+            : abortToCombinedSignal(timeoutController.signal, getAbortController.signal);
+
+          const getResponse = await fetch(url, {
+            method: 'GET',
+            signal: getCombinedSignal,
+            redirect: 'follow',
+          });
+
+          // 成功（2xx/3xx）した場合は結果を上書き
+          if (getResponse.status < 400) {
+            response = getResponse;
+          }
+          
+          // Bodyの読み込みを開始せず即座に中断
+          getAbortController.abort();
+        } catch (e) {
+          // GETフォールバック自体のエラーは無視（HEADの結果を優先）
+          console.debug(`GET fallback failed for ${url}:`, e);
+        }
+      }
+      
       clearTimeout(timeoutId);
       return { statusCode: response.status };
     } catch (error) {
       clearTimeout(timeoutId);
+
+      // HEAD自体が例外（ネットワークエラー等）を投げた場合も、GETでリトライしてみる価値がある
+      if (useGetFallback && !signal.aborted) {
+        try {
+          const getResponse = await fetch(url, {
+            method: 'GET',
+            signal: combinedSignal,
+            redirect: 'follow',
+          });
+          return { statusCode: getResponse.status };
+        } catch (getFallbackError) {
+          // GETも失敗した場合は元のエラーを返す
+        }
+      }
       
       if (timeoutController.signal.aborted && !signal.aborted) {
         return { statusCode: null, error: 'timeout' };
@@ -416,6 +462,21 @@ async function checkSingleUrl(
   } catch (error) {
     return { statusCode: null, error: String(error) };
   }
+}
+
+/**
+ * 複数のAbortSignalを結合する（簡易版）
+ */
+function abortToCombinedSignal(...signals: AbortSignal[]): AbortSignal {
+  const controller = new AbortController();
+  for (const signal of signals) {
+    if (signal.aborted) {
+      controller.abort();
+      return controller.signal;
+    }
+    signal.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  return controller.signal;
 }
 
 /**

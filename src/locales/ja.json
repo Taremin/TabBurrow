@@ -431,6 +431,8 @@
             "actionDead": "リンク切れ",
             "actionWarning": "警告",
             "actionIgnore": "無視",
+            "useGetFallback": "HEADで失敗した場合にGETで再試行する",
+            "useGetFallbackHint": "一部のサイトではHEADリクエストが正しく機能しないため、GETリクエストでリンク切れを確認します。",
             "editRule": "ルールを編集",
             "dialog": {
                 "name": "ルール名",

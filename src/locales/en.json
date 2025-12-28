@@ -431,6 +431,8 @@
             "actionDead": "Dead",
             "actionWarning": "Warning",
             "actionIgnore": "Ignore",
+            "useGetFallback": "Retry with GET if HEAD fails",
+            "useGetFallbackHint": "Some sites do not support HEAD requests. Enable this to fallback to GET for better accuracy.",
             "editRule": "Edit Rule",
             "dialog": {
                 "name": "Rule Name",

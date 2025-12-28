@@ -226,11 +226,13 @@ export function App() {
             concurrency={settings.linkCheckConcurrency}
             domainConcurrency={settings.linkCheckDomainConcurrency}
             domainDelayMs={settings.linkCheckDomainDelayMs}
+            useGetFallback={settings.linkCheckUseGetFallback}
             onRulesChange={(value) => updateSetting('linkCheckRules', value)}
             onTimeoutChange={(value) => updateSetting('linkCheckTimeoutMs', value)}
             onConcurrencyChange={(value) => updateSetting('linkCheckConcurrency', value)}
             onDomainConcurrencyChange={(value) => updateSetting('linkCheckDomainConcurrency', value)}
             onDomainDelayChange={(value) => updateSetting('linkCheckDomainDelayMs', value)}
+            onUseGetFallbackChange={(value) => updateSetting('linkCheckUseGetFallback', value)}
           />
         </SettingsSection>
 

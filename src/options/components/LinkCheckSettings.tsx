@@ -14,11 +14,13 @@ interface LinkCheckSettingsProps {
   concurrency: number;
   domainConcurrency: number;
   domainDelayMs: number;
+  useGetFallback: boolean;
   onRulesChange: (rules: LinkCheckRule[]) => void;
   onTimeoutChange: (value: number) => void;
   onConcurrencyChange: (value: number) => void;
   onDomainConcurrencyChange: (value: number) => void;
   onDomainDelayChange: (value: number) => void;
+  onUseGetFallbackChange: (value: boolean) => void;
 }
 
 // アクションの選択肢
@@ -35,11 +37,13 @@ export function LinkCheckSettings({
   concurrency,
   domainConcurrency,
   domainDelayMs,
+  useGetFallback,
   onRulesChange,
   onTimeoutChange,
   onConcurrencyChange,
   onDomainConcurrencyChange,
   onDomainDelayChange,
+  onUseGetFallbackChange,
 }: LinkCheckSettingsProps) {
   const { t } = useTranslation();
 
@@ -182,6 +186,25 @@ export function LinkCheckSettings({
               />
               <span className="input-suffix">{t('linkCheck.settings.domainDelayUnit')}</span>
             </div>
+          </div>
+        </div>
+
+        {/* GETフォールバック設定 */}
+        <div className="form-group" style={{ marginTop: '16px' }}>
+          <label className="form-checkbox-label" title={t('linkCheck.settings.useGetFallbackHint')}>
+            <input
+              type="checkbox"
+              className="form-checkbox"
+              checked={useGetFallback}
+              onChange={(e) => onUseGetFallbackChange(e.target.checked)}
+            />
+            <span className="checkbox-custom"></span>
+            <span>
+              {t('linkCheck.settings.useGetFallback')}
+            </span>
+          </label>
+          <div className="form-hint" style={{ marginLeft: '30px' }}>
+            {t('linkCheck.settings.useGetFallbackHint')}
           </div>
         </div>
       </div>

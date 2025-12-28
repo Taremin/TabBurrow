@@ -110,6 +110,7 @@ export interface Settings {
   linkCheckConcurrency: number;              // グローバル同時リクエスト数
   linkCheckDomainConcurrency: number;        // ドメイン別同時リクエスト数
   linkCheckDomainDelayMs: number;            // 同一ドメイン間ディレイ（ミリ秒）
+  linkCheckUseGetFallback: boolean;          // HEADで失敗した場合にGETで再試行するか
 
   // アイコンクリック設定
   iconClickApplyRules: boolean;              // 自動収納ルールを適用するか
@@ -148,6 +149,7 @@ const DEFAULT_SETTINGS: Settings = {
   linkCheckConcurrency: 5,           // 5並列
   linkCheckDomainConcurrency: 1,     // ドメインあたり1並列
   linkCheckDomainDelayMs: 100,       // 100ms
+  linkCheckUseGetFallback: true,     // デフォルトでGETフォールバックを有効にする
 
   // アイコンクリック設定
   iconClickApplyRules: true,         // デフォルトでルールを適用
