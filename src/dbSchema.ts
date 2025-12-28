@@ -36,6 +36,7 @@ export interface SavedTab {
   id: string;           // ユニークID (crypto.randomUUID())
   url: string;          // タブのURL
   title: string;        // ページタイトル
+  displayName?: string; // ユーザー設定の表示名（未設定時はtitleを使用）
   domain: string;       // ドメイン（後方互換性のため保持）
   group: string;        // グループ名（ドメインまたはカスタムグループ名）
   groupType: GroupType; // グループタイプ
@@ -63,6 +64,7 @@ export interface BackupTab {
   id: string;
   url: string;
   title: string;
+  displayName?: string; // ユーザー設定の表示名
   domain: string;
   group: string;
   groupType: GroupType;
@@ -129,6 +131,7 @@ export const BACKUPS_INDEXES = [
 export function createTabData(overrides: {
   url: string;
   title: string;
+  displayName?: string;
   domain?: string;
   group?: string;
   groupType?: GroupType;
@@ -143,6 +146,7 @@ export function createTabData(overrides: {
     id: generateId(),
     url: overrides.url,
     title: overrides.title,
+    displayName: overrides.displayName,
     domain: domain,
     group: overrides.group || domain,
     groupType: overrides.groupType || 'domain',

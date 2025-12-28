@@ -9,7 +9,7 @@ import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext.js';
-import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag } from 'lucide-react';
+import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
@@ -20,6 +20,7 @@ interface TabCardProps {
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string, groupName?: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
+  onRenameTab?: (tabId: string) => void; // タブの表示名変更
   // コンテキスト情報
   currentGroupName?: string;
   currentGroupType?: 'domain' | 'custom';
@@ -49,6 +50,7 @@ export const TabCard = memo(function TabCard({
   onMoveToGroup,
   onRemoveFromGroup,
   onRequestMoveToNewGroup,
+  onRenameTab,
   currentGroupName,
   currentGroupType,
   isCompact = false,
@@ -332,7 +334,7 @@ export const TabCard = memo(function TabCard({
           <div className="tab-screenshot-indicator"><Camera size={14} /></div>
         )}
         <div className={`tab-info ${isCompact ? 'tab-info-compact' : ''}`}>
-          <div className="tab-title">
+          <div className="tab-title" title={!isCompact && tab.displayName ? tab.title : undefined}>
             {tab.favIconUrl && (
               <img 
                 src={tab.favIconUrl} 
@@ -341,7 +343,15 @@ export const TabCard = memo(function TabCard({
                 onError={(e) => (e.currentTarget.style.display = 'none')}
               />
             )}
-            <span>{tab.title}</span>
+            <span>{tab.displayName || tab.title}</span>
+            {/* コンパクト表示時: displayNameがあれば編集済みアイコン（タイトル末尾に表示） */}
+            {isCompact && tab.displayName && (
+              <span className="tab-displayname-indicator"><Pencil size={12} /></span>
+            )}
+            {/* 通常表示でdisplayNameがある場合、元タイトルを小さく表示 */}
+            {!isCompact && tab.displayName && (
+              <span className="tab-original-title">{tab.title}</span>
+            )}
           </div>
           {/* URL行: グループタグ/バッジを含む */}
           <div className={`tab-url-row ${isCompact ? 'tab-url-row-compact' : ''}`}>
@@ -385,6 +395,18 @@ export const TabCard = memo(function TabCard({
           )}
         </div>
         <div className="tab-actions">
+          {onRenameTab && (
+            <button 
+              className="tab-rename" 
+              title={t('tabManager.tabCard.rename')}
+              onClick={(e) => {
+                e.stopPropagation();
+                onRenameTab(tab.id);
+              }}
+            >
+              <Pencil size={16} />
+            </button>
+          )}
           <button 
             ref={buttonRef}
             className="tab-group-action" 
@@ -418,7 +440,10 @@ export const TabCard = memo(function TabCard({
           )}
           {isCompact && (
             <div className="popup-info">
-              <div className="popup-title">{tab.title}</div>
+              <div className="popup-title">{tab.displayName || tab.title}</div>
+              {tab.displayName && (
+                <div className="popup-original-title">{tab.title}</div>
+              )}
               <div className="popup-url">{tab.url}</div>
             </div>
           )}

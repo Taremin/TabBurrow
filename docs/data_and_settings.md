@@ -9,6 +9,7 @@
 *   **id**: UUID (PK)
 *   **url**: タブのURL
 *   **title**: ページタイトル
+*   **displayName**: ユーザー設定の表示名（オプショナル、未設定時はtitleを使用）
 *   **domain**: ドメイン名（後方互換性のため保持）
 *   **group**: グループ名（ドメインまたはカスタムグループ名）
 *   **groupType**: `'domain' | 'custom'`

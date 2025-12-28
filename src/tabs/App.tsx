@@ -70,6 +70,7 @@ export function App() {
     handleRemoveFromGroup: removeTabFromGroup,
     handleBulkMoveToGroup: bulkMoveTabsToGroup,
     handleBulkRemoveFromGroup: bulkRemoveTabsFromGroup,
+    handleUpdateTab: updateTabData,
   } = useTabs();
 
   const {
@@ -128,6 +129,11 @@ export function App() {
     tabIdToMove?: string;
     bulkMove?: boolean;
   }>({ isOpen: false });
+  const [tabRenameDialog, setTabRenameDialog] = useState<{
+    isOpen: boolean;
+    tabId: string;
+    currentDisplayName?: string;
+  }>({ isOpen: false, tabId: '' });
 
   // Tab Count
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
@@ -381,6 +387,24 @@ export function App() {
     setCreateGroupDialog({ isOpen: false });
   }, [createGroupDialog, selectedTabIds, customGroups, createGroup, moveTabToGroup, bulkMoveTabsToGroup, setSelectedTabIds]);
 
+  // Tab Rename Logic
+  const handleRequestTabRename = useCallback((tabId: string) => {
+    const tab = allTabs.find(t => t.id === tabId);
+    setTabRenameDialog({
+      isOpen: true,
+      tabId,
+      currentDisplayName: tab?.displayName || '',
+    });
+  }, [allTabs]);
+
+  const handleConfirmTabRename = useCallback(async (newDisplayName: string) => {
+    const trimmed = newDisplayName.trim();
+    // 空文字の場合はundefinedにして表示名を解除
+    const displayName = trimmed || undefined;
+    await updateTabData(tabRenameDialog.tabId, { displayName });
+    setTabRenameDialog({ isOpen: false, tabId: '' });
+  }, [tabRenameDialog.tabId, updateTabData]);
+
   // Bulk Actions
   const handleSelectAll = useCallback(() => {
     selectAll(filteredTabs.map(tab => tab.id));
@@ -535,6 +559,7 @@ export function App() {
             onMoveToGroup={moveTabToGroup}
             onRemoveFromGroup={removeTabFromGroup}
             onRequestMoveToNewGroup={handleRequestMoveToNewGroup}
+            onRenameTab={handleRequestTabRename}
             isSelectionMode={isSelectionMode}
             selectedTabIds={selectedTabIds}
             onToggleSelection={handleToggleSelection}
@@ -597,6 +622,16 @@ export function App() {
         placeholder={t('tabManager.promptDialog.createGroupPlaceholder')}
         onConfirm={handleConfirmCreateGroup}
         onCancel={() => setCreateGroupDialog({ isOpen: false })}
+      />
+
+      {/* タブ表示名変更ダイアログ (PromptDialog) */}
+      <PromptDialog
+        isOpen={tabRenameDialog.isOpen}
+        title={t('tabManager.tabCard.renameDialogTitle')}
+        message={t('tabManager.tabCard.renameDialogMessage')}
+        defaultValue={tabRenameDialog.currentDisplayName || ''}
+        onConfirm={handleConfirmTabRename}
+        onCancel={() => setTabRenameDialog({ isOpen: false, tabId: '' })}
       />
     </div>
   );

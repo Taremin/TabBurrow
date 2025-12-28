@@ -287,7 +287,10 @@
             "saved": "Saved: {datetime}",
             "deleteButton": "Delete",
             "moveToGroup": "Move to Group",
-            "removeFromGroup": "Remove from Group"
+            "removeFromGroup": "Remove from Group",
+            "rename": "Rename",
+            "renameDialogTitle": "Change Tab Display Name",
+            "renameDialogMessage": "Enter a new display name (leave empty to use original title)"
         },
         "group": {
             "openButton": "Open Group",

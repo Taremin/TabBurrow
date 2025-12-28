@@ -18,6 +18,7 @@ import {
   removeMultipleTabsFromGroup,
   getStorageUsage,
   deleteAllTabs,
+  updateTab,
 } from '../../storage';
 import { formatBytes } from '../utils';
 import { useTranslation } from '../../common/i18nContext';
@@ -116,6 +117,12 @@ export function useTabs() {
     await loadTabs();
   }, [loadTabs]);
 
+  // タブの部分更新（displayName等）
+  const handleUpdateTab = useCallback(async (id: string, updates: Partial<SavedTab>) => {
+    await updateTab(id, updates);
+    await loadTabs();
+  }, [loadTabs]);
+
   // 初期読み込みとイベントリスナー
   useEffect(() => {
     loadTabs();
@@ -149,5 +156,6 @@ export function useTabs() {
     handleRemoveFromGroup,
     handleBulkMoveToGroup,
     handleBulkRemoveFromGroup,
+    handleUpdateTab,
   };
 }

@@ -607,6 +607,52 @@
   color: var(--danger-color);
 }
 
+/* リネームボタン */
+.tab-rename {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.tab-rename:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+/* 元タイトル（displayNameがある場合に表示） */
+.tab-original-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+  margin-left: 8px;
+}
+
+/* displayName編集アイコン（タイトル末尾に表示） */
+.tab-displayname-indicator {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* ポップアップ内の元タイトル */
+.popup-original-title {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  word-break: break-word;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
 /* 空状態・検索結果なし */
 .empty-state,
 .no-results {

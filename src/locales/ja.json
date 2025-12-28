@@ -287,7 +287,10 @@
             "saved": "保存: {datetime}",
             "deleteButton": "削除",
             "moveToGroup": "グループに移動",
-            "removeFromGroup": "グループから削除"
+            "removeFromGroup": "グループから削除",
+            "rename": "表示名を変更",
+            "renameDialogTitle": "タブの表示名を変更",
+            "renameDialogMessage": "新しい表示名を入力してください（空にすると元のタイトルが使用されます）"
         },
         "group": {
             "openButton": "グループを開く",
