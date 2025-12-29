@@ -64,6 +64,15 @@ dist/
 npm run typecheck
 ```
 
+## バージョン管理
+
+`package.json` のバージョンを各マニフェストファイル (`src/manifest.*.json`) に同期するためのスクリプトがあります。リリース前には必ず実行してください。
+
+```bash
+# package.json のバージョンを全マニフェストに適用
+npm run version:sync
+```
+
 ## GitHub Actionsリリースワークフロー
 
 ### トリガー
