@@ -13,6 +13,7 @@
     "build:firefox-android": "node esbuild.config.mjs --firefox-android",
     "typecheck": "tsc --noEmit",
     "version:sync": "npx tsx scripts/sync-version.ts",
+    "version": "npm run version:sync && git add src/manifest.*.json",
     "i18n:check": "npx tsx scripts/check-i18n.ts",
     "test": "vitest run",
     "test:watch": "vitest watch",

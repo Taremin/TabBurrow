@@ -66,10 +66,19 @@ npm run typecheck
 
 ## バージョン管理
 
-`package.json` のバージョンを各マニフェストファイル (`src/manifest.*.json`) に同期するためのスクリプトがあります。リリース前には必ず実行してください。
+`package.json` の `version` フックにより、`npm version` コマンド実行時に自動的に各マニフェストファイル (`src/manifest.*.json`) へバージョンが同期されます。
 
 ```bash
-# package.json のバージョンを全マニフェストに適用
+# バージョンを更新（自動的にマニフェストも更新され、コミットに含まれます）
+npm version patch
+# または
+npm version minor
+npm version major
+```
+
+手動で同期する場合は以下を実行してください：
+
+```bash
 npm run version:sync
 ```
 
