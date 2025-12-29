@@ -82,6 +82,7 @@
 *   **linkCheckConcurrency**: グローバル同時リクエスト数
 *   **linkCheckDomainConcurrency**: ドメイン別同時リクエスト数
 *   **linkCheckDomainDelayMs**: 同一ドメイン間ディレイ
+*   **linkCheckUseGetFallback**: HEADリクエスト失敗時にGETで再試行するか (`boolean`)
 
 #### バックアップ設定
 *   **autoBackupEnabled**: 自動バックアップ有効/無効
