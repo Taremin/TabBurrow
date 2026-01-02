@@ -21,7 +21,9 @@ export interface TabExportData {
     id: string;
     url: string;
     title: string;
+    displayName?: string;
     domain: string;
+    customGroups?: string[];
     favIconUrl: string;
     screenshot: string; // Base64
     lastAccessed: number;
@@ -86,7 +88,9 @@ export async function exportTabs(): Promise<TabExportData> {
       id: tab.id,
       url: tab.url,
       title: tab.title,
+      displayName: tab.displayName,
       domain: tab.domain,
+      customGroups: tab.customGroups,
       favIconUrl: tab.favIconUrl,
       screenshot: tab.screenshot ? await blobToBase64(tab.screenshot) : '',
       lastAccessed: tab.lastAccessed,
@@ -137,9 +141,11 @@ export async function importTabs(
       id: crypto.randomUUID(), // 新しいIDを生成
       url: tab.url,
       title: tab.title,
+      displayName: tab.displayName,
       domain: tab.domain,
       group: tab.domain, // インポート時はドメインをグループとして使用
       groupType: 'domain' as const,
+      customGroups: tab.customGroups,
       favIconUrl: tab.favIconUrl,
       screenshot: base64ToBlob(tab.screenshot),
       lastAccessed: tab.lastAccessed,

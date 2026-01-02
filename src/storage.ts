@@ -177,13 +177,15 @@ export async function saveTabs(tabs: SavedTab[]): Promise<void> {
       // 既存タブがあればそのIDを引き継ぐ（上書き用）
       // 新しいスクリーンショットが空の場合は既存のスクリーンショットを引き継ぐ
       const screenshot = tab.screenshot.size > 0 ? tab.screenshot : existing.screenshot;
-      // 既存のgroup/groupTypeを保持（カスタムグループ設定を維持）
+      // 既存の名称やグループ設定を保持
       tabsToSave.push({ 
         ...tab, 
         id: existing.id, 
         screenshot,
+        displayName: existing.displayName,
         group: existing.group,
         groupType: existing.groupType,
+        customGroups: existing.customGroups,
       });
     } else {
       tabsToSave.push(tab);
@@ -217,11 +219,13 @@ export async function saveTabsForCustomGroup(tabs: SavedTab[]): Promise<void> {
       // 既存タブがあればそのIDを引き継ぐ（上書き用）
       // 新しいスクリーンショットが空の場合は既存のスクリーンショットを引き継ぐ
       const screenshot = tab.screenshot.size > 0 ? tab.screenshot : existing.screenshot;
-      // group/groupTypeは新しい値を使用（カスタムグループへの割り当て更新）
+      // 表示名を引き継ぎ
+      // group/groupType/customGroupsは新しい値を使用（カスタムグループへの割り当て更新）
       tabsToSave.push({ 
         ...tab, 
         id: existing.id, 
         screenshot,
+        displayName: existing.displayName,
       });
     } else {
       tabsToSave.push(tab);

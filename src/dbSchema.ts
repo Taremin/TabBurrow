@@ -68,6 +68,7 @@ export interface BackupTab {
   domain: string;
   group: string;
   groupType: GroupType;
+  customGroups?: string[];
   favIconUrl: string;
   screenshot: Blob;     // Blobのまま保存
   lastAccessed: number;
@@ -139,6 +140,7 @@ export function createTabData(overrides: {
   screenshot?: Blob;
   lastAccessed?: number;
   savedAt?: number;
+  customGroups?: string[];
 }): SavedTab {
   const domain = overrides.domain || extractDomain(overrides.url);
   
@@ -154,6 +156,7 @@ export function createTabData(overrides: {
     screenshot: overrides.screenshot || new Blob([]),
     lastAccessed: overrides.lastAccessed || Date.now(),
     savedAt: overrides.savedAt || Date.now(),
+    customGroups: overrides.customGroups || [],
   };
 }
 
