@@ -62,6 +62,8 @@ describe('DialogOverlay', () => {
 
     const overlay = document.querySelector('.dialog-overlay');
     expect(overlay).toBeInTheDocument();
+    // mouseDown + click の組み合わせでダイアログが閉じる
+    fireEvent.mouseDown(overlay!);
     fireEvent.click(overlay!);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -76,6 +78,24 @@ describe('DialogOverlay', () => {
 
     const content = screen.getByTestId('dialog-content');
     fireEvent.click(content);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('ダイアログ内でmousedownしてオーバーレイでclickしてもonCloseが呼ばれない（テキスト選択対応）', () => {
+    const onClose = vi.fn();
+    renderWithI18n(
+      <DialogOverlay isOpen={true} onClose={onClose}>
+        <div data-testid="dialog-content">テスト</div>
+      </DialogOverlay>
+    );
+
+    const content = screen.getByTestId('dialog-content');
+    const overlay = document.querySelector('.dialog-overlay');
+    expect(overlay).toBeInTheDocument();
+
+    // ダイアログ内でmousedownして、オーバーレイ上でmouseup（テキスト選択のシナリオ）
+    fireEvent.mouseDown(content);
+    fireEvent.click(overlay!);
     expect(onClose).not.toHaveBeenCalled();
   });
 

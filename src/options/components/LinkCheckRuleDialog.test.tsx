@@ -214,6 +214,7 @@ describe('LinkCheckRuleDialog', () => {
       
       const overlay = document.querySelector('.dialog-overlay');
       if (overlay) {
+        fireEvent.mouseDown(overlay);
         fireEvent.click(overlay);
         expect(onClose).toHaveBeenCalledTimes(1);
       }

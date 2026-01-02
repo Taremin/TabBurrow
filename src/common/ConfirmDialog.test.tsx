@@ -74,6 +74,7 @@ describe('ConfirmDialog', () => {
     // dialog-overlay クラスを持つ要素を探す
     const overlay = document.querySelector('.dialog-overlay');
     if (overlay) {
+      fireEvent.mouseDown(overlay);
       fireEvent.click(overlay);
       expect(onCancel).toHaveBeenCalledTimes(1);
     }

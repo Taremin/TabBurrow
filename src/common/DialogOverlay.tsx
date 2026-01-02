@@ -40,7 +40,7 @@ export const DialogOverlay = memo(function DialogOverlay({
   children,
   className,
 }: DialogOverlayProps) {
-  const { handleOverlayClick } = useDialog({ isOpen, onClose, onEnter });
+  const { handleOverlayMouseDown, handleOverlayClick } = useDialog({ isOpen, onClose, onEnter });
 
   if (!isOpen) return null;
 
@@ -52,6 +52,7 @@ export const DialogOverlay = memo(function DialogOverlay({
     <div 
       className={overlayClassName}
       style={{ display: 'flex' }}
+      onMouseDown={handleOverlayMouseDown}
       onClick={handleOverlayClick}
     >
       {children}
@@ -59,3 +60,4 @@ export const DialogOverlay = memo(function DialogOverlay({
     document.body
   );
 });
+

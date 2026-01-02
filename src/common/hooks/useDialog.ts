@@ -3,7 +3,7 @@
  * ESCキー処理とオーバーレイクリック処理を共通化
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 
 interface UseDialogOptions {
   /** ダイアログが開いているかどうか */
@@ -15,6 +15,8 @@ interface UseDialogOptions {
 }
 
 interface UseDialogResult {
+  /** オーバーレイでのマウスダウン時のハンドラ */
+  handleOverlayMouseDown: (e: React.MouseEvent) => void;
   /** オーバーレイクリック時のハンドラ */
   handleOverlayClick: (e: React.MouseEvent) => void;
 }
@@ -22,7 +24,7 @@ interface UseDialogResult {
 /**
  * ダイアログの共通動作を管理するフック
  * - ESCキーでダイアログを閉じる
- * - オーバーレイクリックでダイアログを閉じる
+ * - オーバーレイクリックでダイアログを閉じる（mousedownもオーバーレイ上で開始された場合のみ）
  * - Enterキーでオプションの処理を実行
  */
 export function useDialog({
@@ -30,6 +32,11 @@ export function useDialog({
   onClose,
   onEnter,
 }: UseDialogOptions): UseDialogResult {
+  // mousedownがオーバーレイ上で開始されたかを追跡
+  // テキスト選択のためにダイアログ内でmousedownしてオーバーレイ上でmouseupした場合に
+  // ダイアログが閉じるのを防ぐため
+  const mouseDownOnOverlayRef = useRef(false);
+
   // ESCキーとEnterキーの処理
   useEffect(() => {
     if (!isOpen) return;
@@ -46,15 +53,27 @@ export function useDialog({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose, onEnter]);
 
-  // オーバーレイクリックで閉じる
-  const handleOverlayClick = useCallback(
+  // オーバーレイでマウスダウンした場合にフラグを立てる
+  const handleOverlayMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (e.target === e.currentTarget) {
+        mouseDownOnOverlayRef.current = true;
+      }
+    },
+    []
+  );
+
+  // オーバーレイクリックで閉じる（mousedownもオーバーレイ上だった場合のみ）
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === e.currentTarget && mouseDownOnOverlayRef.current) {
         onClose();
       }
+      // クリック後はフラグをリセット
+      mouseDownOnOverlayRef.current = false;
     },
     [onClose]
   );
 
-  return { handleOverlayClick };
+  return { handleOverlayMouseDown, handleOverlayClick };
 }

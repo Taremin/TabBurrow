@@ -66,7 +66,7 @@ describe('useDialog', () => {
   });
 
   describe('オーバーレイクリック', () => {
-    it('オーバーレイをクリックするとonCloseが呼ばれる', () => {
+    it('オーバーレイでmousedown→clickするとonCloseが呼ばれる', () => {
       const onClose = vi.fn();
       const { result } = renderHook(() => useDialog({ isOpen: true, onClose }));
 
@@ -76,9 +76,48 @@ describe('useDialog', () => {
         currentTarget: 'overlay',
       } as unknown as React.MouseEvent;
 
+      // まずmousedownを発火
+      result.current.handleOverlayMouseDown(mockEvent);
+      // その後clickを発火
       result.current.handleOverlayClick(mockEvent);
 
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('ダイアログ内部でmousedownしてオーバーレイでclickしてもonCloseは呼ばれない', () => {
+      const onClose = vi.fn();
+      const { result } = renderHook(() => useDialog({ isOpen: true, onClose }));
+
+      // ダイアログ内部でmousedown
+      const mouseDownEvent = {
+        target: 'dialogContent',
+        currentTarget: 'overlay',
+      } as unknown as React.MouseEvent;
+      result.current.handleOverlayMouseDown(mouseDownEvent);
+
+      // オーバーレイでclick
+      const clickEvent = {
+        target: 'overlay',
+        currentTarget: 'overlay',
+      } as unknown as React.MouseEvent;
+      result.current.handleOverlayClick(clickEvent);
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('mousedownなしでオーバーレイをclickしてもonCloseは呼ばれない', () => {
+      const onClose = vi.fn();
+      const { result } = renderHook(() => useDialog({ isOpen: true, onClose }));
+
+      // mousedownなしでclick
+      const mockEvent = {
+        target: 'overlay',
+        currentTarget: 'overlay',
+      } as unknown as React.MouseEvent;
+
+      result.current.handleOverlayClick(mockEvent);
+
+      expect(onClose).not.toHaveBeenCalled();
     });
 
     it('ダイアログ内部をクリックしてもonCloseは呼ばれない', () => {
@@ -91,6 +130,7 @@ describe('useDialog', () => {
         currentTarget: 'overlay',
       } as unknown as React.MouseEvent;
 
+      result.current.handleOverlayMouseDown(mockEvent);
       result.current.handleOverlayClick(mockEvent);
 
       expect(onClose).not.toHaveBeenCalled();
