@@ -153,8 +153,10 @@ export async function initAutoClose(): Promise<void> {
     const periodInMinutes = checkInterval / 60;
     
     // アラーム設定が必要か判断（べき等性）
-    // 設定が変わっていない場合は再作成しない（タイマーのリセットを防ぐ）
-    if (existingAlarm && oldSettings?.autoCloseEnabled && oldSettings.autoCloseSeconds === settings.autoCloseSeconds) {
+    // すでに正しい周期でアラームが存在する場合は再作成しない（タイマーのリセットを防ぐ）
+    const isSamePeriod = existingAlarm && Math.abs((existingAlarm.periodInMinutes || 0) - periodInMinutes) < 0.001;
+    
+    if (isSamePeriod) {
        console.log('[autoClose] 既存のアラームを維持します');
     } else {
       await browser.alarms.clear(AUTO_CLOSE_ALARM_NAME);
