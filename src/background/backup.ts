@@ -18,22 +18,35 @@ const BACKUP_ALARM_NAME = 'auto-backup';
 export async function initAutoBackup(): Promise<void> {
   const settings = await getSettings();
   
-  // 既存のアラームをクリア
-  await browser.alarms.clear(BACKUP_ALARM_NAME);
+  // 既存のアラームを確認
+  const existingAlarm = await browser.alarms.get(BACKUP_ALARM_NAME);
   
   if (!settings.autoBackupEnabled) {
-    console.log('[Backup] 自動バックアップは無効です');
+    if (existingAlarm) {
+      await browser.alarms.clear(BACKUP_ALARM_NAME);
+      console.log('[Backup] 自動バックアップを無効化しました');
+    }
     return;
   }
   
   const intervalMinutes = getBackupIntervalMinutes(settings);
   
   if (intervalMinutes <= 0) {
+    if (existingAlarm) {
+      await browser.alarms.clear(BACKUP_ALARM_NAME);
+    }
     console.log('[Backup] バックアップ間隔が0以下のため、アラームを設定しません');
     return;
   }
   
-  // アラームを設定
+  // べき等性の確保: 間隔が変わっていない場合は再作成しない
+  if (existingAlarm && existingAlarm.periodInMinutes === intervalMinutes) {
+    console.log(`[Backup] 既存のバックアップアラームを維持します (${intervalMinutes}分ごと)`);
+    return;
+  }
+  
+  // アラームを設定（再設定が必要な場合のみ）
+  await browser.alarms.clear(BACKUP_ALARM_NAME);
   await browser.alarms.create(BACKUP_ALARM_NAME, {
     delayInMinutes: intervalMinutes,
     periodInMinutes: intervalMinutes,

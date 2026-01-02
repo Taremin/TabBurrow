@@ -25,9 +25,41 @@ let cachedSettings: Settings | null = null;
 
 /**
  * キャッシュされた設定を取得
+ * 設定がロードされていない場合は null を返します
  */
 export function getCachedSettings(): Settings | null {
   return cachedSettings;
+}
+
+/**
+ * 初期化が完了しているか確認し、必要なら初期化する
+ */
+export async function ensureInitialized(): Promise<void> {
+  if (cachedSettings && tabLastActiveTime.size > 0) {
+    return;
+  }
+  
+  if (!cachedSettings) {
+    console.log('[autoClose] 設定が未ロードのため初期化を開始します');
+    await initAutoClose();
+  } else if (tabLastActiveTime.size === 0) {
+    // 設定はあるがタブ情報が空の場合（サスペンドからの復帰時など）
+    console.log('[autoClose] タブ状態が未ロードのため復元を試みます');
+    await restoreTabLastActiveTime();
+    
+    // 復元しても空の場合は現在の全タブを登録
+    if (tabLastActiveTime.size === 0) {
+      const tabs = await browser.tabs.query({ pinned: false });
+      const now = Date.now();
+      for (const tab of tabs) {
+        if (tab.id !== undefined) {
+          tabLastActiveTime.set(tab.id, now);
+        }
+      }
+      console.log(`[autoClose] ${tabs.length}件のタブを初期状態として登録しました`);
+      await persistTabLastActiveTime();
+    }
+  }
 }
 
 /**
@@ -105,24 +137,38 @@ export function removeTabLastActiveTime(tabId: number): void {
  * 自動収納機能を初期化
  */
 export async function initAutoClose(): Promise<void> {
+  const settings = await getSettings();
+  const oldSettings = cachedSettings;
+  cachedSettings = settings;
+  
   // storage.sessionから状態を復元
   await restoreTabLastActiveTime();
   
-  cachedSettings = await getSettings();
+  // 既存のアラームを確認
+  const existingAlarm = await browser.alarms.get(AUTO_CLOSE_ALARM_NAME);
   
-  // 既存のアラームをクリア
-  await browser.alarms.clear(AUTO_CLOSE_ALARM_NAME);
-  
-  if (cachedSettings.autoCloseEnabled) {
+  if (settings.autoCloseEnabled) {
     // 30秒ごとにチェック（設定された秒数より短い間隔でチェック）
-    const checkInterval = Math.min(cachedSettings.autoCloseSeconds / 2, 30);
-    browser.alarms.create(AUTO_CLOSE_ALARM_NAME, {
-      periodInMinutes: checkInterval / 60,
-    });
-    const nextCheckTime = new Date(Date.now() + checkInterval * 1000);
-    console.log(`自動収納を有効化: ${cachedSettings.autoCloseSeconds}秒後に非アクティブタブを収納します（次回チェック: ${nextCheckTime.toLocaleTimeString()}）`);
+    const checkInterval = Math.min(settings.autoCloseSeconds / 2, 30);
+    const periodInMinutes = checkInterval / 60;
+    
+    // アラーム設定が必要か判断（べき等性）
+    // 設定が変わっていない場合は再作成しない（タイマーのリセットを防ぐ）
+    if (existingAlarm && oldSettings?.autoCloseEnabled && oldSettings.autoCloseSeconds === settings.autoCloseSeconds) {
+       console.log('[autoClose] 既存のアラームを維持します');
+    } else {
+      await browser.alarms.clear(AUTO_CLOSE_ALARM_NAME);
+      browser.alarms.create(AUTO_CLOSE_ALARM_NAME, {
+        periodInMinutes,
+      });
+      const nextCheckTime = new Date(Date.now() + checkInterval * 1000);
+      console.log(`[autoClose] 自動収納を有効化: ${settings.autoCloseSeconds}秒後に非アクティブタブを収納します（次回チェック: ${nextCheckTime.toLocaleTimeString()}）`);
+    }
   } else {
-    console.log('自動収納を無効化');
+    if (existingAlarm) {
+      await browser.alarms.clear(AUTO_CLOSE_ALARM_NAME);
+      console.log('[autoClose] 自動収納を無効化しました');
+    }
   }
 }
 
@@ -132,7 +178,13 @@ export async function initAutoClose(): Promise<void> {
 export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
   if (alarm.name !== AUTO_CLOSE_ALARM_NAME) return;
   
-  if (!cachedSettings?.autoCloseEnabled) return;
+  // 初期化を保証
+  await ensureInitialized();
+  
+  if (!cachedSettings?.autoCloseEnabled) {
+    console.log('[AutoClose] 自動収納が無効のためスキップします');
+    return;
+  }
   
   const nowDate = new Date();
   console.log(`[AutoClose] 自動収納チェックを開始（${nowDate.toLocaleTimeString()}）`);

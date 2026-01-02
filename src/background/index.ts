@@ -91,42 +91,45 @@ async function handleActionClick(clickedTab: Tabs.Tab): Promise<void> {
 // 拡張アイコンクリック時のイベントリスナー
 browser.action.onClicked.addListener(handleActionClick);
 
-// 拡張機能がインストールされたとき
-browser.runtime.onInstalled.addListener(async () => {
-  console.log('TabBurrow がインストールされました');
-
+/**
+ * 全機能の初期化
+ */
+async function initializeAll(): Promise<void> {
+  console.log('[Background] initializeAll() 開始');
   try {
     // 設定を読み込んで言語を初期化
-    console.log('[onInstalled] Loading settings...');
     const settings = await getSettings();
-    console.log('[onInstalled] Settings loaded, applying locale:', settings.locale);
     applyLocaleSetting(settings.locale);
-    console.log('[onInstalled] Locale applied');
+    
+    // コンテキストメニューの状態を初期化
+    await initContextMenuVisibility();
+    
+    // 自動収納を初期化（アラーム設定含む）
+    await initAutoClose();
+    
+    // 自動バックアップを初期化（アラーム設定含む）
+    await initAutoBackup();
+    
+    console.log('[Background] initializeAll() 完了');
+  } catch (error) {
+    console.error('[Background] 初期化中にエラーが発生しました:', error);
+  }
+}
 
+// 拡張機能がインストールされたとき
+browser.runtime.onInstalled.addListener(async (details) => {
+  console.log(`TabBurrow がインストールされました (reason: ${details.reason})`);
+
+  // インストール・更新時のみ必要な処理
+  try {
     // コンテキストメニューを作成
-    console.log('[onInstalled] Creating context menus...');
     createContextMenus();
-    console.log('[onInstalled] Context menus created');
     
     // カスタムグループサブメニューを初期化
-    console.log('[onInstalled] Updating custom group menus...');
     await updateCustomGroupMenus();
-    console.log('[onInstalled] Custom group menus updated');
     
-    // コンテキストメニューの初期状態を設定
-    console.log('[onInstalled] Initializing context menu visibility...');
-    await initContextMenuVisibility();
-    console.log('[onInstalled] Context menu visibility initialized');
-
-    // 設定を読み込んで自動収納を初期化
-    console.log('[onInstalled] Initializing auto close...');
-    await initAutoClose();
-    console.log('[onInstalled] Auto close initialized');
-
-    // 自動バックアップを初期化
-    console.log('[onInstalled] Initializing auto backup...');
-    await initAutoBackup();
-    console.log('[onInstalled] Auto backup initialized');
+    // 初期化実行
+    await initializeAll();
   } catch (error) {
     console.error('[onInstalled] Error:', error);
   }
@@ -135,18 +138,14 @@ browser.runtime.onInstalled.addListener(async () => {
 // ブラウザ起動時（Service Worker復帰時）の初期化
 browser.runtime.onStartup.addListener(async () => {
   console.log('[onStartup] TabBurrow が起動しました');
-  
-  try {
-    // 設定を読み込んで言語を初期化
-    const settings = await getSettings();
-    applyLocaleSetting(settings.locale);
-    
-    // コンテキストメニューの初期状態を設定
-    await initContextMenuVisibility();
-    console.log('[onStartup] Context menu visibility initialized');
-  } catch (error) {
-    console.error('[onStartup] Error:', error);
-  }
+  await initializeAll();
+});
+
+// Service Worker 再起動時のためにトップレベルでも初期化をスケジュール
+// (ただし、onInstalled や onStartup と重複しないよう配慮が必要な場合もあるが、
+//  各機能の init がべき等であれば問題ない)
+initializeAll().catch(err => {
+  console.error('[Background] Top-level initialization failed:', err);
 });
 
 // メッセージの型定義
