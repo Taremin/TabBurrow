@@ -19,6 +19,8 @@ interface PromptDialogProps {
   confirmButtonText?: string;
   // エラーメッセージ（オプション）
   error?: string | null;
+  // 空入力を許可するかどうか（デフォルト: false）
+  allowEmpty?: boolean;
 }
 
 export const PromptDialog = memo(function PromptDialog({
@@ -31,6 +33,7 @@ export const PromptDialog = memo(function PromptDialog({
   onCancel,
   confirmButtonText,
   error,
+  allowEmpty = false,
 }: PromptDialogProps) {
   const { t } = useTranslation();
   const [value, setValue] = useState(defaultValue);
@@ -38,10 +41,10 @@ export const PromptDialog = memo(function PromptDialog({
 
   // 確認ボタン
   const handleConfirm = useCallback(() => {
-    if (value.trim()) {
+    if (allowEmpty || value.trim()) {
       onConfirm(value.trim());
     }
-  }, [value, onConfirm]);
+  }, [value, onConfirm, allowEmpty]);
 
   // ダイアログが開いたときに初期値をセットしてフォーカス
   useEffect(() => {
@@ -76,7 +79,7 @@ export const PromptDialog = memo(function PromptDialog({
           <button 
             className="btn btn-primary" 
             onClick={handleConfirm}
-            disabled={!value.trim()}
+            disabled={!allowEmpty && !value.trim()}
           >
             {confirmButtonText || t('dialog.ok')}
           </button>

@@ -86,6 +86,7 @@ export async function createTestTabData(page: Page, tabData: {
   group?: string;
   groupType?: 'domain' | 'custom';
   screenshot?: boolean; // スクリーンショットを含めるか
+  displayName?: string; // カスタム表示名
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
@@ -173,7 +174,7 @@ export async function createTestTabData(page: Page, tabData: {
     }
     
     // SavedTab型に準拠したオブジェクトを作成
-    const tab = {
+    const tab: Record<string, unknown> = {
       id: Date.now().toString() + Math.random().toString(36).slice(2),
       url: data.url,
       title: data.title,
@@ -185,6 +186,11 @@ export async function createTestTabData(page: Page, tabData: {
       lastAccessed: Date.now(),
       savedAt: Date.now(),
     };
+    
+    // displayNameが指定されている場合のみ追加
+    if (data.displayName) {
+      tab.displayName = data.displayName;
+    }
     
     return new Promise<void>((resolve, reject) => {
       const transaction = db.transaction([TABS_STORE_NAME], 'readwrite');

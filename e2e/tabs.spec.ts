@@ -1424,3 +1424,131 @@ test.describe('カスタムグループ作成機能', () => {
     await expect(selectionToolbar).not.toBeVisible();
   });
 });
+
+test.describe('タブ表示名変更機能', () => {
+  test('タブカードの鉛筆ボタンをクリックすると表示名変更ダイアログが表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/rename-test',
+      title: 'Original Title',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブカードが表示されていることを確認
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    await expect(tabCard).toBeVisible();
+    
+    // 鉛筆アイコンボタンをクリック
+    const renameButton = tabCard.locator('.tab-rename');
+    await expect(renameButton).toBeVisible();
+    await renameButton.click();
+    await page.waitForTimeout(100);
+    
+    // ダイアログが表示される
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // ダイアログにメッセージが表示される
+    const dialogMessage = dialog.locator('.dialog-message');
+    await expect(dialogMessage).toContainText(/空にすると|empty/i);
+  });
+
+  test('表示名を変更したタブにカスタム表示名が表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // テストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/display-name-test',
+      title: 'Original Title',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブカードの鉛筆ボタンをクリック
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    const renameButton = tabCard.locator('.tab-rename');
+    await renameButton.click();
+    await page.waitForTimeout(100);
+    
+    // ダイアログに新しい表示名を入力
+    const dialog = page.locator('.dialog');
+    const input = dialog.locator('input[type="text"]');
+    await input.fill('My Custom Display Name');
+    
+    // OKボタンをクリック
+    const okButton = dialog.locator('button.btn-primary');
+    await okButton.click();
+    await page.waitForTimeout(300);
+    
+    // タブカードにカスタム表示名が表示される
+    const tabTitle = page.locator('.tab-title');
+    await expect(tabTitle).toContainText('My Custom Display Name');
+  });
+
+  test('表示名を空にするとOKボタンが押せて元のタイトルに戻る', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // 表示名付きのテストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/reset-name-test',
+      title: 'Original Title',
+      displayName: 'Custom Name',
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // カスタム表示名が表示されていることを確認
+    const tabTitle = page.locator('.tab-title');
+    await expect(tabTitle).toContainText('Custom Name');
+    
+    // タブカードの鉛筆ボタンをクリック
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    const renameButton = tabCard.locator('.tab-rename');
+    await renameButton.click();
+    await page.waitForTimeout(100);
+    
+    // ダイアログが表示される
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // 入力欄を空にする
+    const input = dialog.locator('input[type="text"]');
+    await input.clear();
+    await page.waitForTimeout(100);
+    
+    // OKボタンが有効であることを確認（空入力でも押せる）
+    const okButton = dialog.locator('button.btn-primary');
+    await expect(okButton).toBeEnabled();
+    
+    // OKボタンをクリック
+    await okButton.click();
+    await page.waitForTimeout(300);
+    
+    // ダイアログが閉じる
+    await expect(dialog).not.toBeVisible();
+    
+    // 元のタイトルが表示される（カスタム表示名がクリアされた）
+    await expect(tabTitle).toContainText('Original Title');
+  });
+});

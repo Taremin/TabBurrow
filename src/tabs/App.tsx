@@ -630,6 +630,7 @@ export function App() {
         title={t('tabManager.tabCard.renameDialogTitle')}
         message={t('tabManager.tabCard.renameDialogMessage')}
         defaultValue={tabRenameDialog.currentDisplayName || ''}
+        allowEmpty={true}
         onConfirm={handleConfirmTabRename}
         onCancel={() => setTabRenameDialog({ isOpen: false, tabId: '' })}
       />
