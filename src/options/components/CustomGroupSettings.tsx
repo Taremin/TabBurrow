@@ -2,8 +2,8 @@
  * TabBurrow - カスタムグループ設定コンポーネント
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Folder, FolderPlus, Pencil, Trash2 } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Folder, FolderPlus, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { useTranslation } from '../../common/i18nContext.js';
 import { ConfirmDialog } from '../../common/ConfirmDialog.js';
 import { PromptDialog } from '../../common/PromptDialog.js';
@@ -13,6 +13,7 @@ import {
   renameCustomGroup,
   deleteCustomGroup,
   getAllTabs,
+  updateCustomGroupOrder,
 } from '../../storage.js';
 import type { CustomGroupMeta, SavedTab } from '../../storage.js';
 
@@ -42,6 +43,11 @@ export function CustomGroupSettings({
   
   // エラー状態
   const [error, setError] = useState<string | null>(null);
+  
+  // ドラッグアンドドロップ状態
+  const [draggedGroupName, setDraggedGroupName] = useState<string | null>(null);
+  const [dragOverGroupName, setDragOverGroupName] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<'before' | 'after' | null>(null);
 
   // グループ一覧を読み込む
   const loadGroups = useCallback(async () => {
@@ -163,6 +169,97 @@ export function CustomGroupSettings({
     setCreateDialogOpen(true);
   }, []);
 
+  // ドラッグ開始
+  const handleDragStart = useCallback((e: React.DragEvent, groupName: string) => {
+    setDraggedGroupName(groupName);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', groupName);
+  }, []);
+
+  // ドラッグ終了
+  const handleDragEnd = useCallback(() => {
+    setDraggedGroupName(null);
+    setDragOverGroupName(null);
+    setDropPosition(null);
+  }, []);
+
+  // ドラッグオーバー（ドロップ可能エリア）
+  const handleDragOver = useCallback((e: React.DragEvent, groupName: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    if (draggedGroupName && draggedGroupName !== groupName) {
+      // マウス位置に基づいて挿入位置を判定（上半分=before、下半分=after）
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const mouseY = e.clientY - rect.top;
+      const position: 'before' | 'after' = mouseY < rect.height / 2 ? 'before' : 'after';
+      
+      setDragOverGroupName(groupName);
+      setDropPosition(position);
+    }
+  }, [draggedGroupName]);
+
+  // ドラッグ離脱
+  const handleDragLeave = useCallback(() => {
+    setDragOverGroupName(null);
+    setDropPosition(null);
+  }, []);
+
+  // ドロップ処理
+  const handleDrop = useCallback(async (e: React.DragEvent, targetGroupName: string) => {
+    e.preventDefault();
+    const sourceGroupName = e.dataTransfer.getData('text/plain');
+    
+    if (!sourceGroupName || sourceGroupName === targetGroupName) {
+      setDraggedGroupName(null);
+      setDragOverGroupName(null);
+      setDropPosition(null);
+      return;
+    }
+
+    // 挿入位置を計算
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const mouseY = e.clientY - rect.top;
+    const position: 'before' | 'after' = mouseY < rect.height / 2 ? 'before' : 'after';
+
+    // 新しい順序を計算
+    const newOrder = [...groups];
+    const sourceIndex = newOrder.findIndex(g => g.name === sourceGroupName);
+    let targetIndex = newOrder.findIndex(g => g.name === targetGroupName);
+    
+    if (sourceIndex === -1 || targetIndex === -1) {
+      setDraggedGroupName(null);
+      setDragOverGroupName(null);
+      setDropPosition(null);
+      return;
+    }
+
+    // ソースを削除
+    const [movedGroup] = newOrder.splice(sourceIndex, 1);
+    
+    // ターゲットインデックスを再計算（ソース削除後にインデックスがずれる可能性）
+    targetIndex = newOrder.findIndex(g => g.name === targetGroupName);
+    
+    // 挿入位置を調整
+    const insertIndex = position === 'after' ? targetIndex + 1 : targetIndex;
+    newOrder.splice(insertIndex, 0, movedGroup);
+    
+    // UIを即座に更新
+    setGroups(newOrder);
+    setDraggedGroupName(null);
+    setDragOverGroupName(null);
+    setDropPosition(null);
+
+    // DBに保存
+    try {
+      await updateCustomGroupOrder(newOrder.map(g => g.name));
+    } catch (err) {
+      console.error('Failed to update group order:', err);
+      // エラー時は再読み込み
+      await loadGroups();
+    }
+  }, [groups, loadGroups]);
+
   if (isLoading) {
     return null;
   }
@@ -193,39 +290,57 @@ export function CustomGroupSettings({
         <p className="empty-message">{t('settings.customGroups.empty')}</p>
       ) : (
         <ul className="custom-groups-list">
-          {groups.map(group => (
-            <li key={group.name} className="custom-group-item">
-              <div className="custom-group-info">
-                <span className="custom-group-icon">
-                  <Folder size={16} />
+          {groups.map(group => {
+            const isDragging = draggedGroupName === group.name;
+            const isDropTarget = dragOverGroupName === group.name && !isDragging;
+            const dropClass = isDropTarget && dropPosition ? `drop-${dropPosition}` : '';
+            
+            return (
+              <li
+                key={group.name}
+                className={`custom-group-item ${isDragging ? 'dragging' : ''} ${dropClass}`}
+                draggable
+                onDragStart={(e) => handleDragStart(e, group.name)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => handleDragOver(e, group.name)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, group.name)}
+              >
+                <span className="drag-handle" title={t('settings.customGroups.dragHint')}>
+                  <GripVertical size={16} />
                 </span>
-                <span className="custom-group-name">{group.name}</span>
-                <span className="custom-group-count">
-                  ({t('settings.customGroups.tabCount', { count: tabCounts.get(group.name) || 0 })})
-                </span>
-              </div>
-              <div className="custom-group-actions">
-                <button
-                  type="button"
-                  className="btn btn-icon"
-                  onClick={() => openEditDialog(group)}
-                  title={t('settings.customGroups.editGroup')}
-                  aria-label={t('settings.customGroups.editGroup')}
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-icon btn-danger-icon"
-                  onClick={() => openDeleteDialog(group)}
-                  title={t('settings.customGroups.deleteGroup')}
-                  aria-label={t('settings.customGroups.deleteGroup')}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </li>
-          ))}
+                <div className="custom-group-info">
+                  <span className="custom-group-icon">
+                    <Folder size={16} />
+                  </span>
+                  <span className="custom-group-name">{group.name}</span>
+                  <span className="custom-group-count">
+                    ({t('settings.customGroups.tabCount', { count: tabCounts.get(group.name) || 0 })})
+                  </span>
+                </div>
+                <div className="custom-group-actions">
+                  <button
+                    type="button"
+                    className="btn btn-icon"
+                    onClick={() => openEditDialog(group)}
+                    title={t('settings.customGroups.editGroup')}
+                    aria-label={t('settings.customGroups.editGroup')}
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-icon btn-danger-icon"
+                    onClick={() => openDeleteDialog(group)}
+                    title={t('settings.customGroups.deleteGroup')}
+                    aria-label={t('settings.customGroups.deleteGroup')}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
 

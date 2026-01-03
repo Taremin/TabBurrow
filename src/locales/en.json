@@ -219,6 +219,7 @@
             "createDialogTitle": "Enter new group name",
             "duplicateError": "A group with this name already exists",
             "emptyNameError": "Please enter a group name",
+            "dragHint": "Drag to reorder",
             "showInDomainGroups": "Show custom grouped tabs in domain groups",
             "showInDomainGroupsHelp": "If enabled, tabs belonging to custom groups will also be displayed in their original domain groups."
         },

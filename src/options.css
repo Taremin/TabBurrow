@@ -955,6 +955,62 @@
     border-color: var(--text-muted);
 }
 
+/* ドラッグハンドル */
+.drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: grab;
+    padding: 4px;
+    flex-shrink: 0;
+    transition: color var(--transition-fast);
+}
+
+.drag-handle:hover {
+    color: var(--text-primary);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* ドラッグ中のアイテム */
+.custom-group-item.dragging {
+    opacity: 0.5;
+    border-color: var(--accent-color);
+    background: var(--accent-light);
+}
+
+/* リスト項目の相対位置設定（挿入インジケーター用） */
+.custom-group-item {
+    position: relative;
+}
+
+/* 挿入インジケーター（上に挿入） */
+.custom-group-item.drop-before::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+/* 挿入インジケーター（下に挿入） */
+.custom-group-item.drop-after::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
 .custom-group-info {
     display: flex;
     align-items: center;

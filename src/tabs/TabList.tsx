@@ -216,9 +216,24 @@ export function TabList({
   const { groups, groupCounts, flatTabs } = useMemo(() => {
     const { customGroups: cGroups, domainGroups } = groupTabs(tabs, showGroupedTabsInDomainGroups);
     
-    // カスタムグループをソート
-    const sortedCustomGroups = sortGroups(cGroups, groupSort);
-    // ドメイングループをソート
+    // カスタムグループは props の customGroups 順序を維持（sortOrder順）
+    // propsのcustomGroupsは getAllCustomGroups() から取得され、sortOrder順になっている
+    const orderedCustomGroupNames = customGroups.map(g => g.name);
+    const sortedCustomGroups: [string, SavedTab[]][] = [];
+    for (const name of orderedCustomGroupNames) {
+      const tabs = cGroups.get(name);
+      if (tabs && tabs.length > 0) {
+        sortedCustomGroups.push([name, tabs]);
+      }
+    }
+    // cGroupsに存在するがcustomGroupsに存在しないグループも追加（エッジケース）
+    for (const [name, tabs] of cGroups.entries()) {
+      if (!orderedCustomGroupNames.includes(name)) {
+        sortedCustomGroups.push([name, tabs]);
+      }
+    }
+    
+    // ドメイングループをソート（グローバル設定を使用）
     const sortedDomainGroups = sortGroups(domainGroups, groupSort);
     
     const groups: TabGroup[] = [];
@@ -254,7 +269,7 @@ export function TabList({
     }
     
     return { groups, groupCounts, flatTabs };
-  }, [tabs, groupSort, itemSort, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups]);
+  }, [tabs, customGroups, groupSort, itemSort, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups]);
 
   // グループヘッダーのレンダリング
   const groupContent = useCallback((index: number) => {

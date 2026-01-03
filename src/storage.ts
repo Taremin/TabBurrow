@@ -142,6 +142,36 @@ async function openDB(): Promise<IDBDatabase> {
           }
         };
       }
+
+      // バージョン5: カスタムグループの表示順序対応
+      if (oldVersion < 5) {
+        const groupStore = transaction.objectStore(CUSTOM_GROUPS_STORE);
+        
+        // sortOrder インデックスを作成
+        if (!groupStore.indexNames.contains('sortOrder')) {
+          groupStore.createIndex('sortOrder', 'sortOrder', { unique: false });
+        }
+        
+        // 既存のカスタムグループにsortOrderを設定（createdAt順で番号付け）
+        const allGroups: Array<{ name: string; createdAt: number; updatedAt: number; sortOrder?: number }> = [];
+        const cursorRequest = groupStore.openCursor();
+        cursorRequest.onsuccess = (e) => {
+          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+          if (cursor) {
+            allGroups.push(cursor.value);
+            cursor.continue();
+          } else {
+            // 全グループを取得したら、createdAt順でソートしてsortOrderを設定
+            allGroups.sort((a, b) => a.createdAt - b.createdAt);
+            allGroups.forEach((group, index) => {
+              if (group.sortOrder === undefined) {
+                group.sortOrder = index;
+                groupStore.put(group);
+              }
+            });
+          }
+        };
+      }
     };
   });
 }
@@ -533,10 +563,16 @@ export async function getTabCount(): Promise<number> {
 export async function createCustomGroup(name: string): Promise<CustomGroupMeta> {
   const db = await openDB();
   const now = Date.now();
+  
+  // 次のsortOrderを計算（既存の最大値 + 1）
+  const existingGroups = await getAllCustomGroups();
+  const maxSortOrder = existingGroups.reduce((max, g) => Math.max(max, g.sortOrder ?? 0), -1);
+  
   const group: CustomGroupMeta = {
     name,
     createdAt: now,
     updatedAt: now,
+    sortOrder: maxSortOrder + 1,
   };
   
   return new Promise((resolve, reject) => {
@@ -550,7 +586,7 @@ export async function createCustomGroup(name: string): Promise<CustomGroupMeta> 
 }
 
 /**
- * 全カスタムグループを取得
+ * 全カスタムグループを取得（sortOrder順）
  */
 export async function getAllCustomGroups(): Promise<CustomGroupMeta[]> {
   const db = await openDB();
@@ -558,8 +594,17 @@ export async function getAllCustomGroups(): Promise<CustomGroupMeta[]> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readonly');
     const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
-    const index = store.index('createdAt');
-    const request = index.openCursor(null, 'prev'); // 新しい順
+    
+    // sortOrderインデックスが存在すればそれを使用、なければgetAll
+    let request: IDBRequest;
+    if (store.indexNames.contains('sortOrder')) {
+      const index = store.index('sortOrder');
+      request = index.openCursor(null, 'next'); // sortOrder昇順
+    } else {
+      // マイグレーション前のフォールバック
+      const index = store.index('createdAt');
+      request = index.openCursor(null, 'prev'); // createdAt降順
+    }
     
     const results: CustomGroupMeta[] = [];
 
@@ -597,11 +642,12 @@ export async function renameCustomGroup(oldName: string, newName: string): Promi
         return;
       }
       
-      // 新しいグループを作成
+      // 新しいグループを作成（sortOrderを保持）
       const newGroup: CustomGroupMeta = {
         name: newName,
         createdAt: oldGroup.createdAt,
         updatedAt: Date.now(),
+        sortOrder: oldGroup.sortOrder ?? 0,
       };
       groupStore.add(newGroup);
       
@@ -682,6 +728,35 @@ export async function deleteCustomGroup(name: string): Promise<void> {
         cursor.continue();
       }
     };
+    
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+/**
+ * カスタムグループの表示順序を更新
+ * @param groupNames 新しい順序でのグループ名の配列
+ */
+export async function updateCustomGroupOrder(groupNames: string[]): Promise<void> {
+  const db = await openDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readwrite');
+    const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
+    
+    // 各グループのsortOrderを配列のインデックスに合わせて更新
+    groupNames.forEach((name, index) => {
+      const getRequest = store.get(name);
+      getRequest.onsuccess = () => {
+        const group = getRequest.result as CustomGroupMeta | undefined;
+        if (group) {
+          group.sortOrder = index;
+          group.updatedAt = Date.now();
+          store.put(group);
+        }
+      };
+    });
     
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);

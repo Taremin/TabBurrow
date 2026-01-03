@@ -11,7 +11,7 @@
 export const DB_NAME = 'TabBurrowDB';
 
 /** データベースバージョン */
-export const DB_VERSION = 4;
+export const DB_VERSION = 5;
 
 /** タブストア名 */
 export const TABS_STORE_NAME = 'tabs';
@@ -54,6 +54,7 @@ export interface CustomGroupMeta {
   name: string;       // グループ名（主キー）
   createdAt: number;  // 作成日時
   updatedAt: number;  // 更新日時
+  sortOrder: number;  // 表示順序（昇順で表示）
 }
 
 /**

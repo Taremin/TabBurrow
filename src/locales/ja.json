@@ -219,6 +219,7 @@
             "createDialogTitle": "新規グループ名を入力",
             "duplicateError": "同じ名前のグループが既に存在します",
             "emptyNameError": "グループ名を入力してください",
+            "dragHint": "ドラッグして順序を変更",
             "showInDomainGroups": "カスタムグループのタブをドメイングループにも表示する",
             "showInDomainGroupsHelp": "有効にすると、カスタムグループに所属するタブが、元のドメイングループにも重複して表示されます。"
         },

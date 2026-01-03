@@ -165,15 +165,16 @@ test.describe('グループ折りたたみ/展開機能', () => {
     // グループヘッダーが表示されるまで待機
     await page.waitForSelector('.group-header');
     
-    const firstGroupTitle = page.locator('.group-title').first();
+    const firstGroupHeader = page.locator('.group-header').first();
     const firstCollapseIcon = page.locator('.group-collapse-icon').first();
     
-    // グループタイトルにフォーカス
-    await firstGroupTitle.focus();
+    // グループヘッダーにフォーカス（group-headerがtabIndexを持つ）
+    await firstGroupHeader.focus();
     
     // Enterキーを押す
     await page.keyboard.press('Enter');
     await wait(100);
+
     
     // 折りたたまれていることを確認
     await expect(firstCollapseIcon).toHaveClass(/collapsed/);
@@ -190,15 +191,16 @@ test.describe('グループ折りたたみ/展開機能', () => {
     // グループヘッダーが表示されるまで待機
     await page.waitForSelector('.group-header');
     
-    const firstGroupTitle = page.locator('.group-title').first();
+    const firstGroupHeader = page.locator('.group-header').first();
     const firstCollapseIcon = page.locator('.group-collapse-icon').first();
     
-    // グループタイトルにフォーカス
-    await firstGroupTitle.focus();
+    // グループヘッダーにフォーカス（group-headerがtabIndexを持つ）
+    await firstGroupHeader.focus();
     
     // Spaceキーを押す
     await page.keyboard.press('Space');
     await wait(100);
+
     
     // 折りたたまれていることを確認
     await expect(firstCollapseIcon).toHaveClass(/collapsed/);

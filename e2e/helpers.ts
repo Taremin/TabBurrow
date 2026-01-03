@@ -90,7 +90,7 @@ export async function createTestTabData(page: Page, tabData: {
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 4;
+  const DB_VERSION = 5;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -124,6 +124,7 @@ export async function createTestTabData(page: Page, tabData: {
           if (!db.objectStoreNames.contains(CUSTOM_GROUPS_STORE_NAME)) {
             const groupStore = db.createObjectStore(CUSTOM_GROUPS_STORE_NAME, { keyPath: 'name' });
             groupStore.createIndex('createdAt', 'createdAt', { unique: false });
+            groupStore.createIndex('sortOrder', 'sortOrder', { unique: false });
           }
           
           // backupsストアを作成
@@ -215,7 +216,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 } = {}): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 4;
+  const DB_VERSION = 5;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -250,6 +251,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
           if (!db.objectStoreNames.contains(CUSTOM_GROUPS_STORE_NAME)) {
             const groupStore = db.createObjectStore(CUSTOM_GROUPS_STORE_NAME, { keyPath: 'name' });
             groupStore.createIndex('createdAt', 'createdAt', { unique: false });
+            groupStore.createIndex('sortOrder', 'sortOrder', { unique: false });
           }
           
           // backupsストアを作成
@@ -312,7 +314,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 export async function clearTestData(page: Page): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 4;
+  const DB_VERSION = 5;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
