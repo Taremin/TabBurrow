@@ -364,6 +364,7 @@ async function handleStashThisPage(tab: Tabs.Tab): Promise<void> {
       domain,
       group: domain,       // ドメイングループとして保存
       groupType: 'domain',
+      customGroups: [],
       favIconUrl: tab.favIconUrl || '',
       screenshot,
       lastAccessed: tab.lastAccessed || now,
@@ -435,6 +436,7 @@ async function handleSaveToCustomGroup(tab: Tabs.Tab, groupName: string): Promis
       domain,
       group: groupName,      // カスタムグループ名
       groupType: 'custom',   // カスタムグループタイプ
+      customGroups: [groupName],
       favIconUrl: tab.favIconUrl || '',
       screenshot,
       lastAccessed: tab.lastAccessed || now,

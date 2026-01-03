@@ -430,13 +430,19 @@ export async function deleteTabsByGroup(group: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    const index = store.index('group');
-    const request = index.openCursor(IDBKeyRange.only(group));
+    const request = store.openCursor();
 
     request.onsuccess = (event) => {
       const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
       if (cursor) {
-        cursor.delete();
+        const tab = cursor.value as SavedTab;
+        const matches = 
+          (tab.groupType === 'custom' && (tab.customGroups?.includes(group) || tab.group === group)) ||
+          (tab.groupType === 'domain' && (tab.group === group || tab.domain === group));
+          
+        if (matches) {
+          cursor.delete();
+        }
         cursor.continue();
       }
     };

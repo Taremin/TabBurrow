@@ -53,9 +53,15 @@ export function CustomGroupSettings({
       // 各グループのタブ数をカウント
       const counts = new Map<string, number>();
       for (const tab of allTabs) {
-        if (tab.groupType === 'custom') {
-          const currentCount = counts.get(tab.group) || 0;
-          counts.set(tab.group, currentCount + 1);
+        const groupsForTab = new Set<string>();
+        if (tab.customGroups && tab.customGroups.length > 0) {
+          tab.customGroups.forEach(g => groupsForTab.add(g));
+        } else if (tab.groupType === 'custom' && tab.group) {
+          groupsForTab.add(tab.group);
+        }
+        
+        for (const groupName of groupsForTab) {
+          counts.set(groupName, (counts.get(groupName) || 0) + 1);
         }
       }
       

@@ -221,8 +221,22 @@ export function App() {
     browser.tabs.create({ url, active: false });
   }, []);
 
+  const getGroupTabs = useCallback((groupName: string, groupType: 'domain' | 'custom') => {
+    return filteredTabs.filter(t => {
+      if (groupType === 'custom') {
+        return t.customGroups?.includes(groupName) || (t.groupType === 'custom' && t.group === groupName);
+      } else {
+        const matchesDomain = (t.groupType === 'domain' ? t.group : t.domain) === groupName;
+        if (!matchesDomain) return false;
+        
+        const hasCustomGroup = (t.customGroups && t.customGroups.length > 0) || (t.groupType === 'custom' && t.group);
+        return !hasCustomGroup || showGroupedTabsInDomainGroups;
+      }
+    });
+  }, [filteredTabs, showGroupedTabsInDomainGroups]);
+
   const handleDeleteGroup = useCallback((groupName: string, groupType: 'domain' | 'custom') => {
-    const groupTabs = filteredTabs.filter(t => t.group === groupName);
+    const groupTabs = getGroupTabs(groupName, groupType);
     
     if (groupType === 'custom') {
       setDialog({
@@ -269,14 +283,14 @@ export function App() {
     }
   }, [restoreMode, restoreIntervalMs]);
 
-  const handleOpenGroup = useCallback(async (groupName: string) => {
-    const groupTabs = filteredTabs.filter(t => t.group === groupName);
+  const handleOpenGroup = useCallback(async (groupName: string, groupType: 'domain' | 'custom') => {
+    const groupTabs = getGroupTabs(groupName, groupType);
     const urls = groupTabs.map(tab => tab.url);
     await openTabsWithRestoreMode(urls);
-  }, [filteredTabs, openTabsWithRestoreMode]);
+  }, [getGroupTabs, openTabsWithRestoreMode]);
 
-  const handleOpenGroupAsTabGroup = useCallback(async (groupName: string) => {
-    const groupTabs_ = filteredTabs.filter(t => t.group === groupName);
+  const handleOpenGroupAsTabGroup = useCallback(async (groupName: string, groupType: 'domain' | 'custom') => {
+    const groupTabs_ = getGroupTabs(groupName, groupType);
     if (groupTabs_.length === 0) return;
     
     try {

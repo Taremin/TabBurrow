@@ -12,8 +12,8 @@ interface GroupHeaderProps {
   groupType: 'domain' | 'custom';
   tabCount: number;
   onDeleteGroup: (name: string, groupType: 'domain' | 'custom') => void;
-  onOpenGroup: (name: string) => void;
-  onOpenGroupAsTabGroup?: (name: string) => void;
+  onOpenGroup: (name: string, groupType: 'domain' | 'custom') => void;
+  onOpenGroupAsTabGroup?: (name: string, groupType: 'domain' | 'custom') => void;
   // リネームリクエスト（親でPromptDialogを表示）
   onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
   // グループ内フィルタ
@@ -95,14 +95,14 @@ export const GroupHeader = memo(function GroupHeader({
   }, [name, groupType, onDeleteGroup]);
 
   const handleOpen = useCallback(() => {
-    onOpenGroup(name);
-  }, [name, onOpenGroup]);
+    onOpenGroup(name, groupType);
+  }, [name, groupType, onOpenGroup]);
 
   const handleOpenAsTabGroup = useCallback(() => {
     if (onOpenGroupAsTabGroup) {
-      onOpenGroupAsTabGroup(name);
+      onOpenGroupAsTabGroup(name, groupType);
     }
-  }, [name, onOpenGroupAsTabGroup]);
+  }, [name, groupType, onOpenGroupAsTabGroup]);
 
   const handleRename = useCallback(() => {
     // 親コンポーネントにリネームリクエストを通知（PromptDialogを表示させる）

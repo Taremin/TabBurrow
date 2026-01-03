@@ -54,6 +54,7 @@ export function createSavedTab(
     domain,
     group: domain,           // デフォルトはドメインでグループ化
     groupType: 'domain',     // デフォルトはドメイングループ
+    customGroups: [],
     favIconUrl: tab.favIconUrl || '',
     screenshot,
     lastAccessed: tab.lastAccessed || savedAt,
