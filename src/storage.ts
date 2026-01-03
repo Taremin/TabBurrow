@@ -14,6 +14,7 @@ import {
   type CustomGroupMeta,
   type GroupType,
 } from './dbSchema.js';
+import browser from './browserApi.js';
 
 // 型を再エクスポート（後方互換性のため）
 export type { SavedTab, CustomGroupMeta, GroupType };
@@ -582,6 +583,9 @@ export async function createCustomGroup(name: string): Promise<CustomGroupMeta> 
 
     request.onsuccess = () => resolve(group);
     request.onerror = () => reject(request.error);
+  }).then((result) => {
+    browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
+    return result as CustomGroupMeta;
   });
 }
 
@@ -628,7 +632,7 @@ export async function getAllCustomGroups(): Promise<CustomGroupMeta[]> {
 export async function renameCustomGroup(oldName: string, newName: string): Promise<void> {
   const db = await openDB();
   
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction([CUSTOM_GROUPS_STORE, STORE_NAME], 'readwrite');
     const groupStore = transaction.objectStore(CUSTOM_GROUPS_STORE);
     const tabStore = transaction.objectStore(STORE_NAME);
@@ -684,6 +688,8 @@ export async function renameCustomGroup(oldName: string, newName: string): Promi
     
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+  }).then(() => {
+    browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
   });
 }
 
@@ -693,7 +699,7 @@ export async function renameCustomGroup(oldName: string, newName: string): Promi
 export async function deleteCustomGroup(name: string): Promise<void> {
   const db = await openDB();
   
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction([CUSTOM_GROUPS_STORE, STORE_NAME], 'readwrite');
     const groupStore = transaction.objectStore(CUSTOM_GROUPS_STORE);
     const tabStore = transaction.objectStore(STORE_NAME);
@@ -731,6 +737,8 @@ export async function deleteCustomGroup(name: string): Promise<void> {
     
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+  }).then(() => {
+    browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
   });
 }
 
@@ -741,7 +749,7 @@ export async function deleteCustomGroup(name: string): Promise<void> {
 export async function updateCustomGroupOrder(groupNames: string[]): Promise<void> {
   const db = await openDB();
   
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readwrite');
     const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
     
@@ -760,6 +768,8 @@ export async function updateCustomGroupOrder(groupNames: string[]): Promise<void
     
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+  }).then(() => {
+    browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
   });
 }
 

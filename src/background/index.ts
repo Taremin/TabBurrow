@@ -175,6 +175,11 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
       });
       return Promise.resolve({ success: true });
 
+    case 'custom-groups-changed':
+      // カスタムグループが変更されたのでメニューを更新
+      updateCustomGroupMenus();
+      return Promise.resolve({ success: true });
+
     case 'link-check-start':
       // リンクチェックを開始（非同期で実行、進捗はポート経由で通知）
       (async () => {
