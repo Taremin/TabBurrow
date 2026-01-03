@@ -287,7 +287,7 @@
             "lastAccessed": "最終アクセス: {datetime}",
             "saved": "保存: {datetime}",
             "deleteButton": "削除",
-            "moveToGroup": "グループに移動",
+            "customGroups": "カスタムグループ",
             "removeFromGroup": "グループから削除",
             "rename": "表示名を変更",
             "renameDialogTitle": "タブの表示名を変更",

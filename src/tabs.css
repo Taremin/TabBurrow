@@ -1100,7 +1100,8 @@
 }
 
 .group-menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
   padding: 8px 12px;
   text-align: left;
@@ -1112,6 +1113,23 @@
   transition: background var(--transition-fast);
 }
 
+/* チェックマーク領域 - 固定幅でグループ名の位置を統一 */
+.group-menu-item-check {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  color: var(--accent-color);
+}
+
+/* グループ名テキスト */
+.group-menu-item-text {
+  flex: 1;
+  text-align: left;
+}
+
 .group-menu-item:hover:not(:disabled) {
   background: var(--bg-tertiary);
 }
@@ -1121,12 +1139,9 @@
   cursor: not-allowed;
 }
 
-.group-menu-item.remove-from-group {
-  color: var(--danger-color);
-}
-
-.group-menu-item.remove-from-group:hover {
-  background: var(--danger-light);
+/* 所属中グループのハイライト */
+.group-menu-item.is-member {
+  background: var(--accent-light);
 }
 
 .group-menu-empty {

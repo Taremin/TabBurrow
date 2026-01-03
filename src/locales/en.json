@@ -287,7 +287,7 @@
             "lastAccessed": "Last Accessed: {datetime}",
             "saved": "Saved: {datetime}",
             "deleteButton": "Delete",
-            "moveToGroup": "Move to Group",
+            "customGroups": "Custom Groups",
             "removeFromGroup": "Remove from Group",
             "rename": "Rename",
             "renameDialogTitle": "Change Tab Display Name",

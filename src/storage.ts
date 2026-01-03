@@ -250,13 +250,17 @@ export async function saveTabsForCustomGroup(tabs: SavedTab[]): Promise<void> {
       // 既存タブがあればそのIDを引き継ぐ（上書き用）
       // 新しいスクリーンショットが空の場合は既存のスクリーンショットを引き継ぐ
       const screenshot = tab.screenshot.size > 0 ? tab.screenshot : existing.screenshot;
-      // 表示名を引き継ぎ
-      // group/groupType/customGroupsは新しい値を使用（カスタムグループへの割り当て更新）
+      // 既存のcustomGroupsに新しいグループをマージ（重複排除）
+      const mergedCustomGroups = [...new Set([...(existing.customGroups || []), ...(tab.customGroups || [])])];
+      // 表示名、group/groupTypeは既存の設定を維持（ドメイングループからの所属を壊さない）
       tabsToSave.push({ 
         ...tab, 
         id: existing.id, 
         screenshot,
         displayName: existing.displayName,
+        group: existing.group,
+        groupType: existing.groupType,
+        customGroups: mergedCustomGroups,
       });
     } else {
       tabsToSave.push(tab);
@@ -275,6 +279,7 @@ export async function saveTabsForCustomGroup(tabs: SavedTab[]): Promise<void> {
     }
   });
 }
+
 
 /**
  * 全タブを取得（保存日時の降順）

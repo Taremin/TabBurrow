@@ -9,7 +9,7 @@ import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext.js';
-import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil } from 'lucide-react';
+import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
@@ -462,17 +462,9 @@ export const TabCard = memo(function TabCard({
             zIndex: 1000,
           }}
         >
-          {isInCustomGroup && (
-            <button 
-              className="group-menu-item remove-from-group"
-              onClick={handleRemoveFromGroup}
-            >
-              {t('tabManager.tabCard.removeFromGroup')}
-            </button>
-          )}
           {customGroups.length > 0 && (
             <>
-              <div className="group-menu-label">{t('tabManager.tabCard.moveToGroup')}</div>
+              <div className="group-menu-label">{t('tabManager.tabCard.customGroups')}</div>
               {customGroups.map(group => {
                 const isMember = tab.customGroups?.includes(group.name);
                 return (
@@ -481,7 +473,7 @@ export const TabCard = memo(function TabCard({
                     className={`group-menu-item ${isMember ? 'is-member' : ''}`}
                     onClick={() => isMember ? onRemoveFromGroup(tab.id, group.name) : handleMoveToGroup(group.name)}
                   >
-                    <span className="group-menu-item-check">{isMember ? '✓' : ''}</span>
+                    <span className="group-menu-item-check">{isMember && <Check size={14} />}</span>
                     <span className="group-menu-item-text">{group.name}</span>
                   </button>
                 );

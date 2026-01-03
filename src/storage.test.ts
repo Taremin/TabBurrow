@@ -277,7 +277,8 @@ describe('storage', () => {
     it('カスタムグループにタブを保存する', async () => {
       const tab = createMockTab({ 
         group: 'My Custom Group', 
-        groupType: 'custom' 
+        groupType: 'custom',
+        customGroups: ['My Custom Group'],
       });
       
       await saveTabsForCustomGroup([tab]);
@@ -286,20 +287,30 @@ describe('storage', () => {
       expect(tabs).toHaveLength(1);
       expect(tabs[0].group).toBe('My Custom Group');
       expect(tabs[0].groupType).toBe('custom');
+      expect(tabs[0].customGroups).toContain('My Custom Group');
     });
 
-    it('既存タブのグループを更新する', async () => {
+    it('既存タブのcustomGroupsにマージする（group/groupTypeは維持）', async () => {
       const url = 'https://example.com/test';
-      await saveTabs([createMockTab({ url, group: 'example.com', groupType: 'domain' })]);
+      await saveTabs([createMockTab({ 
+        url, 
+        group: 'example.com', 
+        groupType: 'domain',
+        customGroups: ['Group A'],
+      })]);
       
       await saveTabsForCustomGroup([
-        createMockTab({ url, group: 'New Group', groupType: 'custom' }),
+        createMockTab({ url, group: 'New Group', groupType: 'custom', customGroups: ['Group B'] }),
       ]);
       
       const tabs = await getAllTabs();
       expect(tabs).toHaveLength(1);
-      expect(tabs[0].group).toBe('New Group');
-      expect(tabs[0].groupType).toBe('custom');
+      // group/groupTypeは既存の値を維持
+      expect(tabs[0].group).toBe('example.com');
+      expect(tabs[0].groupType).toBe('domain');
+      // customGroupsはマージされる
+      expect(tabs[0].customGroups).toContain('Group A');
+      expect(tabs[0].customGroups).toContain('Group B');
     });
   });
 });
