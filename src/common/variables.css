@@ -16,6 +16,8 @@
     --accent-color: #6366f1;
     --accent-hover: #4f46e5;
     --accent-light: rgba(99, 102, 241, 0.1);
+    --accent-subtle-solid: #eff0fe;
+    /* #6366f1 at 10% opacity on #f8fafc background */
 
     --danger-color: #ef4444;
     --danger-hover: #dc2626;
@@ -51,6 +53,8 @@
         --border-color: #334155;
 
         --accent-light: rgba(99, 102, 241, 0.2);
+        --accent-subtle-solid: #1e2544;
+        /* #6366f1 at 20% opacity on #0f172a background */
         --danger-light: rgba(239, 68, 68, 0.2);
         --success-light: rgba(34, 197, 94, 0.2);
         --warning-light: rgba(245, 158, 11, 0.25);
@@ -72,6 +76,7 @@
     --border-color: #334155;
 
     --accent-light: rgba(99, 102, 241, 0.2);
+    --accent-subtle-solid: #1e2544;
     --danger-light: rgba(239, 68, 68, 0.2);
     --success-light: rgba(34, 197, 94, 0.2);
     --warning-light: rgba(245, 158, 11, 0.25);

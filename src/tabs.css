@@ -1123,7 +1123,7 @@
 
 /* カスタムグループヘッダー */
 .group-header.custom-group {
-  background: var(--accent-light);
+  background: var(--accent-subtle-solid);
   border-bottom-color: var(--accent-color);
 }
 
