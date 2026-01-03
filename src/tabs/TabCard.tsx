@@ -410,7 +410,7 @@ export const TabCard = memo(function TabCard({
           <button 
             ref={buttonRef}
             className="tab-group-action" 
-            title={isInCustomGroup ? t('tabManager.tabCard.removeFromGroup') : t('tabManager.tabCard.moveToGroup')}
+            title={t('tabManager.tabCard.customGroups')}
             onClick={handleToggleGroupMenu}
           >
             <Folder size={16} />
