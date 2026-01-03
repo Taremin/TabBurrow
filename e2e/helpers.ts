@@ -356,6 +356,54 @@ export async function clearTestData(page: Page): Promise<void> {
 }
 
 /**
+ * テスト用のカスタムグループデータを作成（IndexedDB直接挿入）
+ */
+export async function createCustomGroupData(page: Page, groups: {
+  name: string;
+  sortOrder?: number;
+}[]): Promise<void> {
+  const DB_NAME = 'TabBurrowDB';
+  const DB_VERSION = 5;
+  const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
+  
+  await page.evaluate(async ({ groups, dbConfig }) => {
+    const { DB_NAME, DB_VERSION, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
+    
+    const openDB = (): Promise<IDBDatabase> => {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+    };
+
+    const db = await openDB();
+    const now = Date.now();
+    
+    return new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction([CUSTOM_GROUPS_STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(CUSTOM_GROUPS_STORE_NAME);
+      
+      groups.forEach((group, index) => {
+        const groupData = {
+          name: group.name,
+          createdAt: now - (groups.length - index) * 1000,
+          updatedAt: now,
+          sortOrder: group.sortOrder ?? index,
+        };
+        store.add(groupData);
+      });
+      
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+  }, { 
+    groups, 
+    dbConfig: { DB_NAME, DB_VERSION, CUSTOM_GROUPS_STORE_NAME } 
+  });
+}
+
+/**
  * 翻訳キーのパターン
  * 例: "tabManager.title", "settings.language.description"
  * ドット区切りで2階層以上の英数字パターンを検出
