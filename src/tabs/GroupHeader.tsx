@@ -104,7 +104,8 @@ export const GroupHeader = memo(function GroupHeader({
     }
   }, [name, groupType, onOpenGroupAsTabGroup]);
 
-  const handleRename = useCallback(() => {
+  const handleRename = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
     // 親コンポーネントにリネームリクエストを通知（PromptDialogを表示させる）
     if (onRequestRename) {
       onRequestRename(name, groupType);
@@ -117,7 +118,8 @@ export const GroupHeader = memo(function GroupHeader({
     }
   }, [onFilterChange]);
 
-  const toggleFilter = useCallback(() => {
+  const toggleFilter = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
     setShowFilter(prev => !prev);
     // フィルタを閉じる時はクリア
     if (showFilter && onFilterChange) {
@@ -126,7 +128,8 @@ export const GroupHeader = memo(function GroupHeader({
   }, [showFilter, onFilterChange]);
   
   // グループ選択のトグル
-  const handleToggleGroupSelection = useCallback(() => {
+  const handleToggleGroupSelection = useCallback((e?: React.ChangeEvent | React.MouseEvent) => {
+    e?.stopPropagation();
     if (isAllSelected || isPartiallySelected) {
       // 全選択または部分選択 → 解除
       if (onDeselectGroup) {
@@ -144,24 +147,28 @@ export const GroupHeader = memo(function GroupHeader({
   const hasActiveFilter = filterPattern.trim().length > 0;
 
   // 折りたたみトグルのハンドラ
-  const handleToggleCollapse = useCallback(() => {
+  const handleToggleCollapse = useCallback((e?: React.MouseEvent | React.KeyboardEvent) => {
+    // 伝播を止める必要はない（これが最上位のハンドラになるため）
     if (onToggleCollapse) {
       onToggleCollapse(name);
     }
   }, [name, onToggleCollapse]);
 
-
+  const handleButtonClick = useCallback((e: React.MouseEvent, action: () => void) => {
+    e.stopPropagation();
+    action();
+  }, []);
 
   return (
-    <div className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
-      <div 
-        className="group-title"
-        onClick={handleToggleCollapse}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(); }}
-        title={isCollapsed ? t('tabManager.group.expandButton') : t('tabManager.group.collapseButton')}
-      >
+    <div 
+      className={`group-header ${isCustomGroup ? 'custom-group' : 'domain-group'} ${isCompact ? 'group-header-compact' : ''} ${isCollapsed ? 'collapsed' : ''}`}
+      onClick={handleToggleCollapse}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(e); }}
+      title={isCollapsed ? t('tabManager.group.expandButton') : t('tabManager.group.collapseButton')}
+    >
+      <div className="group-title">
         {isSelectionMode && groupTabIds.length > 0 && (
           <div 
             className="group-checkbox"
@@ -225,7 +232,7 @@ export const GroupHeader = memo(function GroupHeader({
         <button 
           className="group-open" 
           title={t('tabManager.group.openButton')}
-          onClick={handleOpen}
+          onClick={(e) => handleButtonClick(e, handleOpen)}
         >
           {t('tabManager.group.openButton')}
         </button>
@@ -233,7 +240,7 @@ export const GroupHeader = memo(function GroupHeader({
           <button 
             className="group-open" 
             title={t('tabManager.group.openAsTabGroupButton')}
-            onClick={handleOpenAsTabGroup}
+            onClick={(e) => handleButtonClick(e, handleOpenAsTabGroup)}
           >
             {t('tabManager.group.openAsTabGroupButton')}
           </button>
@@ -241,7 +248,7 @@ export const GroupHeader = memo(function GroupHeader({
         <button 
           className="group-delete" 
           title={t('tabManager.group.deleteButton')}
-          onClick={handleDelete}
+          onClick={(e) => handleButtonClick(e, handleDelete)}
         >
           {t('tabManager.group.deleteButton')}
         </button>

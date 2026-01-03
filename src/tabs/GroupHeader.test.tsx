@@ -61,7 +61,7 @@ describe('GroupHeader', () => {
     const openButton = screen.getByText('tabManager.group.openButton');
     fireEvent.click(openButton);
     
-    expect(onOpenGroup).toHaveBeenCalledWith('example.com');
+    expect(onOpenGroup).toHaveBeenCalledWith('example.com', 'domain');
   });
 
   it('削除ボタンをクリックするとonDeleteGroupが呼ばれる', () => {
@@ -293,7 +293,7 @@ describe('GroupHeader - タブグループとして開く', () => {
     const button = screen.getByText('tabManager.group.openAsTabGroupButton');
     fireEvent.click(button);
     
-    expect(onOpenGroupAsTabGroup).toHaveBeenCalledWith('example.com');
+    expect(onOpenGroupAsTabGroup).toHaveBeenCalledWith('example.com', 'domain');
   });
 });
 
@@ -336,8 +336,8 @@ describe('GroupHeader - 折りたたみ/展開', () => {
       />
     );
     
-    const title = document.querySelector('.group-title');
-    fireEvent.click(title!);
+    const header = document.querySelector('.group-header');
+    fireEvent.click(header!);
     
     expect(onToggleCollapse).toHaveBeenCalledWith('example.com');
   });
@@ -345,9 +345,9 @@ describe('GroupHeader - 折りたたみ/展開', () => {
   it('グループヘッダーにクリック可能なroleが設定される', () => {
     render(<GroupHeader {...defaultProps} />);
     
-    const title = document.querySelector('.group-title');
-    expect(title).toHaveAttribute('role', 'button');
-    expect(title).toHaveAttribute('tabIndex', '0');
+    const header = document.querySelector('.group-header');
+    expect(header).toHaveAttribute('role', 'button');
+    expect(header).toHaveAttribute('tabIndex', '0');
   });
 
   it('折りたたみ状態によって適切なツールチップが表示される', () => {
@@ -355,12 +355,12 @@ describe('GroupHeader - 折りたたみ/展開', () => {
       <GroupHeader {...defaultProps} isCollapsed={false} />
     );
     
-    let title = document.querySelector('.group-title');
-    expect(title).toHaveAttribute('title', 'tabManager.group.collapseButton');
+    let header = document.querySelector('.group-header');
+    expect(header).toHaveAttribute('title', 'tabManager.group.collapseButton');
     
     rerender(<GroupHeader {...defaultProps} isCollapsed={true} />);
-    title = document.querySelector('.group-title');
-    expect(title).toHaveAttribute('title', 'tabManager.group.expandButton');
+    header = document.querySelector('.group-header');
+    expect(header).toHaveAttribute('title', 'tabManager.group.expandButton');
   });
 
   it('キーボード操作（Enter）でonToggleCollapseが呼ばれる', () => {
@@ -372,8 +372,8 @@ describe('GroupHeader - 折りたたみ/展開', () => {
       />
     );
     
-    const title = document.querySelector('.group-title');
-    fireEvent.keyDown(title!, { key: 'Enter' });
+    const header = document.querySelector('.group-header');
+    fireEvent.keyDown(header!, { key: 'Enter' });
     
     expect(onToggleCollapse).toHaveBeenCalledWith('example.com');
   });
@@ -387,8 +387,8 @@ describe('GroupHeader - 折りたたみ/展開', () => {
       />
     );
     
-    const title = document.querySelector('.group-title');
-    fireEvent.keyDown(title!, { key: ' ' });
+    const header = document.querySelector('.group-header');
+    fireEvent.keyDown(header!, { key: ' ' });
     
     expect(onToggleCollapse).toHaveBeenCalledWith('example.com');
   });

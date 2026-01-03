@@ -319,6 +319,28 @@
   padding: 10px 16px;
   background: var(--bg-tertiary);
   border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+}
+
+.group-header:hover {
+  background: var(--bg-secondary);
+  filter: brightness(0.98);
+}
+
+/* ダークモード等での視認性向上のための微調整 */
+[data-theme='dark'] .group-header:hover {
+  filter: brightness(1.1);
+}
+
+.group-header:focus {
+  outline: none;
+}
+
+.group-header:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: -2px;
 }
 
 .group-title {
@@ -359,24 +381,17 @@
   transform: rotate(-90deg);
 }
 
-/* グループタイトルをクリック可能に */
+/* グループタイトル */
 .group-title {
-  cursor: pointer;
-  user-select: none;
-}
-
-.group-title:hover {
-  opacity: 0.8;
-}
-
-.group-title:focus {
-  outline: none;
-}
-
-.group-title:focus-visible {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  flex: 1;
+  /* 残りのスペースを埋める */
+  min-width: 0;
 }
 
 .group-delete {
