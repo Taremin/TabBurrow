@@ -117,7 +117,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
       <button
         ref={triggerRef}
         type="button"
-        className={`color-picker-trigger ${disabled ? 'disabled' : ''}`}
+        className={`btn btn-icon color-picker-trigger ${disabled ? 'disabled' : ''}`}
         onClick={togglePicker}
         title="グループ色を選択"
         disabled={disabled}
