@@ -85,10 +85,10 @@ test.describe('コンテキストメニュー更新通知', () => {
     const renameDialog = page.locator('.dialog');
     await expect(renameDialog).toBeVisible();
     
-    // グループ名入力
+    // グループ名入力 - fill()で確実に置換（clear()だけでは不完全な場合がある）
     const renameInput = renameDialog.locator('input[type="text"]');
-    await renameInput.clear(); // 既存の値をクリア
-    await renameInput.pressSequentially(newGroupName, { delay: 100 });
+    await renameInput.fill(''); // 先に空にする
+    await renameInput.fill(newGroupName); // 新しい値を設定
     
     // 入力値が反映されていることを確認
     await expect(renameInput).toHaveValue(newGroupName);
