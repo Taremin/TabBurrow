@@ -6,7 +6,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from '../../common/i18nContext.js';
 import type { LinkCheckRule, LinkCheckAction } from '../../settings.js';
 import { LinkCheckRuleDialog } from './LinkCheckRuleDialog.js';
-import { Pencil, X } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface LinkCheckSettingsProps {
   rules: LinkCheckRule[];
@@ -230,41 +230,45 @@ export function LinkCheckSettings({
           )}
           {rules.map(rule => (
             <div key={rule.id} className={`link-check-rule-item ${!rule.enabled ? 'disabled' : ''}`}>
-              <input
-                type="checkbox"
-                checked={rule.enabled}
-                onChange={() => handleToggleRule(rule.id)}
-                className="rule-checkbox"
-              />
-              <span className="rule-condition">{rule.condition}</span>
-              <span className="rule-arrow">→</span>
-              <select
-                className="form-select form-select-small"
-                value={rule.action}
-                onChange={(e) => handleActionChange(rule.id, e.target.value as LinkCheckAction)}
-              >
-                {ACTIONS.map(action => (
-                  <option key={action.value} value={action.value}>
-                    {t(action.labelKey)}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="button"
-                className="btn-rule-edit"
-                onClick={() => handleEditRule(rule.id)}
-                title={t('linkCheck.settings.editRule')}
-              >
-                <Pencil size={14} />
-              </button>
-              <button
-                type="button"
-                className="btn-rule-delete"
-                onClick={() => handleDeleteRule(rule.id)}
-                title={t('common.delete')}
-              >
-                <X size={14} />
-              </button>
+              <div className="link-check-rule-content">
+                <input
+                  type="checkbox"
+                  checked={rule.enabled}
+                  onChange={() => handleToggleRule(rule.id)}
+                  className="rule-checkbox"
+                />
+                <span className="rule-condition">{rule.condition}</span>
+                <span className="rule-arrow">→</span>
+                <select
+                  className="form-select form-select-small"
+                  value={rule.action}
+                  onChange={(e) => handleActionChange(rule.id, e.target.value as LinkCheckAction)}
+                >
+                  {ACTIONS.map(action => (
+                    <option key={action.value} value={action.value}>
+                      {t(action.labelKey)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="link-check-rule-actions">
+                <button
+                  type="button"
+                  className="btn btn-icon"
+                  onClick={() => handleEditRule(rule.id)}
+                  title={t('linkCheck.settings.editRule')}
+                >
+                  <Pencil size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-icon btn-danger-icon"
+                  onClick={() => handleDeleteRule(rule.id)}
+                  title={t('common.delete')}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

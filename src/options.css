@@ -787,6 +787,7 @@
 .link-check-rule-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
     padding: 10px 14px;
     background: var(--bg-tertiary);
@@ -801,6 +802,21 @@
 
 .link-check-rule-item.disabled {
     opacity: 0.5;
+}
+
+.link-check-rule-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.link-check-rule-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
 .rule-checkbox {
@@ -826,40 +842,6 @@
 .link-check-rule-item .form-select-small {
     flex: 1;
     max-width: 140px;
-}
-
-.btn-rule-edit {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 0.875rem;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
-}
-
-.btn-rule-edit:hover {
-    background: var(--accent-light);
-    color: var(--accent-color);
-}
-
-.btn-rule-delete {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.125rem;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
-}
-
-.btn-rule-delete:hover {
-    background: var(--danger-light);
-    color: var(--danger-color);
 }
 
 /* ======================
