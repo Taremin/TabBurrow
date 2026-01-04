@@ -447,13 +447,13 @@ export function TabList({
   }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onRenameTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
 
   return (
-    <div className="tab-groups" style={{ height: 'calc(100vh - 180px)' }}>
+    <div className="tab-groups">
       {viewMode === 'flat' ? (
         <Virtuoso
           key="flat-view"
           totalCount={sortedFlatTabs.length}
           itemContent={flatItemContent}
-          style={{ height: '100%' }}
+          style={{ height: '100%', flex: 1 }}
           overscan={200}
         />
       ) : (
@@ -463,7 +463,7 @@ export function TabList({
           groupCounts={groupCounts}
           groupContent={groupContent}
           itemContent={itemContent}
-          style={{ height: '100%' }}
+          style={{ height: '100%', flex: 1 }}
           overscan={200}
         />
       )}

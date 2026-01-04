@@ -295,6 +295,9 @@
 .main {
   flex: 1;
   padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* タブグループ */
@@ -302,6 +305,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  min-height: 0;
 }
 
 .tab-group {
