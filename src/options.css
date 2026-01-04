@@ -1298,13 +1298,3 @@
     flex-direction: column;
     gap: 16px;
 }
-
-.pinned-domain-icons {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-}
-
-.pinned-domain-icons .pinned-indicator {
-    color: var(--accent-color);
-}

@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Folder, Pin } from 'lucide-react';
+import { Folder } from 'lucide-react';
 import { useTranslation } from '../../common/i18nContext.js';
 import { ConfirmDialog } from '../../common/ConfirmDialog.js';
 import { DraggableList, DraggableListItem } from './DraggableList.js';
@@ -56,12 +56,7 @@ export function PinnedDomainGroupSettings({
   const items: DraggableListItem[] = pinnedDomainGroups.map(pinned => ({
     id: pinned.domain,
     name: domainGroupAliases[pinned.domain] || pinned.domain,
-    icon: (
-      <span className="pinned-domain-icons">
-        <Folder size={16} />
-        <Pin size={12} className="pinned-indicator" />
-      </span>
-    ),
+    icon: <Folder size={16} />,
     badge: domainGroupAliases[pinned.domain] ? pinned.domain : undefined,
     action: onColorChange ? (
       <ColorPicker
