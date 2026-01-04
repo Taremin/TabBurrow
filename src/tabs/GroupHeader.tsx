@@ -188,6 +188,9 @@ export const GroupHeader = memo(function GroupHeader({
         </span>
         <span className="group-icon">{isCustomGroup ? <Bookmark size={16} /> : <Folder size={16} />}</span>
         <span className="group-domain">{displayName || name}</span>
+        {displayName && (
+          <span className="group-original-domain">{name}</span>
+        )}
         <span className="group-count">({tabCount})</span>
       </div>
       <div className="group-actions">

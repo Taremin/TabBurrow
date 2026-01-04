@@ -148,4 +148,54 @@ test.describe('ドメイングループ名変更', () => {
     await expect(groupHeaderFinal.locator('.group-domain')).toHaveText('example.com');
     await expect(page.locator('.group-header').filter({ hasText: 'Updated Alias' })).not.toBeVisible();
   });
+
+  test('エイリアス設定後、グループヘッダーに元のドメイン名が薄く表示される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+
+    // グループヘッダーを探す (example.com)
+    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
+    await groupHeader.scrollIntoViewIfNeeded();
+    await groupHeader.hover();
+
+    // エイリアス設定前は元ドメイン名が表示されていないことを確認
+    await expect(groupHeader.locator('.group-original-domain')).not.toBeVisible();
+
+    // 編集ボタンをクリック
+    await groupHeader.evaluate(el => {
+      const btn = el.querySelector('.group-edit') as HTMLElement;
+      if (btn) btn.click();
+      else throw new Error('Edit button not found in JS');
+    });
+
+    // 新しい名前を入力
+    const dialogInput = page.locator('.dialog input');
+    await expect(dialogInput).toBeVisible();
+    await dialogInput.fill('My Custom Alias');
+    await page.locator('.dialog .btn-primary').click();
+    await expect(page.locator('.dialog')).not.toBeVisible();
+
+    // グループヘッダーを再度取得
+    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Custom Alias' }).first();
+    await expect(renamedGroupHeader).toBeVisible();
+
+    // エイリアス名が表示されている
+    await expect(renamedGroupHeader.locator('.group-domain')).toHaveText('My Custom Alias');
+
+    // 元のドメイン名が薄く表示されている
+    const originalDomain = renamedGroupHeader.locator('.group-original-domain');
+    await expect(originalDomain).toBeVisible();
+    await expect(originalDomain).toHaveText('example.com');
+
+    // リロード後も維持されることを確認
+    await page.reload();
+    await waitForPageLoad(page);
+
+    const reloadedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Custom Alias' }).first();
+    await expect(reloadedGroupHeader.locator('.group-domain')).toHaveText('My Custom Alias');
+    await expect(reloadedGroupHeader.locator('.group-original-domain')).toHaveText('example.com');
+  });
 });

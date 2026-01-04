@@ -115,6 +115,41 @@ describe('GroupHeader', () => {
     const editButton = document.querySelector('.group-edit');
     expect(editButton).not.toBeInTheDocument();
   });
+
+  it('displayNameが設定されている場合、エイリアス名と元のドメイン名の両方が表示される', () => {
+    render(
+      <GroupHeader 
+        {...defaultProps} 
+        groupType="domain"
+        displayName="マイエイリアス"
+      />
+    );
+    
+    // エイリアス名が表示される
+    expect(screen.getByText('マイエイリアス')).toBeInTheDocument();
+    // 元のドメイン名も表示される
+    expect(screen.getByText('example.com')).toBeInTheDocument();
+    // 元のドメイン名は専用のクラスを持つ
+    const originalDomain = document.querySelector('.group-original-domain');
+    expect(originalDomain).toBeInTheDocument();
+    expect(originalDomain?.textContent).toBe('example.com');
+  });
+
+  it('displayNameが設定されていない場合、元のドメイン名は表示されない', () => {
+    render(
+      <GroupHeader 
+        {...defaultProps} 
+        groupType="domain"
+        // displayName を渡さない
+      />
+    );
+    
+    // ドメイン名が表示される（エイリアスなし）
+    expect(screen.getByText('example.com')).toBeInTheDocument();
+    // group-original-domainクラスの要素は存在しない
+    const originalDomain = document.querySelector('.group-original-domain');
+    expect(originalDomain).not.toBeInTheDocument();
+  });
 });
 
 describe('GroupHeader - 選択モード', () => {
