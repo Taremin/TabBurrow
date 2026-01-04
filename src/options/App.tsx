@@ -19,9 +19,10 @@ import { BackupSettings } from './components/BackupSettings.js';
 import { DataManagement } from './components/DataManagement.js';
 import { CustomGroupSettings } from './components/CustomGroupSettings.js';
 import { DomainGroupSettings } from './components/DomainGroupSettings.js';
+import { PinnedDomainGroupSettings } from './components/PinnedDomainGroupSettings.js';
 import { Dialog } from '../common/Dialog.js';
 import { Layout } from '../common/Layout.js';
-import { AlertTriangle, Folder, Tag } from 'lucide-react';
+import { AlertTriangle, Folder, Tag, Pin } from 'lucide-react';
 
 export function App() {
   const { t } = useTranslation();
@@ -280,6 +281,23 @@ export function App() {
         <CustomGroupSettings
           showGroupedTabsInDomainGroups={settings.showGroupedTabsInDomainGroups}
           onShowGroupedTabsInDomainGroupsChange={(value) => updateSetting('showGroupedTabsInDomainGroups', value)}
+        />
+      </SettingsSection>
+
+      {/* ピン留めドメイングループ設定 */}
+      <SettingsSection
+        icon={<Pin size={20} />}
+        title={t('settings.pinnedDomainGroups.title')}
+        description={t('settings.pinnedDomainGroups.description')}
+      >
+        <PinnedDomainGroupSettings
+          pinnedDomainGroups={settings.pinnedDomainGroups || []}
+          domainGroupAliases={settings.domainGroupAliases || {}}
+          onReorder={(newOrder) => updateSetting('pinnedDomainGroups', newOrder)}
+          onUnpin={(domain) => {
+            const newPinned = (settings.pinnedDomainGroups || []).filter(d => d !== domain);
+            updateSetting('pinnedDomainGroups', newPinned);
+          }}
         />
       </SettingsSection>
 

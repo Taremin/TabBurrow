@@ -1199,3 +1199,112 @@
     margin-top: 8px;
     text-align: left;
 }
+
+/* ======================
+ * DraggableList 共通スタイル
+ * ====================== */
+
+.draggable-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.draggable-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.draggable-list-item:hover {
+    border-color: var(--text-muted);
+}
+
+.draggable-list-item.dragging {
+    opacity: 0.5;
+    border-color: var(--accent-color);
+    background: var(--accent-light);
+}
+
+.draggable-list-item.drop-before::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+.draggable-list-item.drop-after::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent-color);
+    border-radius: 2px;
+}
+
+.draggable-list-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.draggable-list-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+}
+
+.draggable-list-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.draggable-list-badge {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.draggable-list-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* ピン留めドメイングループ設定 */
+.pinned-domain-groups-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.pinned-domain-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.pinned-domain-icons .pinned-indicator {
+    color: var(--accent-color);
+}
