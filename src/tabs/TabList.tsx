@@ -3,7 +3,7 @@
  * react-virtuosoのGroupedVirtuosoを使用
  */
 
-import { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { GroupedVirtuoso, Virtuoso, GroupedVirtuosoHandle } from 'react-virtuoso';
 import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter } from './types';
 import { TabCard } from './TabCard';
@@ -211,6 +211,7 @@ export function TabList({
 }: TabListProps) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
+  const [pendingScrollGroup, setPendingScrollGroup] = useState<string | null>(null);
 
   // グループ化とソート（フィルタ適用）
   const { groups, groupCounts, flatTabs } = useMemo(() => {
@@ -300,20 +301,37 @@ export function TabList({
     );
   }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases]);
 
+  // 展開待ちのスクロールを処理
+  useEffect(() => {
+    if (pendingScrollGroup && virtuosoRef.current) {
+      const groupIndex = groups.findIndex(g => g.name === pendingScrollGroup);
+      if (groupIndex !== -1 && !collapsedGroups[pendingScrollGroup]) {
+        virtuosoRef.current.scrollToIndex({
+          groupIndex,
+          behavior: 'smooth',
+          align: 'start',
+        });
+        setPendingScrollGroup(null);
+      }
+    }
+  }, [groups, collapsedGroups, pendingScrollGroup]);
+
   // グループへのナビゲーションハンドラ（タグクリック時）
   const handleNavigateToGroup = useCallback((groupName: string) => {
     const groupIndex = groups.findIndex(g => g.name === groupName);
     if (groupIndex !== -1 && virtuosoRef.current) {
-      // 折りたたまれている場合は展開
+      // 折りたたまれている場合は展開して待ち状態にする
       if (collapsedGroups[groupName]) {
+        setPendingScrollGroup(groupName);
         onToggleCollapse(groupName);
+      } else {
+        // すでに展開されている場合は即座にスクロール
+        virtuosoRef.current.scrollToIndex({
+          groupIndex,
+          behavior: 'smooth',
+          align: 'start',
+        });
       }
-      // グループヘッダーへスクロール
-      virtuosoRef.current.scrollToIndex({
-        index: groupIndex,
-        behavior: 'smooth',
-        align: 'start',
-      });
     }
   }, [groups, collapsedGroups, onToggleCollapse]);
 
