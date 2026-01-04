@@ -127,6 +127,7 @@ export interface Settings {
   showGroupedTabsInDomainGroups: boolean;    // カスタムグループに所属するタブをドメイングループにも表示するか
   autoBackupKeepCount: number;               // 保持する世代数（0=無効、-1=無制限）
   domainGroupAliases: Record<string, string>; // ドメイングループの表示名エイリアス
+  pinnedDomainGroups: string[];              // ピン留めされたドメイングループ（順序付き）
 }
 
 // デフォルト設定
@@ -166,6 +167,7 @@ const DEFAULT_SETTINGS: Settings = {
   showGroupedTabsInDomainGroups: false,
   autoBackupKeepCount: 5,            // デフォルト5世代
   domainGroupAliases: {},            // エイリアスなし
+  pinnedDomainGroups: [],            // ピン留めなし
 };
 
 const STORAGE_KEY = 'settings';

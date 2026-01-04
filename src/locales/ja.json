@@ -239,6 +239,15 @@
             "emptyDomainError": "ドメイン名を入力してください",
             "emptyAliasError": "表示名を入力してください",
             "duplicateError": "そのドメインのエイリアスは既に存在します"
+        },
+        "pinnedDomainGroups": {
+            "title": "ピン留めドメイングループ",
+            "description": "ピン留めされたドメイングループはカスタムグループの直後に表示されます。",
+            "empty": "ピン留めされたドメイングループはありません",
+            "dragHint": "ドラッグして順序を変更",
+            "unpin": "ピン留めを解除",
+            "unpinConfirmTitle": "ピン留めを解除",
+            "unpinConfirmMessage": "「{domain}」のピン留めを解除しますか？"
         }
     },
     "tabManager": {
@@ -298,7 +307,9 @@
             "openAsTabGroupButton": "タブグループとして開く",
             "deleteButton": "グループ削除",
             "collapseButton": "折りたたむ",
-            "expandButton": "展開する"
+            "expandButton": "展開する",
+            "pinButton": "ピン留め",
+            "unpinButton": "ピン留め解除"
         },
         "confirmDialog": {
             "deleteGroupTitle": "グループを削除",

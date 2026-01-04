@@ -430,6 +430,41 @@
   gap: 8px;
 }
 
+/* ピン留めボタン */
+.group-pin {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.group-pin:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.group-pin.pinned {
+  color: var(--accent-color);
+}
+
+.group-pin.pinned:hover {
+  background: var(--danger-light);
+  color: var(--danger-color);
+}
+
+/* ピン留めアイコン（グループ名の横に表示） */
+.group-pin-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent-color);
+  margin-left: 4px;
+}
+
 .group-open {
   background: none;
   border: none;

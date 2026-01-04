@@ -43,6 +43,9 @@ interface TabListProps {
   onToggleCollapse: (groupName: string) => void;
   // 新規設定
   showGroupedTabsInDomainGroups?: boolean;
+  // ピン留めドメイングループ
+  pinnedDomainGroups?: string[];
+  onTogglePin?: (name: string) => void;
 }
 
 /**
@@ -208,6 +211,8 @@ export function TabList({
   onToggleCollapse,
   domainGroupAliases = {},
   showGroupedTabsInDomainGroups = false,
+  pinnedDomainGroups = [],
+  onTogglePin,
 }: TabListProps) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
@@ -237,6 +242,25 @@ export function TabList({
     // ドメイングループをソート（グローバル設定を使用）
     const sortedDomainGroups = sortGroups(domainGroups, groupSort);
     
+    // ドメイングループをピン留めと非ピンに分類
+    const pinnedDomainGroupEntries: [string, SavedTab[]][] = [];
+    const unpinnedDomainGroupEntries: [string, SavedTab[]][] = [];
+    
+    // ピン留めグループはpinnedDomainGroups配列の順序を維持
+    for (const pinnedName of pinnedDomainGroups) {
+      const entry = sortedDomainGroups.find(([name]) => name === pinnedName);
+      if (entry) {
+        pinnedDomainGroupEntries.push(entry);
+      }
+    }
+    
+    // 非ピンのドメイングループ
+    for (const entry of sortedDomainGroups) {
+      if (!pinnedDomainGroups.includes(entry[0])) {
+        unpinnedDomainGroupEntries.push(entry);
+      }
+    }
+    
     const groups: TabGroup[] = [];
     const groupCounts: number[] = [];
     const flatTabs: { tab: SavedTab; groupName: string; groupType: 'domain' | 'custom' }[] = [];
@@ -255,8 +279,20 @@ export function TabList({
       }
     }
     
-    // ドメイングループを追加
-    for (const [name, groupTabList] of sortedDomainGroups) {
+    // ピン留めドメイングループを追加（カスタムグループの直後）
+    for (const [name, groupTabList] of pinnedDomainGroupEntries) {
+      const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
+      const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
+      const isCollapsed = collapsedGroups[name] || false;
+      groups.push({ name, groupType: 'domain', tabs: filteredTabs });
+      groupCounts.push(isCollapsed ? 0 : filteredTabs.length);
+      if (!isCollapsed) {
+        flatTabs.push(...filteredTabs.map(tab => ({ tab, groupName: name, groupType: 'domain' as const })));
+      }
+    }
+    
+    // 非ピン留めドメイングループを追加
+    for (const [name, groupTabList] of unpinnedDomainGroupEntries) {
       const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
       // グループフィルタを適用
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
@@ -270,7 +306,7 @@ export function TabList({
     }
     
     return { groups, groupCounts, flatTabs };
-  }, [tabs, customGroups, groupSort, itemSort, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups]);
+  }, [tabs, customGroups, groupSort, itemSort, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups, pinnedDomainGroups]);
 
   // グループヘッダーのレンダリング
   const groupContent = useCallback((index: number) => {
@@ -297,9 +333,11 @@ export function TabList({
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
         displayName={group.groupType === 'domain' ? domainGroupAliases[group.name] : undefined}
+        isPinned={group.groupType === 'domain' && pinnedDomainGroups.includes(group.name)}
+        onTogglePin={group.groupType === 'domain' ? onTogglePin : undefined}
       />
     );
-  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases]);
+  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {

@@ -5,7 +5,7 @@
 
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '../common/i18nContext.js';
-import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown } from 'lucide-react';
+import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin } from 'lucide-react';
 
 interface GroupHeaderProps {
   name: string;
@@ -31,6 +31,9 @@ interface GroupHeaderProps {
   isCollapsed?: boolean;
   onToggleCollapse?: (groupName: string) => void;
   displayName?: string;
+  // ピン留め関連
+  isPinned?: boolean;
+  onTogglePin?: (name: string) => void;
 }
 
 /**
@@ -56,6 +59,8 @@ export const GroupHeader = memo(function GroupHeader({
   isCollapsed = false,
   onToggleCollapse,
   displayName,
+  isPinned = false,
+  onTogglePin,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -144,7 +149,16 @@ export const GroupHeader = memo(function GroupHeader({
   }, [isAllSelected, isPartiallySelected, groupTabIds, onSelectGroup, onDeselectGroup]);
 
   const isCustomGroup = groupType === 'custom';
+  const isDomainGroup = groupType === 'domain';
   const hasActiveFilter = filterPattern.trim().length > 0;
+
+  // ピン留めトグルのハンドラ
+  const handleTogglePin = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onTogglePin) {
+      onTogglePin(name);
+    }
+  }, [name, onTogglePin]);
 
   // 折りたたみトグルのハンドラ
   const handleToggleCollapse = useCallback((e?: React.MouseEvent | React.KeyboardEvent) => {
@@ -187,6 +201,11 @@ export const GroupHeader = memo(function GroupHeader({
           <ChevronDown size={16} />
         </span>
         <span className="group-icon">{isCustomGroup ? <Bookmark size={16} /> : <Folder size={16} />}</span>
+        {isPinned && isDomainGroup && (
+          <span className="group-pin-icon" title={t('tabManager.group.unpinButton')}>
+            <Pin size={12} />
+          </span>
+        )}
         <span className="group-domain">{displayName || name}</span>
         {displayName && (
           <span className="group-original-domain">{name}</span>
@@ -230,6 +249,15 @@ export const GroupHeader = memo(function GroupHeader({
             onClick={handleRename}
           >
             <Pencil size={14} />
+          </button>
+        )}
+        {isDomainGroup && onTogglePin && (
+          <button 
+            className={`group-pin ${isPinned ? 'pinned' : ''}`}
+            title={isPinned ? t('tabManager.group.unpinButton') : t('tabManager.group.pinButton')}
+            onClick={handleTogglePin}
+          >
+            <Pin size={14} />
           </button>
         )}
         <button 

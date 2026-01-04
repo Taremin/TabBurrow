@@ -111,6 +111,7 @@ export function App() {
   const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined);
   const [domainGroupAliases, setDomainGroupAliases] = useState<Record<string, string>>({});
   const [showGroupedTabsInDomainGroups, setShowGroupedTabsInDomainGroups] = useState(false);
+  const [pinnedDomainGroups, setPinnedDomainGroups] = useState<string[]>([]);
 
   // UI State
   const [dialog, setDialog] = useState<DialogState>({
@@ -150,6 +151,7 @@ export function App() {
       setDisplayDensity(prev => prev === undefined ? settings.defaultDisplayDensity : prev);
       setDomainGroupAliases(settings.domainGroupAliases || {});
       setShowGroupedTabsInDomainGroups(settings.showGroupedTabsInDomainGroups);
+      setPinnedDomainGroups(settings.pinnedDomainGroups || []);
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -211,6 +213,22 @@ export function App() {
       console.error('設定の保存に失敗:', error);
     }
   }, [showGroupedTabsInDomainGroups]);
+
+  // Toggle domain group pin state
+  const handleTogglePin = useCallback(async (domainName: string) => {
+    const isPinned = pinnedDomainGroups.includes(domainName);
+    const newPinnedGroups = isPinned
+      ? pinnedDomainGroups.filter(d => d !== domainName)
+      : [...pinnedDomainGroups, domainName];
+    
+    setPinnedDomainGroups(newPinnedGroups);
+    try {
+      const settings = await getSettings();
+      await saveSettings({ ...settings, pinnedDomainGroups: newPinnedGroups });
+    } catch (error) {
+      console.error('ピン留め設定の保存に失敗:', error);
+    }
+  }, [pinnedDomainGroups]);
 
   // Actions Wrapper
   const handleOpenTab = useCallback((url: string) => {
@@ -599,6 +617,8 @@ export function App() {
             onToggleCollapse={handleToggleCollapse}
             domainGroupAliases={domainGroupAliases}
             showGroupedTabsInDomainGroups={showGroupedTabsInDomainGroups}
+            pinnedDomainGroups={pinnedDomainGroups}
+            onTogglePin={handleTogglePin}
           />
         )}
 

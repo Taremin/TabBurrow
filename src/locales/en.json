@@ -239,6 +239,15 @@
             "emptyDomainError": "Please enter a domain name",
             "emptyAliasError": "Please enter a display name",
             "duplicateError": "Alias for this domain already exists"
+        },
+        "pinnedDomainGroups": {
+            "title": "Pinned Domain Groups",
+            "description": "Pinned domain groups are displayed right after custom groups.",
+            "empty": "No pinned domain groups",
+            "dragHint": "Drag to reorder",
+            "unpin": "Unpin",
+            "unpinConfirmTitle": "Unpin Domain Group",
+            "unpinConfirmMessage": "Unpin \"{domain}\"?"
         }
     },
     "tabManager": {
@@ -298,7 +307,9 @@
             "openAsTabGroupButton": "Open as Tab Group",
             "deleteButton": "Delete Group",
             "collapseButton": "Collapse",
-            "expandButton": "Expand"
+            "expandButton": "Expand",
+            "pinButton": "Pin",
+            "unpinButton": "Unpin"
         },
         "confirmDialog": {
             "deleteGroupTitle": "Delete Group",
