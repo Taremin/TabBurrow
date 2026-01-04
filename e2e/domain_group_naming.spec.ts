@@ -198,4 +198,105 @@ test.describe('ドメイングループ名変更', () => {
     await expect(reloadedGroupHeader.locator('.group-domain')).toHaveText('My Custom Alias');
     await expect(reloadedGroupHeader.locator('.group-original-domain')).toHaveText('example.com');
   });
+
+  test('エイリアス設定済みドメイングループのダイアログで現在のエイリアスが初期値になる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+
+    // まずエイリアスを設定
+    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
+    await groupHeader.scrollIntoViewIfNeeded();
+    await groupHeader.hover();
+    await groupHeader.evaluate(el => {
+      const btn = el.querySelector('.group-edit') as HTMLElement;
+      if (btn) btn.click();
+      else throw new Error('Edit button not found');
+    });
+
+    const dialogInput = page.locator('.dialog input');
+    await expect(dialogInput).toBeVisible();
+    await dialogInput.fill('First Alias');
+    await page.locator('.dialog .btn-primary').click();
+    await expect(page.locator('.dialog')).not.toBeVisible();
+
+    // 再度編集ダイアログを開き、初期値が設定したエイリアスになっていることを確認
+    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'First Alias' }).first();
+    await renamedGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
+    await renamedGroupHeader.scrollIntoViewIfNeeded();
+    await renamedGroupHeader.hover();
+    await renamedGroupHeader.evaluate(el => {
+      const btn = el.querySelector('.group-edit') as HTMLElement;
+      if (btn) btn.click();
+      else throw new Error('Edit button not found');
+    });
+
+    const dialogInput2 = page.locator('.dialog input');
+    await expect(dialogInput2).toBeVisible();
+    // 初期値がエイリアス名になっている（ドメイン名ではない）
+    await expect(dialogInput2).toHaveValue('First Alias');
+
+    await page.locator('.dialog .btn-secondary').click(); // キャンセル
+  });
+
+  test('ドメイングループの表示名を空にするとエイリアスが削除される', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    page.on('console', msg => console.log(`PAGE LOG: ${msg.text()}`));
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+
+    // まずエイリアスを設定
+    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
+    await groupHeader.scrollIntoViewIfNeeded();
+    await groupHeader.hover();
+    await groupHeader.evaluate(el => {
+      const btn = el.querySelector('.group-edit') as HTMLElement;
+      if (btn) btn.click();
+      else throw new Error('Edit button not found');
+    });
+
+    const dialogInput = page.locator('.dialog input');
+    await expect(dialogInput).toBeVisible();
+    await dialogInput.fill('Temporary Alias');
+    await page.locator('.dialog .btn-primary').click();
+    await expect(page.locator('.dialog')).not.toBeVisible();
+
+    // エイリアスが設定されたことを確認
+    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'Temporary Alias' }).first();
+    await expect(renamedGroupHeader).toBeVisible();
+
+    // 再度編集ダイアログを開き、空文字に変更
+    await renamedGroupHeader.scrollIntoViewIfNeeded();
+    await renamedGroupHeader.hover();
+    await renamedGroupHeader.evaluate(el => {
+      const btn = el.querySelector('.group-edit') as HTMLElement;
+      if (btn) btn.click();
+      else throw new Error('Edit button not found');
+    });
+
+    const dialogInput2 = page.locator('.dialog input');
+    await expect(dialogInput2).toBeVisible();
+    
+    // ダイアログメッセージに「空にすると」の説明があることを確認
+    const dialogMessage = page.locator('.dialog-message');
+    await expect(dialogMessage).toContainText(/空にすると|empty/i);
+
+    // 入力を空にする
+    await dialogInput2.clear();
+    
+    // OKボタンが有効であることを確認（空入力でも押せる）
+    const okButton = page.locator('.dialog .btn-primary');
+    await expect(okButton).toBeEnabled();
+    await okButton.click();
+    await expect(page.locator('.dialog')).not.toBeVisible();
+
+    // 元のドメイン名に戻っていることを確認
+    const originalGroupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    await expect(originalGroupHeader.locator('.group-domain')).toHaveText('example.com');
+    // 元ドメイン表示は非表示になっている
+    await expect(originalGroupHeader.locator('.group-original-domain')).not.toBeVisible();
+  });
 });

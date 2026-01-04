@@ -123,7 +123,7 @@ export function App() {
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
-  const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string; groupType?: 'domain' | 'custom' }>({ isOpen: false, currentName: '' });
+  const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string; groupType?: 'domain' | 'custom'; initialValue?: string }>({ isOpen: false, currentName: '' });
   const [createGroupDialog, setCreateGroupDialog] = useState<{
     isOpen: boolean;
     tabIdToMove?: string;
@@ -338,24 +338,37 @@ export function App() {
 
   // Rename Logic
   const handleRequestRename = useCallback((currentName: string, groupType: 'domain' | 'custom') => {
-    setRenameDialog({ isOpen: true, currentName, groupType });
-  }, []);
+    // ドメイングループの場合、エイリアスがあれば初期値をエイリアスに
+    const initialValue = groupType === 'domain' 
+      ? domainGroupAliases[currentName] || currentName 
+      : currentName;
+    setRenameDialog({ isOpen: true, currentName, groupType, initialValue });
+  }, [domainGroupAliases]);
 
   const handleConfirmRename = useCallback(async (newName: string) => {
     setRenameDialog({ isOpen: false, currentName: '' });
-    if (renameDialog.currentName && newName !== renameDialog.currentName) {
-      if (renameDialog.groupType === 'custom') {
+    if (renameDialog.groupType === 'custom') {
+      // カスタムグループ: 名前が変わった場合のみリネーム
+      if (renameDialog.currentName && newName && newName !== renameDialog.currentName) {
         await renameGroup(renameDialog.currentName, newName);
-      } else if (renameDialog.groupType === 'domain') {
-        try {
-          const settings = await getSettings();
-          const newAliases = { ...settings.domainGroupAliases, [renameDialog.currentName]: newName };
-          await saveSettings({ ...settings, domainGroupAliases: newAliases });
-          notifySettingsChanged();
-          setDomainGroupAliases(newAliases);
-        } catch (error) {
-          console.error('エイリアスの保存に失敗:', error);
+      }
+    } else if (renameDialog.groupType === 'domain') {
+      // ドメイングループ: 空入力でエイリアス削除、それ以外はエイリアス設定
+      try {
+        const settings = await getSettings();
+        const newAliases = { ...settings.domainGroupAliases };
+        if (newName) {
+          // 新しいエイリアスを設定
+          newAliases[renameDialog.currentName] = newName;
+        } else {
+          // 空文字の場合はエイリアスを削除
+          delete newAliases[renameDialog.currentName];
         }
+        await saveSettings({ ...settings, domainGroupAliases: newAliases });
+        notifySettingsChanged();
+        setDomainGroupAliases(newAliases);
+      } catch (error) {
+        console.error('エイリアスの保存に失敗:', error);
       }
     }
   }, [renameDialog, renameGroup]);
@@ -407,7 +420,8 @@ export function App() {
     setTabRenameDialog({
       isOpen: true,
       tabId,
-      currentDisplayName: tab?.displayName || '',
+      // displayNameがない場合は元のタイトルを初期値に
+      currentDisplayName: tab?.displayName || tab?.title || '',
     });
   }, [allTabs]);
 
@@ -622,8 +636,11 @@ export function App() {
       <PromptDialog
         isOpen={renameDialog.isOpen}
         title={t('tabManager.promptDialog.renameGroupTitle')}
-        message={t('tabManager.promptDialog.renameGroupMessage')}
-        defaultValue={renameDialog.currentName}
+        message={renameDialog.groupType === 'domain' 
+          ? t('tabManager.promptDialog.renameDomainGroupMessage')
+          : t('tabManager.promptDialog.renameGroupMessage')}
+        defaultValue={renameDialog.initialValue ?? renameDialog.currentName}
+        allowEmpty={renameDialog.groupType === 'domain'}
         onConfirm={handleConfirmRename}
         onCancel={() => setRenameDialog({ isOpen: false, currentName: '' })}
       />

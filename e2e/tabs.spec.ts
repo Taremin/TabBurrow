@@ -1551,4 +1551,40 @@ test.describe('タブ表示名変更機能', () => {
     // 元のタイトルが表示される（カスタム表示名がクリアされた）
     await expect(tabTitle).toContainText('Original Title');
   });
+
+  test('表示名が未設定のタブでダイアログを開くと元のタイトルが初期値になる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // 既存データをクリア
+    await clearTestData(page);
+    
+    // 表示名なしのテストタブを追加
+    await createTestTabData(page, {
+      url: 'https://example.com/no-display-name-test',
+      title: 'My Original Page Title',
+      // displayName は設定しない
+    });
+    
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // タブカードの鉛筆ボタンをクリック
+    const tabCard = page.locator(tabsPageSelectors.tabCard).first();
+    const renameButton = tabCard.locator('.tab-rename');
+    await renameButton.click();
+    await page.waitForTimeout(100);
+    
+    // ダイアログが表示される
+    const dialog = page.locator('.dialog');
+    await expect(dialog).toBeVisible();
+    
+    // 入力欄の初期値が元のタイトルになっている
+    const input = dialog.locator('input[type="text"]');
+    await expect(input).toHaveValue('My Original Page Title');
+    
+    // キャンセル
+    await dialog.locator('.btn-secondary').click();
+  });
 });

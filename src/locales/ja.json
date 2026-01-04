@@ -312,6 +312,7 @@
         "promptDialog": {
             "renameGroupTitle": "グループ名の変更",
             "renameGroupMessage": "新しいグループ名を入力してください",
+            "renameDomainGroupMessage": "新しい表示名を入力してください（空にすると元のドメイン名が使用されます）",
             "createGroupTitle": "新規グループ作成",
             "createGroupMessage": "グループ名を入力してください",
             "createGroupPlaceholder": "グループ名"

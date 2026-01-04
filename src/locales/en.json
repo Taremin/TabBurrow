@@ -312,6 +312,7 @@
         "promptDialog": {
             "renameGroupTitle": "Rename Group",
             "renameGroupMessage": "Enter new group name",
+            "renameDomainGroupMessage": "Enter a new display name (leave empty to use original domain name)",
             "createGroupTitle": "Create New Group",
             "createGroupMessage": "Enter group name",
             "createGroupPlaceholder": "Group Name"
