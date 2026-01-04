@@ -965,6 +965,8 @@
 
 /* コンパクトモード用ポップアップ */
 .screenshot-popup.compact-popup {
+  min-width: 416px;
+  /* 幅を固定して位置計算を安定させる */
   max-width: 420px;
 }
 

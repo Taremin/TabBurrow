@@ -71,6 +71,7 @@ export const TabCard = memo(function TabCard({
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const deleteMenuRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   // 画像の遅延読み込み/解放
   const { url: screenshotUrl, ref: imageRef } = useImageLoader(tab.screenshot, {
@@ -183,6 +184,8 @@ export const TabCard = memo(function TabCard({
 
   // スクリーンショットホバー
   const [compactPopupUrl, setCompactPopupUrl] = useState<string | null>(null);
+  // マウス位置を保持（ポップアップ位置計算用）
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
     // デバッグログ
@@ -209,68 +212,124 @@ export const TabCard = memo(function TabCard({
       return;
     }
     
-    const popupWidth = 400;
-    const popupHeight = 300;
-    let left: number;
-    let top: number;
+    // マウス位置を保存
+    setMousePos({ x: e.clientX, y: e.clientY });
     
+    // 一旦画面外に配置して表示（次フレームで実際のサイズを取得して位置を計算）
     if (isCompact) {
-      // コンパクト表示時: マウスカーソルの右下に表示
-      left = e.clientX + 16;
-      top = e.clientY + 16;
+      setPopupPosition({ left: -9999, top: -9999 });
+      setShowPopup(true);
     } else {
       // 通常表示時: 要素の右側に表示
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      left = rect.right + 12;
-      top = rect.top;
+      const popupWidth = 400 + 16; // 予測値
+      const popupHeight = 300 + 16;
+      let left = rect.right + 12;
+      let top = rect.top;
+      
+      // 右側に収まらない場合は左側に表示
+      if (left + popupWidth > window.innerWidth) {
+        left = rect.left - popupWidth - 12;
+      }
+      // 左端に収まらない場合は画面左端に配置
+      if (left < 12) {
+        left = 12;
+      }
+      if (top + popupHeight > window.innerHeight) {
+        top = window.innerHeight - popupHeight - 12;
+      }
+      if (top < 12) {
+        top = 12;
+      }
+      
+      setPopupPosition({ left, top });
+      setShowPopup(true);
     }
     
-    // 右側に収まらない場合は左側に表示
-    if (left + popupWidth > window.innerWidth) {
-      left = isCompact ? e.clientX - popupWidth - 16 : left - popupWidth - 24;
-    }
-    // 左側にも収まらない場合は画面左端に配置
-    if (left < 12) {
-      left = 12;
-    }
-    if (top + popupHeight > window.innerHeight) {
-      top = window.innerHeight - popupHeight - 12;
-    }
-    if (top < 12) {
-      top = 12;
-    }
-    
-    console.log('[TabCard] Setting popup visible', { urlToUse, left, top });
-    setPopupPosition({ left, top });
-    setShowPopup(true);
+    console.log('[TabCard] Setting popup visible', { urlToUse });
   }, [isCompact, screenshotUrl, tab.screenshot]);
 
-  // コンパクト表示時: マウス移動でポップアップがついてくる
+  // コンパクト表示時: マウス移動でポップアップがついてくる（実際のサイズを取得）
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!isCompact || !showPopup) return;
     
-    const popupWidth = 400;
-    const popupHeight = 300;
-    let left = e.clientX + 16;
-    let top = e.clientY + 16;
+    // マウス位置を更新
+    setMousePos({ x: e.clientX, y: e.clientY });
     
-    // 右側に収まらない場合は左側に表示
-    if (left + popupWidth > window.innerWidth) {
-      left = e.clientX - popupWidth - 16;
+    // ポップアップの実際のサイズを取得
+    const popupElement = popupRef.current;
+    if (!popupElement) return;
+    
+    const rect = popupElement.getBoundingClientRect();
+    const popupWidth = rect.width;
+    const popupHeight = rect.height;
+    const cursorOffset = 16; // カーソルからの距離
+    
+    // 右側に収まるかチェック
+    const canFitRight = e.clientX + cursorOffset + popupWidth <= window.innerWidth;
+    
+    let left: number;
+    let top = e.clientY + cursorOffset;
+    
+    if (canFitRight) {
+      // 右下に表示: ポップアップの左端がカーソルの右側に来る
+      left = e.clientX + cursorOffset;
+    } else {
+      // 左下に表示: ポップアップの右端がカーソルの左側に来る
+      left = e.clientX - popupWidth - cursorOffset;
     }
-    // 左側にも収まらない場合は画面左端に配置
+    
+    // 左端に収まらない場合は画面左端に配置
     if (left < 12) {
       left = 12;
     }
+    // 下端に収まらない場合は画面下端に配置
     if (top + popupHeight > window.innerHeight) {
       top = window.innerHeight - popupHeight - 12;
     }
+    // 上端に収まらない場合は画面上端に配置
     if (top < 12) {
       top = 12;
     }
     
     setPopupPosition({ left, top });
   }, [isCompact, showPopup]);
+
+  // コンパクト表示時: ポップアップ表示後に実際のサイズで位置を計算
+  useEffect(() => {
+    if (!isCompact || !showPopup || !popupRef.current) return;
+    
+    // ポップアップの実際のサイズを取得
+    const rect = popupRef.current.getBoundingClientRect();
+    const popupWidth = rect.width;
+    const popupHeight = rect.height;
+    const cursorOffset = 16;
+    
+    // 右側に収まるかチェック
+    const canFitRight = mousePos.x + cursorOffset + popupWidth <= window.innerWidth;
+    
+    let left: number;
+    let top = mousePos.y + cursorOffset;
+    
+    if (canFitRight) {
+      left = mousePos.x + cursorOffset;
+    } else {
+      left = mousePos.x - popupWidth - cursorOffset;
+    }
+    
+    // 画面端の調整
+    if (left < 12) {
+      left = 12;
+    }
+    if (top + popupHeight > window.innerHeight) {
+      top = window.innerHeight - popupHeight - 12;
+    }
+    if (top < 12) {
+      top = 12;
+    }
+    
+    setPopupPosition({ left, top });
+  }, [isCompact, showPopup, mousePos.x, mousePos.y]);
 
   const handleMouseLeave = useCallback(() => {
     setShowPopup(false);
@@ -474,6 +533,7 @@ export const TabCard = memo(function TabCard({
       {/* スクリーンショットポップアップ（コンパクトモード用：タイトル・URL全文表示） */}
       {showPopup && (
         <div 
+          ref={popupRef}
           className={`screenshot-popup ${isCompact ? 'compact-popup' : ''}`}
           style={{
             display: 'block',
