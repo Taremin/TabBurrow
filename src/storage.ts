@@ -779,6 +779,35 @@ export async function updateCustomGroupOrder(groupNames: string[]): Promise<void
 }
 
 /**
+ * カスタムグループの色を更新
+ * @param groupName グループ名
+ * @param color 色（HEX形式）、undefinedで色を削除
+ */
+export async function updateCustomGroupColor(groupName: string, color: string | undefined): Promise<void> {
+  const db = await openDB();
+  
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readwrite');
+    const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
+    const getRequest = store.get(groupName);
+    
+    getRequest.onsuccess = () => {
+      const group = getRequest.result as CustomGroupMeta | undefined;
+      if (group) {
+        group.color = color;
+        group.updatedAt = Date.now();
+        store.put(group);
+      }
+    };
+    
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  }).then(() => {
+    browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
+  });
+}
+
+/**
  * タブをカスタムグループに割り当て
  */
 export async function assignTabToCustomGroup(tabId: string, groupName: string): Promise<void> {

@@ -10,10 +10,11 @@ import { GripVertical, Pencil, Trash2 } from 'lucide-react';
  * リストアイテムの型定義
  */
 export interface DraggableListItem {
-  id: string;             // ユニーク識別子
-  name: string;           // 表示名
-  icon: React.ReactNode;  // アイコン
-  badge?: string;         // 補足情報（タブ数など）
+  id: string;              // ユニーク識別子
+  name: string;            // 表示名
+  icon: React.ReactNode;   // アイコン
+  badge?: string;          // 補足情報（タブ数など）
+  action?: React.ReactNode; // カスタムアクション（カラーピッカーなど）
 }
 
 /**
@@ -171,6 +172,7 @@ export function DraggableList({
               )}
             </div>
             <div className="draggable-list-actions">
+              {item.action}
               {onEdit && (
                 <button
                   type="button"

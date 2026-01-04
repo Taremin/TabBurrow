@@ -14,8 +14,10 @@ import {
   deleteCustomGroup,
   getAllTabs,
   updateCustomGroupOrder,
+  updateCustomGroupColor,
 } from '../../storage.js';
 import type { CustomGroupMeta, SavedTab } from '../../storage.js';
+import { ColorPicker } from '../../common/ColorPicker.js';
 
 interface CustomGroupSettingsProps {
   showGroupedTabsInDomainGroups?: boolean;
@@ -319,6 +321,15 @@ export function CustomGroupSettings({
                   </span>
                 </div>
                 <div className="custom-group-actions">
+                  <ColorPicker
+                    color={group.color}
+                    onChange={async (color) => {
+                      await updateCustomGroupColor(group.name, color);
+                      setGroups(prev => prev.map(g => 
+                        g.name === group.name ? { ...g, color } : g
+                      ));
+                    }}
+                  />
                   <button
                     type="button"
                     className="btn btn-icon"

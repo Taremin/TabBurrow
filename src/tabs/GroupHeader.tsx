@@ -34,6 +34,8 @@ interface GroupHeaderProps {
   // ピン留め関連
   isPinned?: boolean;
   onTogglePin?: (name: string) => void;
+  // グループ色
+  color?: string;
 }
 
 /**
@@ -61,6 +63,7 @@ export const GroupHeader = memo(function GroupHeader({
   displayName,
   isPinned = false,
   onTogglePin,
+  color,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -182,6 +185,10 @@ export const GroupHeader = memo(function GroupHeader({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(e); }}
       title={isCollapsed ? t('tabManager.group.expandButton') : t('tabManager.group.collapseButton')}
     >
+      {/* グループカラーバー */}
+      {color && (
+        <div className="group-color-bar" style={{ backgroundColor: color }} />
+      )}
       <div className="group-title">
         {isSelectionMode && groupTabIds.length > 0 && (
           <div 

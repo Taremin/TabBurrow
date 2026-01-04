@@ -6,6 +6,7 @@
 import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { GroupedVirtuoso, Virtuoso, GroupedVirtuosoHandle } from 'react-virtuoso';
 import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter } from './types';
+import type { PinnedDomainGroup } from '../settings.js';
 import { TabCard } from './TabCard';
 import { GroupHeader } from './GroupHeader';
 
@@ -44,7 +45,7 @@ interface TabListProps {
   // 新規設定
   showGroupedTabsInDomainGroups?: boolean;
   // ピン留めドメイングループ
-  pinnedDomainGroups?: string[];
+  pinnedDomainGroups?: PinnedDomainGroup[];
   onTogglePin?: (name: string) => void;
 }
 
@@ -247,16 +248,17 @@ export function TabList({
     const unpinnedDomainGroupEntries: [string, SavedTab[]][] = [];
     
     // ピン留めグループはpinnedDomainGroups配列の順序を維持
-    for (const pinnedName of pinnedDomainGroups) {
-      const entry = sortedDomainGroups.find(([name]) => name === pinnedName);
+    for (const pinned of pinnedDomainGroups) {
+      const entry = sortedDomainGroups.find(([name]) => name === pinned.domain);
       if (entry) {
         pinnedDomainGroupEntries.push(entry);
       }
     }
     
     // 非ピンのドメイングループ
+    const pinnedDomains = pinnedDomainGroups.map(p => p.domain);
     for (const entry of sortedDomainGroups) {
-      if (!pinnedDomainGroups.includes(entry[0])) {
+      if (!pinnedDomains.includes(entry[0])) {
         unpinnedDomainGroupEntries.push(entry);
       }
     }
@@ -313,6 +315,19 @@ export function TabList({
     const group = groups[index];
     const groupTabIds = group.tabs.map(t => t.id);
     const isCollapsed = collapsedGroups[group.name] || false;
+    
+    // グループ色を取得
+    let groupColor: string | undefined;
+    if (group.groupType === 'custom') {
+      // カスタムグループの色はcustomGroupsから取得
+      const customGroup = customGroups.find(g => g.name === group.name);
+      groupColor = customGroup?.color;
+    } else {
+      // ピン留めドメイングループの色はpinnedDomainGroupsから取得
+      const pinnedGroup = pinnedDomainGroups.find(p => p.domain === group.name);
+      groupColor = pinnedGroup?.color;
+    }
+    
     return (
       <GroupHeader
         name={group.name}
@@ -333,11 +348,12 @@ export function TabList({
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
         displayName={group.groupType === 'domain' ? domainGroupAliases[group.name] : undefined}
-        isPinned={group.groupType === 'domain' && pinnedDomainGroups.includes(group.name)}
+        isPinned={group.groupType === 'domain' && pinnedDomainGroups.some(p => p.domain === group.name)}
         onTogglePin={group.groupType === 'domain' ? onTogglePin : undefined}
+        color={groupColor}
       />
     );
-  }, [groups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin]);
+  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {

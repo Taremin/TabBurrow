@@ -8,12 +8,15 @@ import { Folder, Pin } from 'lucide-react';
 import { useTranslation } from '../../common/i18nContext.js';
 import { ConfirmDialog } from '../../common/ConfirmDialog.js';
 import { DraggableList, DraggableListItem } from './DraggableList.js';
+import type { PinnedDomainGroup } from '../../settings.js';
+import { ColorPicker } from '../../common/ColorPicker.js';
 
 interface PinnedDomainGroupSettingsProps {
-  pinnedDomainGroups: string[];
+  pinnedDomainGroups: PinnedDomainGroup[];
   domainGroupAliases?: Record<string, string>;
-  onReorder: (newOrder: string[]) => void;
+  onReorder: (newOrder: PinnedDomainGroup[]) => void;
   onUnpin: (domain: string) => void;
+  onColorChange?: (domain: string, color: string | undefined) => void;
 }
 
 /**
@@ -26,6 +29,7 @@ export function PinnedDomainGroupSettings({
   domainGroupAliases = {},
   onReorder,
   onUnpin,
+  onColorChange,
 }: PinnedDomainGroupSettingsProps) {
   const { t } = useTranslation();
   
@@ -49,22 +53,33 @@ export function PinnedDomainGroupSettings({
   }, [selectedDomain, onUnpin]);
   
   // DraggableList用のアイテムリスト作成
-  const items: DraggableListItem[] = pinnedDomainGroups.map(domain => ({
-    id: domain,
-    name: domainGroupAliases[domain] || domain,
+  const items: DraggableListItem[] = pinnedDomainGroups.map(pinned => ({
+    id: pinned.domain,
+    name: domainGroupAliases[pinned.domain] || pinned.domain,
     icon: (
       <span className="pinned-domain-icons">
         <Folder size={16} />
         <Pin size={12} className="pinned-indicator" />
       </span>
     ),
-    badge: domainGroupAliases[domain] ? domain : undefined,
+    badge: domainGroupAliases[pinned.domain] ? pinned.domain : undefined,
+    action: onColorChange ? (
+      <ColorPicker
+        color={pinned.color}
+        onChange={(color) => onColorChange(pinned.domain, color)}
+      />
+    ) : undefined,
   }));
   
   // 順序変更
   const handleReorder = useCallback((newOrder: string[]) => {
-    onReorder(newOrder);
-  }, [onReorder]);
+    // 既存のピン留めデータから色情報を引き継いで新しい順序を作成
+    const reordered = newOrder.map(domain => {
+      const existing = pinnedDomainGroups.find(p => p.domain === domain);
+      return existing || { domain };
+    });
+    onReorder(reordered);
+  }, [pinnedDomainGroups, onReorder]);
   
   // 削除（ピン解除）
   const handleDelete = useCallback((id: string) => {

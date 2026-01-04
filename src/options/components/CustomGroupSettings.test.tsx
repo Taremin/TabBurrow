@@ -44,8 +44,8 @@ vi.mock('../../common/i18nContext.js', () => ({
 
 describe('CustomGroupSettings', () => {
   const mockGroups: CustomGroupMeta[] = [
-    { name: '仕事用', createdAt: 1000, updatedAt: 1000 },
-    { name: '参考資料', createdAt: 2000, updatedAt: 2000 },
+    { name: '仕事用', createdAt: 1000, updatedAt: 1000, sortOrder: 0 },
+    { name: '参考資料', createdAt: 2000, updatedAt: 2000, sortOrder: 1 },
   ];
 
   const mockTabs: SavedTab[] = [

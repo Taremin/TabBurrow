@@ -7,7 +7,7 @@ import browser from '../browserApi.js';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import { platform } from '../platform.js';
 import type { Tabs } from 'webextension-polyfill';
-import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity } from '../settings.js';
+import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings.js';
 import type { GroupFilter, SearchOptions } from './types.js';
 import { DEFAULT_SEARCH_OPTIONS } from './types.js';
 import { Header } from './Header.js';
@@ -111,7 +111,7 @@ export function App() {
   const [displayDensity, setDisplayDensity] = useState<DisplayDensity | undefined>(undefined);
   const [domainGroupAliases, setDomainGroupAliases] = useState<Record<string, string>>({});
   const [showGroupedTabsInDomainGroups, setShowGroupedTabsInDomainGroups] = useState(false);
-  const [pinnedDomainGroups, setPinnedDomainGroups] = useState<string[]>([]);
+  const [pinnedDomainGroups, setPinnedDomainGroups] = useState<PinnedDomainGroup[]>([]);
 
   // UI State
   const [dialog, setDialog] = useState<DialogState>({
@@ -216,10 +216,10 @@ export function App() {
 
   // Toggle domain group pin state
   const handleTogglePin = useCallback(async (domainName: string) => {
-    const isPinned = pinnedDomainGroups.includes(domainName);
+    const isPinned = pinnedDomainGroups.some(p => p.domain === domainName);
     const newPinnedGroups = isPinned
-      ? pinnedDomainGroups.filter(d => d !== domainName)
-      : [...pinnedDomainGroups, domainName];
+      ? pinnedDomainGroups.filter(p => p.domain !== domainName)
+      : [...pinnedDomainGroups, { domain: domainName }];
     
     setPinnedDomainGroups(newPinnedGroups);
     try {

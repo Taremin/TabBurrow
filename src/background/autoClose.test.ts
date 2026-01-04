@@ -75,12 +75,18 @@ describe('autoClose', () => {
         linkCheckConcurrency: 5,
         linkCheckDomainConcurrency: 1,
         linkCheckDomainDelayMs: 100,
+        linkCheckUseGetFallback: true,
         iconClickApplyRules: true,
         iconClickPinnedAction: 'skip',
         autoBackupEnabled: false,
         autoBackupIntervalPreset: '24h',
         autoBackupIntervalMinutes: 1440,
         autoBackupKeepCount: 5,
+        defaultViewMode: 'grouped',
+        defaultDisplayDensity: 'normal',
+        showGroupedTabsInDomainGroups: false,
+        domainGroupAliases: {},
+        pinnedDomainGroups: [],
       };
 
       setCachedSettings(mockSettings);
@@ -108,12 +114,18 @@ describe('autoClose', () => {
         linkCheckConcurrency: 5,
         linkCheckDomainConcurrency: 1,
         linkCheckDomainDelayMs: 100,
+        linkCheckUseGetFallback: true,
         iconClickApplyRules: true,
         iconClickPinnedAction: 'skip',
         autoBackupEnabled: false,
         autoBackupIntervalPreset: '24h',
         autoBackupIntervalMinutes: 1440,
         autoBackupKeepCount: 5,
+        defaultViewMode: 'grouped',
+        defaultDisplayDensity: 'normal',
+        showGroupedTabsInDomainGroups: false,
+        domainGroupAliases: {},
+        pinnedDomainGroups: [],
       };
 
       const settings2: Settings = {
@@ -132,12 +144,18 @@ describe('autoClose', () => {
         linkCheckConcurrency: 5,
         linkCheckDomainConcurrency: 1,
         linkCheckDomainDelayMs: 100,
+        linkCheckUseGetFallback: true,
         iconClickApplyRules: true,
         iconClickPinnedAction: 'skip',
         autoBackupEnabled: false,
         autoBackupIntervalPreset: '24h',
         autoBackupIntervalMinutes: 1440,
         autoBackupKeepCount: 5,
+        defaultViewMode: 'grouped',
+        defaultDisplayDensity: 'normal',
+        showGroupedTabsInDomainGroups: false,
+        domainGroupAliases: {},
+        pinnedDomainGroups: [],
       };
 
       setCachedSettings(settings1);

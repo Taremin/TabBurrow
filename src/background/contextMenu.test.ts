@@ -628,7 +628,7 @@ describe('contextMenu', () => {
       vi.mocked(browser.scripting.executeScript)
         .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
         .mockResolvedValueOnce([{ result: 'Existing Group' }] as any);
-      vi.mocked(getAllCustomGroups).mockResolvedValueOnce([{ name: 'Existing Group', createdAt: Date.now(), updatedAt: Date.now() }]);
+      vi.mocked(getAllCustomGroups).mockResolvedValueOnce([{ name: 'Existing Group', createdAt: Date.now(), updatedAt: Date.now(), sortOrder: 0 }]);
       
       const info: Menus.OnClickData = {
         menuItemId: 'create-group-from-url',

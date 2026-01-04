@@ -290,12 +290,18 @@ export function App() {
         title={t('settings.pinnedDomainGroups.title')}
         description={t('settings.pinnedDomainGroups.description')}
       >
-        <PinnedDomainGroupSettings
+      <PinnedDomainGroupSettings
           pinnedDomainGroups={settings.pinnedDomainGroups || []}
           domainGroupAliases={settings.domainGroupAliases || {}}
           onReorder={(newOrder) => updateSetting('pinnedDomainGroups', newOrder)}
           onUnpin={(domain) => {
-            const newPinned = (settings.pinnedDomainGroups || []).filter(d => d !== domain);
+            const newPinned = (settings.pinnedDomainGroups || []).filter(p => p.domain !== domain);
+            updateSetting('pinnedDomainGroups', newPinned);
+          }}
+          onColorChange={(domain, color) => {
+            const newPinned = (settings.pinnedDomainGroups || []).map(p =>
+              p.domain === domain ? { ...p, color } : p
+            );
             updateSetting('pinnedDomainGroups', newPinned);
           }}
         />

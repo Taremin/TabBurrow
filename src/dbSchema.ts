@@ -55,6 +55,7 @@ export interface CustomGroupMeta {
   createdAt: number;  // 作成日時
   updatedAt: number;  // 更新日時
   sortOrder: number;  // 表示順序（昇順で表示）
+  color?: string;     // グループ色（HEX形式、例: "#3b82f6"）
 }
 
 /**

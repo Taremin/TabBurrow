@@ -44,6 +44,12 @@ export type ViewMode = 'grouped' | 'flat';
 // normal: 通常表示, compact: コンパクト表示
 export type DisplayDensity = 'normal' | 'compact';
 
+// ピン留めドメイングループ
+export interface PinnedDomainGroup {
+  domain: string;   // ドメイン名
+  color?: string;   // グループ色（HEX形式）
+}
+
 // 自動収納ルール
 export interface AutoCloseRule {
   id: string;              // ユニークID
@@ -127,7 +133,7 @@ export interface Settings {
   showGroupedTabsInDomainGroups: boolean;    // カスタムグループに所属するタブをドメイングループにも表示するか
   autoBackupKeepCount: number;               // 保持する世代数（0=無効、-1=無制限）
   domainGroupAliases: Record<string, string>; // ドメイングループの表示名エイリアス
-  pinnedDomainGroups: string[];              // ピン留めされたドメイングループ（順序付き）
+  pinnedDomainGroups: PinnedDomainGroup[];     // ピン留めされたドメイングループ（順序付き）
 }
 
 // デフォルト設定

@@ -322,6 +322,17 @@
   cursor: pointer;
   user-select: none;
   transition: all var(--transition-fast);
+  position: relative;
+}
+
+/* グループカラーバー（色が設定されている場合に左端に表示） */
+.group-color-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px 0 0 2px;
 }
 
 .group-header:hover {

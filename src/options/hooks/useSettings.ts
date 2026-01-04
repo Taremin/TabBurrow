@@ -43,6 +43,7 @@ const defaultSettings: Settings = {
   linkCheckConcurrency: 5,
   linkCheckDomainConcurrency: 1,
   linkCheckDomainDelayMs: 100,
+  linkCheckUseGetFallback: true,
   iconClickApplyRules: true,
   iconClickPinnedAction: 'skip',
   autoBackupEnabled: false,
@@ -51,6 +52,9 @@ const defaultSettings: Settings = {
   autoBackupKeepCount: 5,
   defaultViewMode: 'grouped',
   defaultDisplayDensity: 'normal',
+  showGroupedTabsInDomainGroups: false,
+  domainGroupAliases: {},
+  pinnedDomainGroups: [],
 };
 
 /**
