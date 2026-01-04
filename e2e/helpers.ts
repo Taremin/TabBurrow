@@ -104,9 +104,13 @@ export async function createTestTabData(page: Page, tabData: {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         
-        request.onerror = () => reject(request.error);
+        request.onerror = () => {
+          console.error('[E2E Helper] openDB error:', request.error);
+          reject(request.error);
+        };
         
         request.onupgradeneeded = (event) => {
+          console.log('[E2E Helper] openDB upgradeneeded');
           const db = (event.target as IDBOpenDBRequest).result;
           
           // tabsストアを作成
@@ -467,4 +471,28 @@ export async function findTranslationKeysInPage(page: Page): Promise<string[]> {
   const uniqueKeys = [...new Set(matches)].filter(isLikelyTranslationKey);
   
   return uniqueKeys;
+}
+
+/**
+ * IndexedDBをクリアする
+ */
+export async function clearIndexedDB(page: Page): Promise<void> {
+  const DB_NAME = 'TabBurrowDB';
+  await page.evaluate(async (name) => {
+    return new Promise<void>((resolve, reject) => {
+      const request = indexedDB.deleteDatabase(name);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => resolve(); // 既に開いている場合は無視
+    });
+  }, DB_NAME);
+}
+
+/**
+ * ダミーのタブデータを作成する
+ */
+export async function createDummyTabs(page: Page, tabs: { url: string; title: string; domain?: string }[]): Promise<void> {
+  for (const tab of tabs) {
+    await createTestTabData(page, tab);
+  }
 }

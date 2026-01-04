@@ -556,6 +556,10 @@ export function App() {
         displayDensity={displayDensity ?? 'normal'}
         onViewModeChange={setViewMode}
         onDisplayDensityChange={setDisplayDensity}
+        groupSort={groupSort}
+        itemSort={itemSort}
+        onGroupSortChange={setGroupSort}
+        onItemSortChange={setItemSort}
         onDeleteAll={handleDeleteAllConfirm}
         onOpenAll={handleOpenAll}
         onLinkCheck={() => setIsLinkCheckOpen(true)}

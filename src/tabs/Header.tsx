@@ -39,6 +39,11 @@ interface HeaderProps {
   // カスタムグループ表示設定
   showGroupedTabsInDomainGroups: boolean;
   onToggleShowGroupedTabsInDomainGroups: () => void;
+  // ソート順関連
+  groupSort: string;
+  itemSort: string;
+  onGroupSortChange: (mode: any) => void;
+  onItemSortChange: (mode: any) => void;
 }
 
 export const Header = memo(function Header({
@@ -73,6 +78,10 @@ export const Header = memo(function Header({
   onRequestBulkMoveToNewGroup,
   showGroupedTabsInDomainGroups,
   onToggleShowGroupedTabsInDomainGroups,
+  groupSort,
+  itemSort,
+  onGroupSortChange,
+  onItemSortChange,
 }: HeaderProps) {
   const { t } = useTranslation();
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -389,7 +398,6 @@ export const Header = memo(function Header({
                     </div>
                     <div className="view-mode-menu-divider" />
                     <div className="view-mode-menu-section">
-                      <div className="view-mode-menu-label">{t('settings.customGroups.title')}</div>
                       <button
                         className="view-mode-menu-item"
                         onClick={() => {
@@ -400,6 +408,42 @@ export const Header = memo(function Header({
                         {showGroupedTabsInDomainGroups ? <CheckSquare size={16} /> : <Square size={16} />}
                         {t('settings.customGroups.showInDomainGroups')}
                       </button>
+                    </div>
+
+                    <div className="view-mode-menu-divider" />
+                    <div className="view-mode-menu-section">
+                      <div className="view-mode-menu-label">{t('tabManager.sort.groupLabel')}</div>
+                      <select
+                        className="view-mode-menu-select"
+                        value={groupSort}
+                        onChange={(e) => onGroupSortChange(e.target.value as any)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <option value="count-desc">{t('tabManager.sort.countDesc')}</option>
+                        <option value="count-asc">{t('tabManager.sort.countAsc')}</option>
+                        <option value="domain-asc">{t('tabManager.sort.domainAsc')}</option>
+                        <option value="domain-desc">{t('tabManager.sort.domainDesc')}</option>
+                        <option value="updated-desc">{t('tabManager.sort.updatedDesc')}</option>
+                        <option value="updated-asc">{t('tabManager.sort.updatedAsc')}</option>
+                      </select>
+                    </div>
+
+                    <div className="view-mode-menu-divider" />
+                    <div className="view-mode-menu-section">
+                      <div className="view-mode-menu-label">{t('tabManager.sort.itemLabel')}</div>
+                      <select
+                        className="view-mode-menu-select"
+                        value={itemSort}
+                        onChange={(e) => onItemSortChange(e.target.value as any)}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <option value="saved-desc">{t('tabManager.sort.savedDesc')}</option>
+                        <option value="saved-asc">{t('tabManager.sort.savedAsc')}</option>
+                        <option value="title-asc">{t('tabManager.sort.titleAsc')}</option>
+                        <option value="title-desc">{t('tabManager.sort.titleDesc')}</option>
+                        <option value="accessed-desc">{t('tabManager.sort.accessedDesc')}</option>
+                        <option value="accessed-asc">{t('tabManager.sort.accessedAsc')}</option>
+                      </select>
                     </div>
                   </div>
                 )}
