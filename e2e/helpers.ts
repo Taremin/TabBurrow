@@ -87,6 +87,7 @@ export async function createTestTabData(page: Page, tabData: {
   groupType?: 'domain' | 'custom';
   screenshot?: boolean; // スクリーンショットを含めるか
   displayName?: string; // カスタム表示名
+  customGroups?: string[]; // カスタムグループ名
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
@@ -195,6 +196,11 @@ export async function createTestTabData(page: Page, tabData: {
     // displayNameが指定されている場合のみ追加
     if (data.displayName) {
       tab.displayName = data.displayName;
+    }
+    
+    // customGroupsが指定されている場合のみ追加
+    if (data.customGroups) {
+      tab.customGroups = data.customGroups;
     }
     
     return new Promise<void>((resolve, reject) => {

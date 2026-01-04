@@ -295,12 +295,14 @@
         "tabCard": {
             "lastAccessed": "Last Accessed: {datetime}",
             "saved": "Saved: {datetime}",
-            "deleteButton": "Delete",
             "customGroups": "Custom Groups",
-            "removeFromGroup": "Remove from Group",
             "rename": "Rename",
             "renameDialogTitle": "Change Tab Display Name",
-            "renameDialogMessage": "Enter a new display name (leave empty to use original title)"
+            "renameDialogMessage": "Enter a new display name (leave empty to use original title)",
+            "deleteButton": "Delete",
+            "deleteMenuLabel": "Delete Actions",
+            "removeFromGroup": "Remove from Group",
+            "deleteTab": "Delete Tab"
         },
         "group": {
             "openButton": "Open Group",

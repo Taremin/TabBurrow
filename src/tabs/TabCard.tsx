@@ -9,7 +9,7 @@ import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext.js';
-import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check } from 'lucide-react';
+import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check, X } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
@@ -65,8 +65,12 @@ export const TabCard = memo(function TabCard({
   const [popupPosition, setPopupPosition] = useState({ left: 0, top: 0 });
   const [showGroupMenu, setShowGroupMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 });
+  const [showDeleteMenu, setShowDeleteMenu] = useState(false);
+  const [deleteMenuPosition, setDeleteMenuPosition] = useState({ left: 0, top: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const deleteMenuRef = useRef<HTMLDivElement>(null);
 
   // 画像の遅延読み込み/解放
   const { url: screenshotUrl, ref: imageRef } = useImageLoader(tab.screenshot, {
@@ -126,13 +130,31 @@ export const TabCard = memo(function TabCard({
     }
   }, [onToggleSelection, tab.id]);
 
-  // 削除
-  const handleDelete = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // 実際の削除処理
+  const handleConfirmDelete = useCallback(async () => {
     setIsRemoving(true);
     await new Promise(resolve => setTimeout(resolve, 200));
     onDelete(tab.id);
+    setShowDeleteMenu(false);
   }, [onDelete, tab.id]);
+
+  // 削除
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // カスタムグループ内の場合はメニューを表示
+    if (currentGroupType === 'custom' && deleteButtonRef.current) {
+      const rect = deleteButtonRef.current.getBoundingClientRect();
+      setDeleteMenuPosition({
+        left: rect.right - 180, // メニュー幅を考慮して右寄せ
+        top: rect.bottom + 4,
+      });
+      setShowDeleteMenu(prev => !prev);
+    } else {
+      // ドメイングループ内やフラット表示時は即座に削除（従来通り）
+      handleConfirmDelete();
+    }
+  }, [currentGroupType, handleConfirmDelete]);
 
   // グループメニュートグル
   const handleToggleGroupMenu = useCallback((e: React.MouseEvent) => {
@@ -280,17 +302,38 @@ export const TabCard = memo(function TabCard({
     };
   }, [showGroupMenu]);
 
+  // 外部クリックで削除メニューを閉じる
+  useEffect(() => {
+    if (!showDeleteMenu) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (deleteMenuRef.current && !deleteMenuRef.current.contains(e.target as Node) &&
+          deleteButtonRef.current && !deleteButtonRef.current.contains(e.target as Node)) {
+        setShowDeleteMenu(false);
+      }
+    };
+
+    requestAnimationFrame(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    });
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDeleteMenu]);
+
   // スクロール時にメニューを閉じる
   useEffect(() => {
-    if (!showGroupMenu) return;
+    if (!showGroupMenu && !showDeleteMenu) return;
 
     const handleScroll = () => {
       setShowGroupMenu(false);
+      setShowDeleteMenu(false);
     };
 
     window.addEventListener('scroll', handleScroll, true);
     return () => window.removeEventListener('scroll', handleScroll, true);
-  }, [showGroupMenu]);
+  }, [showGroupMenu, showDeleteMenu]);
 
   return (
     <>
@@ -302,6 +345,8 @@ export const TabCard = memo(function TabCard({
         onMouseEnter={isCompact ? handleMouseEnter : undefined}
         onMouseMove={isCompact ? handleMouseMove : undefined}
         onMouseLeave={isCompact ? handleMouseLeave : undefined}
+        data-group-type={currentGroupType}
+        data-tab-id={tab.id}
       >
         {/* 選択モード時のチェックボックス */}
         {isSelectionMode && (
@@ -416,6 +461,7 @@ export const TabCard = memo(function TabCard({
             <Folder size={16} />
           </button>
           <button 
+            ref={deleteButtonRef}
             className="tab-delete" 
             title={t('tabManager.tabCard.deleteButton')}
             onClick={handleDelete}
@@ -490,6 +536,46 @@ export const TabCard = memo(function TabCard({
             }}
           >
             {t('tabManager.customGroup.createNew')}
+          </button>
+        </div>,
+        document.body
+      )}
+
+      {/* 削除メニュー（ポータルで描画） */}
+      {showDeleteMenu && createPortal(
+        <div 
+          ref={deleteMenuRef}
+          className="delete-menu-portal"
+          style={{
+            position: 'fixed',
+            left: deleteMenuPosition.left,
+            top: deleteMenuPosition.top,
+            zIndex: 1000,
+          }}
+        >
+          <div className="group-menu-label">{t('tabManager.tabCard.deleteMenuLabel')}</div>
+          <button
+            className="group-menu-item"
+            data-testid="remove-from-group"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveFromGroup(tab.id, currentGroupName);
+              setShowDeleteMenu(false);
+            }}
+          >
+            <span className="group-menu-item-check"><X size={14} /></span>
+            <span className="group-menu-item-text">{t('tabManager.tabCard.removeFromGroup')}</span>
+          </button>
+          <button
+            className="group-menu-item group-menu-item-danger"
+            data-testid="delete-tab"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConfirmDelete();
+            }}
+          >
+            <span className="group-menu-item-check"><Trash2 size={14} /></span>
+            <span className="group-menu-item-text">{t('tabManager.tabCard.deleteTab')}</span>
           </button>
         </div>,
         document.body

@@ -1207,6 +1207,19 @@
   background: var(--accent-light);
 }
 
+.group-menu-item-danger {
+  color: var(--danger-color);
+}
+
+.group-menu-item-danger:hover:not(:disabled) {
+  background: var(--danger-light) !important;
+  color: var(--danger-color) !important;
+}
+
+.group-menu-item-danger .group-menu-item-check {
+  color: var(--danger-color);
+}
+
 .group-menu-empty {
   padding: 12px;
   text-align: center;
@@ -1238,6 +1251,16 @@
 
 /* グループメニュー（ポータル） */
 .group-menu-portal {
+  min-width: 180px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 4px 0;
+  animation: fadeIn 150ms ease;
+}
+
+.delete-menu-portal {
   min-width: 180px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -1787,6 +1810,8 @@
   color: var(--accent-color);
   font-weight: 500;
 }
+
+
 
 /* ========================================
    表示モードドロップダウンメニュー

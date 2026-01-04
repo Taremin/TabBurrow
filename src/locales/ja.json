@@ -295,12 +295,14 @@
         "tabCard": {
             "lastAccessed": "最終アクセス: {datetime}",
             "saved": "保存: {datetime}",
-            "deleteButton": "削除",
             "customGroups": "カスタムグループ",
-            "removeFromGroup": "グループから削除",
             "rename": "表示名を変更",
             "renameDialogTitle": "タブの表示名を変更",
-            "renameDialogMessage": "新しい表示名を入力してください（空にすると元のタイトルが使用されます）"
+            "renameDialogMessage": "新しい表示名を入力してください（空にすると元のタイトルが使用されます）",
+            "deleteButton": "削除",
+            "deleteMenuLabel": "削除操作",
+            "removeFromGroup": "グループから外す",
+            "deleteTab": "タブを削除"
         },
         "group": {
             "openButton": "グループを開く",
