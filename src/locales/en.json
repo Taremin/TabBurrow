@@ -84,7 +84,8 @@
             "title": "Default View Mode",
             "description": "Configure the initial view mode when opening the tab manager.",
             "groupModeLabel": "Group Mode",
-            "densityLabel": "Display Density"
+            "densityLabel": "Display Density",
+            "maximizeWidthLabel": "Use maximum width"
         },
         "sort": {
             "title": "Sort Order",

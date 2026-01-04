@@ -134,6 +134,7 @@ export interface Settings {
   autoBackupKeepCount: number;               // 保持する世代数（0=無効、-1=無制限）
   domainGroupAliases: Record<string, string>; // ドメイングループの表示名エイリアス
   pinnedDomainGroups: PinnedDomainGroup[];     // ピン留めされたドメイングループ（順序付き）
+  maximizeWidth: boolean;                    // 横幅を最大まで使用するか
 }
 
 // デフォルト設定
@@ -174,6 +175,7 @@ const DEFAULT_SETTINGS: Settings = {
   autoBackupKeepCount: 5,            // デフォルト5世代
   domainGroupAliases: {},            // エイリアスなし
   pinnedDomainGroups: [],            // ピン留めなし
+  maximizeWidth: false,              // デフォルトはオフ
 };
 
 const STORAGE_KEY = 'settings';

@@ -140,10 +140,13 @@ export function App() {
           <ViewModeSettings
             viewMode={settings.defaultViewMode}
             displayDensity={settings.defaultDisplayDensity}
+            maximizeWidth={settings.maximizeWidth}
             savedViewMode={savedSettings.defaultViewMode}
             savedDisplayDensity={savedSettings.defaultDisplayDensity}
+            savedMaximizeWidth={savedSettings.maximizeWidth}
             onViewModeChange={(value) => updateSetting('defaultViewMode', value)}
             onDisplayDensityChange={(value) => updateSetting('defaultDisplayDensity', value)}
+            onMaximizeWidthChange={(value) => updateSetting('maximizeWidth', value)}
           />
         </SettingsSection>
 

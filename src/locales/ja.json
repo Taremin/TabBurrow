@@ -84,7 +84,8 @@
             "title": "デフォルト表示モード",
             "description": "タブ管理画面を開いた時の初期表示モードを設定します。",
             "groupModeLabel": "グループ化",
-            "densityLabel": "表示密度"
+            "densityLabel": "表示密度",
+            "maximizeWidthLabel": "横幅を最大まで使用する"
         },
         "sort": {
             "title": "ソート順",

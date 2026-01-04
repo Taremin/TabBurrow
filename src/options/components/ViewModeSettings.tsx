@@ -8,23 +8,30 @@ import type { ViewMode, DisplayDensity } from '../../settings.js';
 interface ViewModeSettingsProps {
   viewMode: ViewMode;
   displayDensity: DisplayDensity;
+  maximizeWidth: boolean;
   savedViewMode: ViewMode;
   savedDisplayDensity: DisplayDensity;
+  savedMaximizeWidth: boolean;
   onViewModeChange: (value: ViewMode) => void;
   onDisplayDensityChange: (value: DisplayDensity) => void;
+  onMaximizeWidthChange: (value: boolean) => void;
 }
 
 export function ViewModeSettings({
   viewMode,
   displayDensity,
+  maximizeWidth,
   savedViewMode,
   savedDisplayDensity,
+  savedMaximizeWidth,
   onViewModeChange,
   onDisplayDensityChange,
+  onMaximizeWidthChange,
 }: ViewModeSettingsProps) {
   const { t } = useTranslation();
   const isViewModeModified = viewMode !== savedViewMode;
   const isDensityModified = displayDensity !== savedDisplayDensity;
+  const isMaximizeWidthModified = maximizeWidth !== savedMaximizeWidth;
 
   const viewModeOptions: { value: ViewMode; labelKey: string }[] = [
     { value: 'grouped', labelKey: 'tabManager.viewMode.grouped' },
@@ -78,6 +85,21 @@ export function ViewModeSettings({
             </label>
           ))}
         </div>
+      </div>
+
+      {/* 横幅最大化 */}
+      <div className="form-group">
+        <label className={`form-checkbox-label ${isMaximizeWidthModified ? 'modified' : ''}`}>
+          <input
+            type="checkbox"
+            className="form-checkbox"
+            data-testid="maximize-width-checkbox"
+            checked={maximizeWidth}
+            onChange={(e) => onMaximizeWidthChange(e.target.checked)}
+          />
+          <span className="checkbox-custom"></span>
+          <span>{t('settings.viewMode.maximizeWidthLabel')}</span>
+        </label>
       </div>
     </>
   );

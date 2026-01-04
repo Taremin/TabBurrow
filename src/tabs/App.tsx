@@ -112,6 +112,7 @@ export function App() {
   const [domainGroupAliases, setDomainGroupAliases] = useState<Record<string, string>>({});
   const [showGroupedTabsInDomainGroups, setShowGroupedTabsInDomainGroups] = useState(false);
   const [pinnedDomainGroups, setPinnedDomainGroups] = useState<PinnedDomainGroup[]>([]);
+  const [maximizeWidth, setMaximizeWidth] = useState(false);
 
   // UI State
   const [dialog, setDialog] = useState<DialogState>({
@@ -152,6 +153,7 @@ export function App() {
       setDomainGroupAliases(settings.domainGroupAliases || {});
       setShowGroupedTabsInDomainGroups(settings.showGroupedTabsInDomainGroups);
       setPinnedDomainGroups(settings.pinnedDomainGroups || []);
+      setMaximizeWidth(settings.maximizeWidth || false);
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -541,7 +543,7 @@ export function App() {
   }, []);
   
   return (
-    <div className="container">
+    <div className={`container ${maximizeWidth ? 'maximize-width' : ''}`}>
       <Header
         tabCount={tabCount}
         storageInfo={storageInfo}

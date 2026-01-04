@@ -40,6 +40,11 @@ body {
     box-sizing: border-box;
 }
 
+.container.maximize-width {
+    max-width: none;
+    padding: 0 40px;
+}
+
 @media screen and (max-width: 660px) {
     .container {
         padding: 0 12px;
