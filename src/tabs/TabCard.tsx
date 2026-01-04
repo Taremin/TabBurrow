@@ -530,13 +530,14 @@ export const TabCard = memo(function TabCard({
         </div>
       </div>
 
-      {/* スクリーンショットポップアップ（コンパクトモード用：タイトル・URL全文表示） */}
-      {showPopup && (
+      {/* スクリーンショットポップアップ（コンパクトモード用：タイトル・URL全文表示、ポータルで描画） */}
+      {showPopup && createPortal(
         <div 
           ref={popupRef}
           className={`screenshot-popup ${isCompact ? 'compact-popup' : ''}`}
           style={{
             display: 'block',
+            position: 'fixed',
             left: popupPosition.left,
             top: popupPosition.top,
           }}
@@ -553,7 +554,8 @@ export const TabCard = memo(function TabCard({
               <div className="popup-url">{tab.url}</div>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* グループメニュー（ポータルで描画） */}
