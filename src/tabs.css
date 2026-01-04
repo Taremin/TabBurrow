@@ -325,6 +325,10 @@
   position: relative;
 }
 
+.group-header.domain-group {
+  border-bottom-color: var(--domain-group-border);
+}
+
 /* グループカラーバー（色が設定されている場合に左端に表示） */
 .group-color-bar {
   position: absolute;
