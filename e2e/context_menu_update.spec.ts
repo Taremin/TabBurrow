@@ -12,13 +12,11 @@ test.describe('コンテキストメニュー更新通知', () => {
     (window as any).__sentMessages = [];
     
     // chrome.runtime.sendMessage をラップ
-    const originalSendMessage = chrome.runtime.sendMessage;
-    chrome.runtime.sendMessage = function(message: any, ...args: any[]) {
+    const originalSendMessage = chrome.runtime.sendMessage.bind(chrome.runtime);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (chrome.runtime as any).sendMessage = function(message: any, ...args: any[]): Promise<any> {
       (window as any).__sentMessages.push(message);
-      if (originalSendMessage) {
-        return originalSendMessage.apply(this, [message, ...args]);
-      }
-      return Promise.resolve();
+      return originalSendMessage(message, ...args);
     };
   };
 

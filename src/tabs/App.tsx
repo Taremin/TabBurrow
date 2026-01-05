@@ -22,15 +22,9 @@ import { useTabs } from './hooks/useTabs.js';
 import { useGroups } from './hooks/useGroups.js';
 import { useSearch } from './hooks/useSearch.js';
 import { useSelection } from './hooks/useSelection.js';
+import { useDialogs, type DialogState } from './hooks/useDialogs.js';
 
-interface DialogState {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  confirmButtonText?: string;
-  confirmButtonStyle?: 'danger' | 'primary';
-}
+
 
 // ユーティリティ: 指定ミリ秒待機
 const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
@@ -102,6 +96,25 @@ export function App() {
     setIsSelectionMode,
   } = useSelection();
 
+  const {
+    confirmDialog,
+    showConfirmDialog,
+    hideConfirmDialog,
+    setConfirmDialog,
+    renameDialog,
+    showRenameDialog,
+    hideRenameDialog,
+    setRenameDialog,
+    createGroupDialog,
+    showCreateGroupDialog,
+    hideCreateGroupDialog,
+    setCreateGroupDialog,
+    tabRenameDialog,
+    showTabRenameDialog,
+    hideTabRenameDialog,
+    setTabRenameDialog,
+  } = useDialogs();
+
   // Settings State
   const [groupSort, setGroupSort] = useState<GroupSortType>('count-desc');
   const [itemSort, setItemSort] = useState<ItemSortType>('saved-desc');
@@ -114,28 +127,9 @@ export function App() {
   const [pinnedDomainGroups, setPinnedDomainGroups] = useState<PinnedDomainGroup[]>([]);
   const [maximizeWidth, setMaximizeWidth] = useState(false);
 
-  // UI State
-  const [dialog, setDialog] = useState<DialogState>({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: () => {},
-  });
-  
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
-  const [renameDialog, setRenameDialog] = useState<{ isOpen: boolean; currentName: string; groupType?: 'domain' | 'custom'; initialValue?: string }>({ isOpen: false, currentName: '' });
-  const [createGroupDialog, setCreateGroupDialog] = useState<{
-    isOpen: boolean;
-    tabIdToMove?: string;
-    bulkMove?: boolean;
-  }>({ isOpen: false });
-  const [tabRenameDialog, setTabRenameDialog] = useState<{
-    isOpen: boolean;
-    tabId: string;
-    currentDisplayName?: string;
-  }>({ isOpen: false, tabId: '' });
 
   // Tab Count
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
@@ -259,27 +253,25 @@ export function App() {
     const groupTabs = getGroupTabs(groupName, groupType);
     
     if (groupType === 'custom') {
-      setDialog({
-        isOpen: true,
+      showConfirmDialog({
         title: t('tabManager.customGroup.deleteConfirmTitle'),
         message: t('tabManager.customGroup.deleteConfirmMessage', { name: groupName }),
         onConfirm: async () => {
           await deleteCustomGroupByName(groupName);
-          setDialog(d => ({ ...d, isOpen: false }));
+          hideConfirmDialog();
         },
       });
     } else {
-      setDialog({
-        isOpen: true,
+      showConfirmDialog({
         title: t('tabManager.confirmDialog.deleteGroupTitle'),
         message: t('tabManager.confirmDialog.deleteGroupMessage', { domain: groupName, count: groupTabs.length }),
         onConfirm: async () => {
           await deleteDomainGroup(groupName);
-          setDialog(d => ({ ...d, isOpen: false }));
+          hideConfirmDialog();
         },
       });
     }
-  }, [filteredTabs, deleteDomainGroup, deleteCustomGroupByName, t]);
+  }, [getGroupTabs, deleteDomainGroup, deleteCustomGroupByName, t, showConfirmDialog, hideConfirmDialog]);
 
   const openTabsWithRestoreMode = useCallback(async (urls: string[]) => {
     for (let i = 0; i < urls.length; i++) {
@@ -362,11 +354,11 @@ export function App() {
     const initialValue = groupType === 'domain' 
       ? domainGroupAliases[currentName] || currentName 
       : currentName;
-    setRenameDialog({ isOpen: true, currentName, groupType, initialValue });
-  }, [domainGroupAliases]);
+    showRenameDialog(currentName, groupType, initialValue);
+  }, [domainGroupAliases, showRenameDialog]);
 
   const handleConfirmRename = useCallback(async (newName: string) => {
-    setRenameDialog({ isOpen: false, currentName: '' });
+    hideRenameDialog();
     if (renameDialog.groupType === 'custom') {
       // カスタムグループ: 名前が変わった場合のみリネーム
       if (renameDialog.currentName && newName && newName !== renameDialog.currentName) {
@@ -391,26 +383,26 @@ export function App() {
         console.error('エイリアスの保存に失敗:', error);
       }
     }
-  }, [renameDialog, renameGroup]);
+  }, [renameDialog, renameGroup, hideRenameDialog]);
 
   // Create/Move Group Logic
   const handleRequestCreateGroup = useCallback(() => {
-    setCreateGroupDialog({ isOpen: true });
-  }, []);
+    showCreateGroupDialog();
+  }, [showCreateGroupDialog]);
 
   const handleRequestMoveToNewGroup = useCallback((tabId: string) => {
-    setCreateGroupDialog({ isOpen: true, tabIdToMove: tabId });
-  }, []);
+    showCreateGroupDialog({ tabIdToMove: tabId });
+  }, [showCreateGroupDialog]);
 
   const handleRequestBulkMoveToNewGroup = useCallback(() => {
     if (selectedTabIds.size === 0) return;
-    setCreateGroupDialog({ isOpen: true, bulkMove: true });
-  }, [selectedTabIds.size]);
+    showCreateGroupDialog({ bulkMove: true });
+  }, [selectedTabIds.size, showCreateGroupDialog]);
 
   const handleConfirmCreateGroup = useCallback(async (groupName: string) => {
     const name = groupName.trim();
     if (!name) {
-      setCreateGroupDialog({ isOpen: false });
+      hideCreateGroupDialog();
       return;
     }
 
@@ -431,27 +423,22 @@ export function App() {
       console.error('グループ作成に失敗:', error);
     }
     
-    setCreateGroupDialog({ isOpen: false });
-  }, [createGroupDialog, selectedTabIds, customGroups, createGroup, moveTabToGroup, bulkMoveTabsToGroup, setSelectedTabIds]);
+    hideCreateGroupDialog();
+  }, [createGroupDialog, selectedTabIds, customGroups, createGroup, moveTabToGroup, bulkMoveTabsToGroup, setSelectedTabIds, hideCreateGroupDialog, setIsSelectionMode]);
 
   // Tab Rename Logic
   const handleRequestTabRename = useCallback((tabId: string) => {
     const tab = allTabs.find(t => t.id === tabId);
-    setTabRenameDialog({
-      isOpen: true,
-      tabId,
-      // displayNameがない場合は元のタイトルを初期値に
-      currentDisplayName: tab?.displayName || tab?.title || '',
-    });
-  }, [allTabs]);
+    showTabRenameDialog(tabId, tab?.displayName || tab?.title || '');
+  }, [allTabs, showTabRenameDialog]);
 
   const handleConfirmTabRename = useCallback(async (newDisplayName: string) => {
     const trimmed = newDisplayName.trim();
     // 空文字の場合はundefinedにして表示名を解除
     const displayName = trimmed || undefined;
     await updateTabData(tabRenameDialog.tabId, { displayName });
-    setTabRenameDialog({ isOpen: false, tabId: '' });
-  }, [tabRenameDialog.tabId, updateTabData]);
+    hideTabRenameDialog();
+  }, [tabRenameDialog.tabId, updateTabData, hideTabRenameDialog]);
 
   // Bulk Actions
   const handleSelectAll = useCallback(() => {
@@ -462,18 +449,17 @@ export function App() {
     const count = selectedTabIds.size;
     if (count === 0) return;
     
-    setDialog({
-      isOpen: true,
+    showConfirmDialog({
       title: t('tabManager.selection.confirmDeleteTitle'),
       message: t('tabManager.selection.confirmDeleteMessage', { count }),
       onConfirm: async () => {
         await bulkDeleteTabs([...selectedTabIds]);
         setSelectedTabIds(new Set());
         setIsSelectionMode(false);
-        setDialog(d => ({ ...d, isOpen: false }));
+        hideConfirmDialog();
       },
     });
-  }, [selectedTabIds, bulkDeleteTabs, setSelectedTabIds, t]);
+  }, [selectedTabIds, bulkDeleteTabs, setSelectedTabIds, t, showConfirmDialog, hideConfirmDialog, setIsSelectionMode]);
 
   const handleBulkMoveToGroupWrapper = useCallback(async (groupName: string) => {
     if (selectedTabIds.size === 0) return;
@@ -508,8 +494,7 @@ export function App() {
   // Global Actions
   const handleOpenAll = useCallback(() => {
     const count = filteredTabs.length;
-    setDialog({
-      isOpen: true,
+    showConfirmDialog({
       title: t('tabManager.confirmDialog.openAllTitle'),
       message: t('tabManager.confirmDialog.openAllMessage', { count }),
       confirmButtonText: t('tabManager.confirmDialog.openAllConfirm'),
@@ -517,26 +502,25 @@ export function App() {
       onConfirm: async () => {
         const urls = filteredTabs.map(tab => tab.url);
         await openTabsWithRestoreMode(urls);
-        setDialog(d => ({ ...d, isOpen: false }));
+        hideConfirmDialog();
       },
     });
-  }, [filteredTabs, openTabsWithRestoreMode, t]);
+  }, [filteredTabs, openTabsWithRestoreMode, t, showConfirmDialog, hideConfirmDialog]);
 
   const handleDeleteAllConfirm = useCallback(() => {
-    setDialog({
-      isOpen: true,
+    showConfirmDialog({
       title: t('tabManager.confirmDialog.deleteAllTitle'),
       message: t('tabManager.confirmDialog.deleteAllMessage', { count: allTabs.length }),
       onConfirm: async () => {
         await deleteAll();
-        setDialog(d => ({ ...d, isOpen: false }));
+        hideConfirmDialog();
       },
     });
-  }, [allTabs.length, deleteAll, t]);
+  }, [allTabs.length, deleteAll, t, showConfirmDialog, hideConfirmDialog]);
 
   const handleCancelDialog = useCallback(() => {
-    setDialog(d => ({ ...d, isOpen: false }));
-  }, []);
+    hideConfirmDialog();
+  }, [hideConfirmDialog]);
 
   const handleGroupFilterChange = useCallback((groupName: string, pattern: string) => {
     setGroupFilters(prev => ({ ...prev, [groupName]: pattern }));
@@ -643,13 +627,13 @@ export function App() {
       </footer>
 
       <ConfirmDialog
-        isOpen={dialog.isOpen}
-        title={dialog.title}
-        message={dialog.message}
-        onConfirm={dialog.onConfirm}
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        onConfirm={confirmDialog.onConfirm}
         onCancel={handleCancelDialog}
-        confirmButtonText={dialog.confirmButtonText}
-        confirmButtonStyle={dialog.confirmButtonStyle}
+        confirmButtonText={confirmDialog.confirmButtonText}
+        confirmButtonStyle={confirmDialog.confirmButtonStyle}
       />
 
       <LinkCheckDialog
@@ -668,7 +652,7 @@ export function App() {
         defaultValue={renameDialog.initialValue ?? renameDialog.currentName}
         allowEmpty={renameDialog.groupType === 'domain'}
         onConfirm={handleConfirmRename}
-        onCancel={() => setRenameDialog({ isOpen: false, currentName: '' })}
+        onCancel={hideRenameDialog}
       />
 
       {/* 新規グループダイアログ (PromptDialog) */}
@@ -678,7 +662,7 @@ export function App() {
         message={t('tabManager.promptDialog.createGroupMessage')}
         placeholder={t('tabManager.promptDialog.createGroupPlaceholder')}
         onConfirm={handleConfirmCreateGroup}
-        onCancel={() => setCreateGroupDialog({ isOpen: false })}
+        onCancel={hideCreateGroupDialog}
       />
 
       {/* タブ表示名変更ダイアログ (PromptDialog) */}
@@ -689,7 +673,7 @@ export function App() {
         defaultValue={tabRenameDialog.currentDisplayName || ''}
         allowEmpty={true}
         onConfirm={handleConfirmTabRename}
-        onCancel={() => setTabRenameDialog({ isOpen: false, tabId: '' })}
+        onCancel={hideTabRenameDialog}
       />
     </div>
   );
