@@ -7,12 +7,12 @@ import { useEffect, type RefObject } from 'react';
 
 /**
  * 要素の外側クリックを検出するフック
- * @param ref 対象要素のref
+ * @param refs 対象要素のref（単一または配列）
  * @param handler 外部クリック時に呼び出されるハンドラ
  * @param enabled フックの有効/無効（デフォルト: true）
  */
 export function useClickOutside(
-  ref: RefObject<HTMLElement>,
+  refs: RefObject<HTMLElement> | RefObject<HTMLElement>[],
   handler: () => void,
   enabled: boolean = true
 ): void {
@@ -20,8 +20,19 @@ export function useClickOutside(
     if (!enabled) return;
 
     const handleClickOutside = (e: MouseEvent) => {
-      // refの要素外でのクリックを検出
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      // 配列に正規化
+      const refArray = Array.isArray(refs) ? refs : [refs];
+      
+      // 有効なrefが1つもない場合は何もしない
+      const hasValidRef = refArray.some(ref => ref.current !== null);
+      if (!hasValidRef) return;
+      
+      // いずれかの要素内のクリックは無視
+      const isInsideAnyRef = refArray.some(
+        ref => ref.current?.contains(e.target as Node)
+      );
+      
+      if (!isInsideAnyRef) {
         handler();
       }
     };
@@ -35,5 +46,5 @@ export function useClickOutside(
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [ref, handler, enabled]);
+  }, [refs, handler, enabled]);
 }

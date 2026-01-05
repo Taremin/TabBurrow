@@ -84,14 +84,14 @@ export async function openTabManagerPage(): Promise<void> {
   if (existingTabs.length > 0 && existingTabs[0].id !== undefined) {
     // 現在のウィンドウ内の既存タブをアクティブに
     // 設定が有効な場合は固定化も行う
-    const updateProperties: any = { active: true };
+    const updateProperties: Tabs.UpdateUpdatePropertiesType = { active: true };
     if (settings.pinTabManager) {
       updateProperties.pinned = true;
     }
     await browser.tabs.update(existingTabs[0].id, updateProperties);
   } else {
     // 現在のウィンドウに新しいタブを作成
-    const createProperties: any = { url: extensionUrl };
+    const createProperties: Tabs.CreateCreatePropertiesType = { url: extensionUrl };
     if (settings.pinTabManager) {
       createProperties.pinned = true;
     }

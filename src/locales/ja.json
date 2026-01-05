@@ -5,7 +5,13 @@
         "cancel": "キャンセル",
         "delete": "削除",
         "tabs": "タブ",
-        "tabCount": "{count} タブ"
+        "tabCount": "{count} タブ",
+        "colorPicker": {
+            "selectColor": "グループ色を選択",
+            "noColor": "色なし",
+            "customColor": "カスタム色を選択",
+            "close": "閉じる"
+        }
     },
     "dialog": {
         "ok": "OK",

@@ -5,7 +5,13 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "tabs": "tabs",
-        "tabCount": "{count} tabs"
+        "tabCount": "{count} tabs",
+        "colorPicker": {
+            "selectColor": "Select group color",
+            "noColor": "No color",
+            "customColor": "Select custom color",
+            "close": "Close"
+        }
     },
     "dialog": {
         "ok": "OK",

@@ -617,7 +617,7 @@ test.describe('設定画面 - リンクチェック設定', () => {
     const ruleItem = linkCheckSection.locator('.link-check-rule-item').filter({ hasText: '404' }).first();
     await expect(ruleItem).toBeVisible();
     
-    const editButton = ruleItem.locator('.btn-rule-edit');
+    const editButton = ruleItem.locator('.btn-icon').first();
     await editButton.click();
     
     // ダイアログが開く
@@ -1024,7 +1024,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     const groupItem = customGroupSection.locator('.custom-group-item').filter({ hasText: originalName });
     await expect(groupItem).toBeVisible();
     
-    const editButton = groupItem.locator('.btn-icon').first();
+    const editButton = groupItem.locator('.btn-icon:has(.lucide-pencil)');
     await editButton.click();
     
     // 編集ダイアログが開く

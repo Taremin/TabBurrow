@@ -87,6 +87,8 @@ describe('autoClose', () => {
         showGroupedTabsInDomainGroups: false,
         domainGroupAliases: {},
         pinnedDomainGroups: [],
+        maximizeWidth: false,
+        pinTabManager: true,
       };
 
       setCachedSettings(mockSettings);
@@ -126,6 +128,8 @@ describe('autoClose', () => {
         showGroupedTabsInDomainGroups: false,
         domainGroupAliases: {},
         pinnedDomainGroups: [],
+        maximizeWidth: false,
+        pinTabManager: true,
       };
 
       const settings2: Settings = {
@@ -156,6 +160,8 @@ describe('autoClose', () => {
         showGroupedTabsInDomainGroups: false,
         domainGroupAliases: {},
         pinnedDomainGroups: [],
+        maximizeWidth: false,
+        pinTabManager: true,
       };
 
       setCachedSettings(settings1);

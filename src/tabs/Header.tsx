@@ -1,6 +1,7 @@
 import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
-import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions } from './types';
+import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions, GroupSortType, ItemSortType } from './types';
 import { useTranslation } from '../common/i18nContext.js';
+import { useClickOutside } from '../common/hooks/useClickOutside.js';
 import { DateRangeFilterComponent } from './DateRangeFilter';
 import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus, CheckSquare, Square } from 'lucide-react';
 
@@ -40,10 +41,10 @@ interface HeaderProps {
   showGroupedTabsInDomainGroups: boolean;
   onToggleShowGroupedTabsInDomainGroups: () => void;
   // ソート順関連
-  groupSort: string;
-  itemSort: string;
-  onGroupSortChange: (mode: any) => void;
-  onItemSortChange: (mode: any) => void;
+  groupSort: GroupSortType;
+  itemSort: ItemSortType;
+  onGroupSortChange: (mode: GroupSortType) => void;
+  onItemSortChange: (mode: ItemSortType) => void;
 }
 
 export const Header = memo(function Header({
@@ -113,42 +114,12 @@ export const Header = memo(function Header({
   }, [localQuery, onSearchChange]);
 
   // グループメニューの外部クリックで閉じる
-  useEffect(() => {
-    if (!showGroupMenu) return;
-    
-    const handleClickOutside = (e: MouseEvent) => {
-      if (groupMenuRef.current && !groupMenuRef.current.contains(e.target as Node)) {
-        setShowGroupMenu(false);
-      }
-    };
-    
-    requestAnimationFrame(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    });
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showGroupMenu]);
+  const closeGroupMenu = useCallback(() => setShowGroupMenu(false), []);
+  useClickOutside(groupMenuRef, closeGroupMenu, showGroupMenu);
 
   // 表示モードメニューの外部クリックで閉じる
-  useEffect(() => {
-    if (!showViewModeMenu) return;
-    
-    const handleClickOutside = (e: MouseEvent) => {
-      if (viewModeMenuRef.current && !viewModeMenuRef.current.contains(e.target as Node)) {
-        setShowViewModeMenu(false);
-      }
-    };
-    
-    requestAnimationFrame(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    });
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showViewModeMenu]);
+  const closeViewModeMenu = useCallback(() => setShowViewModeMenu(false), []);
+  useClickOutside(viewModeMenuRef, closeViewModeMenu, showViewModeMenu);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setLocalQuery(e.target.value);
@@ -416,7 +387,7 @@ export const Header = memo(function Header({
                       <select
                         className="view-mode-menu-select"
                         value={groupSort}
-                        onChange={(e) => onGroupSortChange(e.target.value as any)}
+                        onChange={(e) => onGroupSortChange(e.target.value as GroupSortType)}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <option value="count-desc">{t('tabManager.sort.countDesc')}</option>
@@ -434,7 +405,7 @@ export const Header = memo(function Header({
                       <select
                         className="view-mode-menu-select"
                         value={itemSort}
-                        onChange={(e) => onItemSortChange(e.target.value as any)}
+                        onChange={(e) => onItemSortChange(e.target.value as ItemSortType)}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <option value="saved-desc">{t('tabManager.sort.savedDesc')}</option>

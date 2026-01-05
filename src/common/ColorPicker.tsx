@@ -7,6 +7,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
 import { Palette, X } from 'lucide-react';
+import { useClickOutside } from './hooks/useClickOutside.js';
+import { useTranslation } from './i18nContext.js';
 
 // プリセットカラー（10色 + なし）
 const PRESET_COLORS = [
@@ -33,6 +35,7 @@ interface ColorPickerProps {
  * - カスタム色選択（HSVピッカー + HEX入力）
  */
 export function ColorPicker({ color, onChange, disabled = false }: ColorPickerProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -56,33 +59,25 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
   }, []);
 
   // 外部クリックで閉じる
+  const closePopover = useCallback(() => {
+    setIsOpen(false);
+    setShowCustomPicker(false);
+  }, []);
+  useClickOutside([popoverRef, triggerRef], closePopover, isOpen);
+
+  // スクロールやリサイズ時に位置を更新
   useEffect(() => {
     if (!isOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      // ポップオーバー内またはトリガーボタン内のクリックは無視
-      if (
-        popoverRef.current?.contains(e.target as Node) ||
-        triggerRef.current?.contains(e.target as Node)
-      ) {
-        return;
-      }
-      setIsOpen(false);
-      setShowCustomPicker(false);
-    };
 
     // 位置を初期計算
     updatePosition();
 
-    // スクロールやリサイズ時に位置を更新
     window.addEventListener('scroll', updatePosition, true);
     window.addEventListener('resize', updatePosition);
-    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
       window.removeEventListener('scroll', updatePosition, true);
       window.removeEventListener('resize', updatePosition);
-      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, updatePosition]);
 
@@ -119,7 +114,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
         type="button"
         className={`btn btn-icon color-picker-trigger ${disabled ? 'disabled' : ''}`}
         onClick={togglePicker}
-        title="グループ色を選択"
+        title={t('common.colorPicker.selectColor')}
         disabled={disabled}
       >
         {color ? (
@@ -163,7 +158,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
               type="button"
               className={`color-preset-item no-color ${!color ? 'selected' : ''}`}
               onClick={handleClearColor}
-              title="色なし"
+              title={t('common.colorPicker.noColor')}
             >
               <X size={12} />
             </button>
@@ -175,7 +170,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
             className="color-custom-toggle"
             onClick={() => setShowCustomPicker(prev => !prev)}
           >
-            {showCustomPicker ? '閉じる' : 'カスタム色を選択'}
+            {showCustomPicker ? t('common.colorPicker.close') : t('common.colorPicker.customColor')}
           </button>
 
           {/* カスタム色ピッカー（HSV + HEX入力） */}

@@ -55,6 +55,8 @@ const defaultSettings: Settings = {
   showGroupedTabsInDomainGroups: false,
   domainGroupAliases: {},
   pinnedDomainGroups: [],
+  maximizeWidth: false,
+  pinTabManager: true,
 };
 
 /**

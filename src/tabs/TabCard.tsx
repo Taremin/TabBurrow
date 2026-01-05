@@ -9,6 +9,7 @@ import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext.js';
+import { useClickOutside } from '../common/hooks/useClickOutside.js';
 import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check, X } from 'lucide-react';
 
 interface TabCardProps {
@@ -341,45 +342,12 @@ export const TabCard = memo(function TabCard({
   }, [compactPopupUrl]);
 
   // 外部クリックでメニューを閉じる
-  useEffect(() => {
-    if (!showGroupMenu) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node) &&
-          buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
-        setShowGroupMenu(false);
-      }
-    };
-
-    // 次のフレームで登録
-    requestAnimationFrame(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    });
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showGroupMenu]);
+  const closeGroupMenu = useCallback(() => setShowGroupMenu(false), []);
+  useClickOutside([menuRef, buttonRef], closeGroupMenu, showGroupMenu);
 
   // 外部クリックで削除メニューを閉じる
-  useEffect(() => {
-    if (!showDeleteMenu) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (deleteMenuRef.current && !deleteMenuRef.current.contains(e.target as Node) &&
-          deleteButtonRef.current && !deleteButtonRef.current.contains(e.target as Node)) {
-        setShowDeleteMenu(false);
-      }
-    };
-
-    requestAnimationFrame(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    });
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showDeleteMenu]);
+  const closeDeleteMenu = useCallback(() => setShowDeleteMenu(false), []);
+  useClickOutside([deleteMenuRef, deleteButtonRef], closeDeleteMenu, showDeleteMenu);
 
   // スクロール時にメニューを閉じる
   useEffect(() => {
