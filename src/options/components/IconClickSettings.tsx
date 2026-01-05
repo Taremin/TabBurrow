@@ -8,19 +8,25 @@ import type { PinnedTabAction } from '../../settings.js';
 interface IconClickSettingsProps {
   applyRules: boolean;
   pinnedAction: PinnedTabAction;
+  pinTabManager: boolean;
   savedApplyRules: boolean;
   savedPinnedAction: PinnedTabAction;
+  savedPinTabManager: boolean;
   onApplyRulesChange: (value: boolean) => void;
   onPinnedActionChange: (value: PinnedTabAction) => void;
+  onPinTabManagerChange: (value: boolean) => void;
 }
 
 export function IconClickSettings({
   applyRules,
   pinnedAction,
+  pinTabManager,
   savedApplyRules,
   savedPinnedAction,
+  savedPinTabManager,
   onApplyRulesChange,
   onPinnedActionChange,
+  onPinTabManagerChange,
 }: IconClickSettingsProps) {
   const { t } = useTranslation();
 
@@ -39,7 +45,23 @@ export function IconClickSettings({
           <span className="checkbox-custom"></span>
           <span>{t('settings.iconClick.applyRules')}</span>
         </label>
-        <div className="form-hint">{t('settings.iconClick.applyRulesHint')}</div>
+        <div className="form-hint">{t('settings.iconClick.applyRulesDescription')}</div>
+      </div>
+
+      {/* タブ管理画面を固定タブとして開くチェックボックス */}
+      <div className="form-group">
+        <label className={`form-checkbox-label ${pinTabManager !== savedPinTabManager ? 'modified' : ''}`}>
+          <input
+            type="checkbox"
+            id="pinTabManager"
+            className="form-checkbox"
+            checked={pinTabManager}
+            onChange={(e) => onPinTabManagerChange(e.target.checked)}
+          />
+          <span className="checkbox-custom"></span>
+          <span>{t('settings.iconClick.pinTabManager')}</span>
+        </label>
+        <div className="form-hint">{t('settings.iconClick.pinTabManagerDescription')}</div>
       </div>
 
       {/* 固定タブの扱い */}

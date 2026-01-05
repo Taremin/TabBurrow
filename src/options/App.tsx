@@ -175,10 +175,13 @@ export function App() {
           <IconClickSettings
             applyRules={settings.iconClickApplyRules}
             pinnedAction={settings.iconClickPinnedAction}
+            pinTabManager={settings.pinTabManager}
             savedApplyRules={savedSettings.iconClickApplyRules}
             savedPinnedAction={savedSettings.iconClickPinnedAction}
+            savedPinTabManager={savedSettings.pinTabManager}
             onApplyRulesChange={(value) => updateSetting('iconClickApplyRules', value)}
             onPinnedActionChange={(value) => updateSetting('iconClickPinnedAction', value)}
+            onPinTabManagerChange={(value) => updateSetting('pinTabManager', value)}
           />
         </SettingsSection>
 

@@ -120,7 +120,9 @@
             "title": "アイコンクリック",
             "description": "拡張機能アイコンをクリックした時の動作を設定します。",
             "applyRules": "自動収納ルールを適用する",
-            "applyRulesHint": "有効にすると、アイコンクリック時にも自動収納ルールが適用されます。",
+            "applyRulesDescription": "アイコンクリック時、除外ルールにマッチしたタブは閉じずに残します",
+            "pinTabManager": "タブ管理画面を固定タブとして開く",
+            "pinTabManagerDescription": "タブ管理画面を開く際、常に固定タブ（ピン留め）として表示します",
             "pinnedTabs": {
                 "label": "固定タブの扱い",
                 "skip": "何もしない",

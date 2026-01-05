@@ -119,8 +119,10 @@
         "iconClick": {
             "title": "Icon Click",
             "description": "Configure behavior when the extension icon is clicked.",
-            "applyRules": "Apply auto stash rules",
-            "applyRulesHint": "When enabled, auto stash rules are also applied when clicking the icon.",
+            "applyRules": "Apply Auto-Close Rules",
+            "applyRulesDescription": "When clicking the icon, tabs that match an exclude rule will remain open.",
+            "pinTabManager": "Open Tab Manager as Pinned Tab",
+            "pinTabManagerDescription": "Always display the Tab Manager as a pinned tab when opening it.",
             "pinnedTabs": {
                 "label": "Pinned Tab Handling",
                 "skip": "Do nothing",

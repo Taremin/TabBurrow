@@ -68,6 +68,10 @@ export function createSavedTab(
 export async function openTabManagerPage(): Promise<void> {
   const extensionUrl = browser.runtime.getURL('tabs.html');
   
+  // 設定を取得
+  const { getSettings } = await import('../settings.js');
+  const settings = await getSettings();
+  
   // 現在のウィンドウを取得
   const currentWindow = await browser.windows.getCurrent();
   
@@ -79,10 +83,19 @@ export async function openTabManagerPage(): Promise<void> {
   
   if (existingTabs.length > 0 && existingTabs[0].id !== undefined) {
     // 現在のウィンドウ内の既存タブをアクティブに
-    await browser.tabs.update(existingTabs[0].id, { active: true });
+    // 設定が有効な場合は固定化も行う
+    const updateProperties: any = { active: true };
+    if (settings.pinTabManager) {
+      updateProperties.pinned = true;
+    }
+    await browser.tabs.update(existingTabs[0].id, updateProperties);
   } else {
     // 現在のウィンドウに新しいタブを作成
-    await browser.tabs.create({ url: extensionUrl });
+    const createProperties: any = { url: extensionUrl };
+    if (settings.pinTabManager) {
+      createProperties.pinned = true;
+    }
+    await browser.tabs.create(createProperties);
   }
 }
 

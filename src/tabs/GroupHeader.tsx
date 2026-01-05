@@ -210,7 +210,7 @@ export const GroupHeader = memo(function GroupHeader({
         <span className="group-icon">{isCustomGroup ? <Bookmark size={16} /> : <Folder size={16} />}</span>
         {isPinned && isDomainGroup && (
           <span className="group-pin-icon" title={t('tabManager.group.unpinButton')}>
-            <Pin size={12} />
+            <Pin size={16} />
           </span>
         )}
         <span className="group-domain">{displayName || name}</span>
@@ -235,7 +235,7 @@ export const GroupHeader = memo(function GroupHeader({
                 />
                 {!isValidPattern && (
                   <span className="group-filter-error" title={t('tabManager.groupFilter.invalidPattern')}>
-                    <AlertTriangle size={14} />
+                    <AlertTriangle size={16} />
                   </span>
                 )}
               </div>
@@ -245,7 +245,7 @@ export const GroupHeader = memo(function GroupHeader({
               onClick={toggleFilter}
               title={t('tabManager.groupFilter.placeholder')}
             >
-              <Search size={14} />
+              <Search size={16} />
             </button>
           </>
         )}
@@ -255,7 +255,7 @@ export const GroupHeader = memo(function GroupHeader({
             title={isCustomGroup ? t('tabManager.customGroup.edit') : t('settings.domainGroups.editAlias')}
             onClick={handleRename}
           >
-            <Pencil size={14} />
+            <Pencil size={16} />
           </button>
         )}
         {isDomainGroup && onTogglePin && (
@@ -264,7 +264,7 @@ export const GroupHeader = memo(function GroupHeader({
             title={isPinned ? t('tabManager.group.unpinButton') : t('tabManager.group.pinButton')}
             onClick={handleTogglePin}
           >
-            <Pin size={14} />
+            <Pin size={16} />
           </button>
         )}
         <button 

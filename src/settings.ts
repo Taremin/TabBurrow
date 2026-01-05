@@ -135,6 +135,7 @@ export interface Settings {
   domainGroupAliases: Record<string, string>; // ドメイングループの表示名エイリアス
   pinnedDomainGroups: PinnedDomainGroup[];     // ピン留めされたドメイングループ（順序付き）
   maximizeWidth: boolean;                    // 横幅を最大まで使用するか
+  pinTabManager: boolean;                    // タブ管理画面を固定タブとして開くか
 }
 
 // デフォルト設定
@@ -176,6 +177,7 @@ const DEFAULT_SETTINGS: Settings = {
   domainGroupAliases: {},            // エイリアスなし
   pinnedDomainGroups: [],            // ピン留めなし
   maximizeWidth: false,              // デフォルトはオフ
+  pinTabManager: true,               // デフォルトはオン
 };
 
 const STORAGE_KEY = 'settings';
