@@ -58,6 +58,7 @@
 *   **itemSort**: アイテムソート順
 *   **defaultViewMode**: デフォルトグループ化モード (`'grouped' | 'flat'`)
 *   **defaultDisplayDensity**: デフォルト表示密度 (`'normal' | 'compact'`)
+*   **maximizeWidth**: タブ管理画面の横幅を最大まで使用するか (`boolean`)
 
 #### カスタムグループ設定
 *   **showGroupedTabsInDomainGroups**: カスタムグループに所属するタブをドメイングループにも表示するか (`boolean`)
@@ -78,6 +79,7 @@
 #### アイコンクリック設定
 *   **iconClickApplyRules**: 自動収納ルールを適用するか
 *   **iconClickPinnedAction**: 固定タブの扱い (`'skip' | 'suspend'`)
+*   **pinTabManager**: タブ管理ページをピン留めタブとして開くか (`boolean`)
 
 #### リンクチェック設定
 *   **linkCheckRules**: リンクチェックルール配列

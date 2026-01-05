@@ -18,7 +18,12 @@ TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機
     *   `autoClose.ts`: 自動収納ロジック。
     *   `tabSaver.ts`: タブ保存処理。
     *   `screenshot.ts`: スクリーンショット取得・リサイズ。
-    *   `contextMenu.ts`: コンテキストメニューの作成・ハンドリング。
+    *   `contextMenu.ts`: コンテキストメニューの統括プロセッサ。
+    *   **`contextMenuHandlers/`**: 分割された各種メニューアクションのハンドラー。
+        *   `actions.ts`: 削除、一括操作、名前変更などの一般アクション。
+        *   `groups.ts`: カスタムグループへの保存・追加ロジック。
+        *   `save.ts`: 基本的なタブ保存ロジック。
+        *   `utils.ts`: ハンドラー共通ユーティリティ。
     *   `tabEvents.ts`: タブイベント監視（アクティベート、更新時のスクショキャッシュ）。
     *   `linkChecker.ts`: リンク切れチェック機能。
     *   `backup.ts`: 自動バックアップ機能。
@@ -30,6 +35,8 @@ TabBurrowは、Browser Extension Manifest V3に基づいたタブ管理拡張機
     *   `Header.tsx`: 検索バー、統計情報、検索オプション。
     *   `LinkCheckDialog.tsx`: リンクチェックダイアログ。
     *   `DateRangeFilter.tsx`: 日付範囲フィルタ。
+    *   **`hooks/`**: タブ管理画面専用のカスタムフック（データ取得、フィルタリングなど）。
+    *   **`utils.ts`**: ソートやグループ化ロジックの抽出。
 *   **`options/`**: 設定画面（Reactアプリケーション）。
     *   `App.tsx`: 設定画面メイン。
     *   `components/`: 各種設定コンポーネント。
