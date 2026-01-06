@@ -2,7 +2,7 @@
  * カスタムグループ順序変更のE2Eテスト
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, clearTestData, createCustomGroupData } from './helpers';
+import { waitForPageLoad, clearTestData, createCustomGroupData, optionsPageSelectors } from './helpers';
 
 test.describe('カスタムグループ順序変更', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -30,7 +30,7 @@ test.describe('カスタムグループ順序変更', () => {
     await waitForPageLoad(page);
     
     // カスタムグループセクションを開く
-    const customGroupsSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupsSection = page.locator(optionsPageSelectors.customGroupsSection);
     await expect(customGroupsSection).toBeVisible();
     
     // ドラッグハンドルが表示されていることを確認
@@ -56,7 +56,7 @@ test.describe('カスタムグループ順序変更', () => {
     await waitForPageLoad(page);
     
     // カスタムグループセクションを開く
-    const customGroupsSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupsSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     // 初期順序を確認 (A, B, C)
     const groupItems = customGroupsSection.locator('.custom-group-item');
@@ -94,7 +94,7 @@ test.describe('カスタムグループ順序変更', () => {
     await waitForPageLoad(page);
     
     // カスタムグループセクション
-    const customGroupsSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupsSection = page.locator(optionsPageSelectors.customGroupsSection);
     let groupItems = customGroupsSection.locator('.custom-group-item');
     
     // 初期順序を確認 (X, Y)
@@ -115,7 +115,7 @@ test.describe('カスタムグループ順序変更', () => {
     await waitForPageLoad(page);
     
     // 順序が維持されていることを確認 (Y, X)
-    groupItems = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ }).locator('.custom-group-item');
+    groupItems = page.locator(optionsPageSelectors.customGroupsSection).locator('.custom-group-item');
     await expect(groupItems.nth(0).locator('.custom-group-name')).toHaveText('グループY');
     await expect(groupItems.nth(1).locator('.custom-group-name')).toHaveText('グループX');
   });
@@ -144,7 +144,7 @@ test.describe('カスタムグループ順序変更', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupsSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupsSection = page.locator(optionsPageSelectors.customGroupsSection);
     const groupItems = customGroupsSection.locator('.custom-group-item');
     
     await expect(groupItems.nth(0).locator('.custom-group-name')).toHaveText('グループC');

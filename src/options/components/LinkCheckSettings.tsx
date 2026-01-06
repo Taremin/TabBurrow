@@ -215,13 +215,14 @@ export function LinkCheckSettings({
         <p className="rules-description">{t('linkCheck.settings.rulesHint')}</p>
 
         <div className="link-check-rules-header">
-          <button
-            type="button"
-            className="btn btn-primary btn-small"
-            onClick={handleAddRule}
-          >
-            {t('linkCheck.settings.addRule')}
-          </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-small"
+              onClick={handleAddRule}
+              data-testid="add-rule-button"
+            >
+              {t('linkCheck.settings.addRule')}
+            </button>
         </div>
 
         <div className="link-check-rules-list">
@@ -229,7 +230,7 @@ export function LinkCheckSettings({
             <div className="rules-empty">{t('settings.autoClose.noRules')}</div>
           )}
           {rules.map(rule => (
-            <div key={rule.id} className={`link-check-rule-item ${!rule.enabled ? 'disabled' : ''}`}>
+            <div key={rule.id} className={`link-check-rule-item ${!rule.enabled ? 'disabled' : ''}`} data-testid="link-check-rule-item">
               <div className="link-check-rule-content">
                 <input
                   type="checkbox"
@@ -252,20 +253,22 @@ export function LinkCheckSettings({
                 </select>
               </div>
               <div className="link-check-rule-actions">
-                <button
-                  type="button"
-                  className="btn btn-icon"
-                  onClick={() => handleEditRule(rule.id)}
-                  title={t('linkCheck.settings.editRule')}
-                >
+                  <button
+                    type="button"
+                    className="btn btn-icon"
+                    onClick={() => handleEditRule(rule.id)}
+                    title={t('linkCheck.settings.editRule')}
+                    data-testid="edit-rule-button"
+                  >
                   <Pencil size={14} />
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-icon btn-danger-icon"
-                  onClick={() => handleDeleteRule(rule.id)}
-                  title={t('common.delete')}
-                >
+                  <button
+                    type="button"
+                    className="btn btn-icon btn-danger-icon"
+                    onClick={() => handleDeleteRule(rule.id)}
+                    title={t('common.delete')}
+                    data-testid="delete-rule-button"
+                  >
                   <Trash2 size={14} />
                 </button>
               </div>

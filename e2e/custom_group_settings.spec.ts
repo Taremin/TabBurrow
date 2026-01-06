@@ -1,5 +1,5 @@
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad } from './helpers';
+import { waitForPageLoad, optionsPageSelectors } from './helpers';
 
 test.describe('カスタムグループ設定', () => {
   test('カスタムグループのドメイングループ表示設定を変更できる', async ({ context, extensionId }) => {
@@ -7,12 +7,11 @@ test.describe('カスタムグループ設定', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
-    // チェックボックスを探す (ラベルテキストを含むlabel要素内のinput)
-    const labelPattern = /カスタムグループのタブをドメイングループにも表示する|Show custom grouped tabs in domain groups/;
-    const checkboxLabel = customGroupSection.locator('label').filter({ hasText: labelPattern });
-    const checkbox = checkboxLabel.locator('input[type="checkbox"]');
+    // チェックボックスを探す
+    const checkboxLabel = customGroupSection.locator('label:has(input[data-testid="show-grouped-tabs-checkbox"])');
+    const checkbox = customGroupSection.getByTestId('show-grouped-tabs-checkbox');
     
     // inputはCSSで隠されている可能性があるため、ラベルの可視性をチェック
     await expect(checkboxLabel).toBeVisible();
@@ -37,9 +36,8 @@ test.describe('カスタムグループ設定', () => {
     await page.reload();
     await waitForPageLoad(page);
     
-    const reloadedSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
-    const reloadedCheckboxLabel = reloadedSection.locator('label').filter({ hasText: labelPattern });
-    const reloadedCheckbox = reloadedCheckboxLabel.locator('input[type="checkbox"]');
+    const reloadedSection = page.locator(optionsPageSelectors.customGroupsSection);
+    const reloadedCheckbox = reloadedSection.getByTestId('show-grouped-tabs-checkbox');
     await expect(reloadedCheckbox).toBeChecked();
   });
 });
@@ -59,8 +57,7 @@ test.describe('タブ管理画面での設定切り替え', () => {
     await expect(viewModeMenu).toBeVisible();
     
     // カスタムグループ設定項目を探す
-    const settingLabel = /カスタムグループのタブをドメイングループにも表示する|Show custom grouped tabs in domain groups/;
-    const settingButton = viewModeMenu.locator('button').filter({ hasText: settingLabel });
+    const settingButton = viewModeMenu.getByTestId('show-grouped-tabs-toggle');
     await expect(settingButton).toBeVisible();
     
     // クリックして切り替え
@@ -74,10 +71,8 @@ test.describe('タブ管理画面での設定切り替え', () => {
     await optionsPage.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(optionsPage);
     
-    const customGroupSection = optionsPage.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
-    const labelPattern = /カスタムグループのタブをドメイングループにも表示する|Show custom grouped tabs in domain groups/;
-    const checkboxLabel = customGroupSection.locator('label').filter({ hasText: labelPattern });
-    const checkbox = checkboxLabel.locator('input[type="checkbox"]');
+    const customGroupSection = optionsPage.locator(optionsPageSelectors.customGroupsSection);
+    const checkbox = customGroupSection.getByTestId('show-grouped-tabs-checkbox');
     
     await expect(checkbox).toBeChecked();
   });
@@ -91,10 +86,9 @@ test.describe('複数グループ所属タブの表示', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
-    const labelPattern = /カスタムグループのタブをドメイングループにも表示する|Show custom grouped tabs in domain groups/;
-    const checkboxLabel = customGroupSection.locator('label').filter({ hasText: labelPattern });
-    const checkbox = checkboxLabel.locator('input[type="checkbox"]');
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
+    const checkboxLabel = customGroupSection.locator('label:has(input[data-testid="show-grouped-tabs-checkbox"])');
+    const checkbox = customGroupSection.getByTestId('show-grouped-tabs-checkbox');
     
     // チェックされていなければ有効化
     if (!await checkbox.isChecked()) {

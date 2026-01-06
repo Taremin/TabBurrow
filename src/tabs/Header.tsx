@@ -189,6 +189,7 @@ export const Header = memo(function Header({
               <button 
                 className="btn btn-secondary btn-small"
                 onClick={selectedCount === tabCount ? onDeselectAll : onSelectAll}
+                data-testid="bulk-select-toggle"
               >
                 {selectedCount === tabCount 
                   ? t('tabManager.selection.deselectAll') 
@@ -199,6 +200,7 @@ export const Header = memo(function Header({
                   className="btn btn-secondary btn-small"
                   onClick={() => setShowGroupMenu(prev => !prev)}
                   disabled={selectedCount === 0}
+                  data-testid="bulk-move-button"
                 >
                   {t('tabManager.selection.bulkMoveToGroup')} ▼
                 </button>
@@ -242,6 +244,7 @@ export const Header = memo(function Header({
                 className="btn btn-danger btn-small"
                 onClick={onBulkDelete}
                 disabled={selectedCount === 0}
+                data-testid="bulk-delete-button"
               >
                 {t('tabManager.selection.bulkDelete')}
               </button>
@@ -251,6 +254,7 @@ export const Header = memo(function Header({
                   onClick={onBulkOpenAsTabGroup}
                   disabled={selectedCount === 0}
                   title={t('tabManager.selection.openAsTabGroup')}
+                  data-testid="bulk-open-tab-group-button"
                 >
                   {t('tabManager.selection.openAsTabGroup')}
                 </button>
@@ -321,6 +325,8 @@ export const Header = memo(function Header({
                 className={`btn btn-icon btn-filter ${showDateFilter || hasActiveDateFilter ? 'active' : ''}`}
                 onClick={toggleDateFilter}
                 title={t('tabManager.dateFilter.toggleButton')}
+                aria-label={t('tabManager.dateFilter.toggleButton')}
+                data-testid="date-filter-toggle"
               >
                 <Calendar size={18} />
                 {hasActiveDateFilter && <span className="filter-badge"></span>}
@@ -341,12 +347,14 @@ export const Header = memo(function Header({
                       <button
                         className={`view-mode-menu-item ${viewMode === 'grouped' ? 'active' : ''}`}
                         onClick={() => handleViewModeSelect('grouped')}
+                        data-testid="view-mode-grouped"
                       >
                         <LayoutList size={16} /> {t('tabManager.viewMode.grouped')}
                       </button>
                       <button
                         className={`view-mode-menu-item ${viewMode === 'flat' ? 'active' : ''}`}
                         onClick={() => handleViewModeSelect('flat')}
+                        data-testid="view-mode-flat"
                       >
                         <List size={16} /> {t('tabManager.viewMode.flat')}
                       </button>
@@ -357,12 +365,14 @@ export const Header = memo(function Header({
                       <button
                         className={`view-mode-menu-item ${displayDensity === 'normal' ? 'active' : ''}`}
                         onClick={() => handleDensitySelect('normal')}
+                        data-testid="view-mode-normal"
                       >
                         {t('tabManager.viewMode.normal')}
                       </button>
                       <button
                         className={`view-mode-menu-item ${displayDensity === 'compact' ? 'active' : ''}`}
                         onClick={() => handleDensitySelect('compact')}
+                        data-testid="view-mode-compact"
                       >
                         <AlignJustify size={16} /> {t('tabManager.viewMode.compact')}
                       </button>
@@ -375,6 +385,7 @@ export const Header = memo(function Header({
                           onToggleShowGroupedTabsInDomainGroups();
                           setShowViewModeMenu(false);
                         }}
+                        data-testid="show-grouped-tabs-toggle"
                       >
                         {showGroupedTabsInDomainGroups ? <CheckSquare size={16} /> : <Square size={16} />}
                         {t('settings.customGroups.showInDomainGroups')}
@@ -431,6 +442,7 @@ export const Header = memo(function Header({
                 className="btn btn-icon btn-secondary"
                 onClick={onCreateGroup}
                 title={t('tabManager.customGroup.createButton')}
+                aria-label={t('tabManager.customGroup.createButton')}
                 data-testid="create-group-button"
               >
                 <FolderPlus size={18} />
@@ -443,6 +455,7 @@ export const Header = memo(function Header({
                 onClick={onOpenAll}
                 disabled={!hasAnyTabs}
                 title={t('tabManager.header.openAllButton')}
+                aria-label={t('tabManager.header.openAllButton')}
               >
                 <ExternalLink size={18} />
               </button>
@@ -451,6 +464,7 @@ export const Header = memo(function Header({
                 onClick={onDeleteAll}
                 disabled={!hasAnyTabs}
                 title={t('tabManager.header.deleteAllButton')}
+                aria-label={t('tabManager.header.deleteAllButton')}
               >
                 <Trash2 size={18} />
               </button>

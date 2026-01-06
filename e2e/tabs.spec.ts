@@ -191,7 +191,7 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
     await page.waitForTimeout(100);
     
     // フラット表示を選択
-    const flatButton = page.locator('.view-mode-menu-item', { hasText: /フラット|Flat/i });
+    const flatButton = page.getByTestId('view-mode-flat');
     await flatButton.click();
     await page.waitForTimeout(300);
     
@@ -238,7 +238,7 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
     await viewModeToggle.click();
     await page.waitForTimeout(300);
     // フラット表示ボタンをクリック
-    await page.locator('.view-mode-menu-item').filter({ hasText: /フラット|Flat/i }).click();
+    await page.getByTestId('view-mode-flat').click();
     await page.waitForTimeout(500);
     
     // グループヘッダーが非表示
@@ -248,7 +248,7 @@ test.describe('表示モード切替（ダミーデータ使用）', () => {
     await viewModeToggle.click();
     await page.waitForTimeout(300);
     // グループ表示ボタンをクリック（最初の一致を選択）
-    await page.locator('.view-mode-menu-item').filter({ hasText: /グループ表示|Grouped/ }).first().click();
+    await page.getByTestId('view-mode-grouped').click();
     await page.waitForTimeout(500);
     
     // グループヘッダーが復帰
@@ -283,7 +283,7 @@ test.describe('コンパクト表示機能', () => {
     const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
     await viewModeToggle.click();
     await page.waitForTimeout(300);
-    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.getByTestId('view-mode-compact').click();
     await page.waitForTimeout(500);
     
     // コンパクト表示のタブカードとURL行の幅を確認
@@ -331,7 +331,7 @@ test.describe('コンパクト表示機能', () => {
     await viewModeToggle.click();
     await page.waitForTimeout(300);
     // コンパクト表示を選択
-    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.getByTestId('view-mode-compact').click();
     await page.waitForTimeout(500);
     
     // コンパクト表示になっていることを確認（スクリーンショットインジケータの存在）
@@ -344,7 +344,7 @@ test.describe('コンパクト表示機能', () => {
     await page.waitForTimeout(500);
     
     // スクリーンショットポップアップが表示されることを確認
-    const screenshotPopup = page.locator('.screenshot-popup');
+    const screenshotPopup = page.locator(tabsPageSelectors.screenshotPopup);
     await expect(screenshotPopup).toBeVisible({ timeout: 3000 });
     
     // ポップアップ内に画像があることを確認
@@ -395,7 +395,7 @@ test.describe('コンパクト表示機能', () => {
     await viewModeToggle.click();
     await page.waitForTimeout(300);
     // コンパクト表示を選択
-    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.getByTestId('view-mode-compact').click();
     await page.waitForTimeout(500);
     
     // タブカードにホバー
@@ -404,7 +404,7 @@ test.describe('コンパクト表示機能', () => {
     await page.waitForTimeout(500);
     
     // ポップアップが表示されることを確認（スクリーンショットなしでもタイトル・URL表示のため）
-    const screenshotPopup = page.locator('.screenshot-popup');
+    const screenshotPopup = page.locator(tabsPageSelectors.screenshotPopup);
     await expect(screenshotPopup).toBeVisible({ timeout: 3000 });
     
     // ポップアップ内にタイトルとURLの全文が表示されることを確認
@@ -445,7 +445,7 @@ test.describe('コンパクト表示機能', () => {
     const viewModeToggle = page.locator('[data-testid="view-mode-toggle"]');
     await viewModeToggle.click();
     await page.waitForTimeout(300);
-    await page.locator('.view-mode-menu-item').filter({ hasText: /コンパクト|Compact/i }).click();
+    await page.getByTestId('view-mode-compact').click();
     await page.waitForTimeout(500);
     
     // コンパクト表示になっていることを確認（スクリーンショットサムネイルが非表示）
@@ -459,7 +459,7 @@ test.describe('コンパクト表示機能', () => {
     // 再度ドロップダウンメニューを開いて通常表示に切替
     await viewModeToggle.click();
     await page.waitForTimeout(300);
-    await page.locator('.view-mode-menu-item').filter({ hasText: /通常|Normal/i }).click();
+    await page.getByTestId('view-mode-normal').click();
     await page.waitForTimeout(500);
     
     // 通常表示になっていることを確認（スクリーンショットサムネイルが表示）
@@ -509,7 +509,7 @@ test.describe('一括選択機能', () => {
     await expect(selectionToolbar).toBeVisible();
     
     // チェックボックスが表示される
-    const checkboxes = page.locator('.tab-checkbox');
+    const checkboxes = page.locator(tabsPageSelectors.tabCard).locator('input[type="checkbox"]');
     await expect(checkboxes).toHaveCount(2);
   });
 
@@ -544,7 +544,7 @@ test.describe('一括選択機能', () => {
     await page.waitForTimeout(100);
     
     // 最初のチェックボックスをクリック
-    const firstCheckbox = page.locator('.tab-checkbox').first();
+    const firstCheckbox = page.locator(tabsPageSelectors.tabCard).first().locator('input[type="checkbox"]');
     await firstCheckbox.click();
     await page.waitForTimeout(100);
     
@@ -553,7 +553,7 @@ test.describe('一括選択機能', () => {
     await expect(selectionCount).toContainText('1');
     
     // 全選択ボタンをクリック
-    const selectAllButton = page.locator('button').filter({ hasText: /全選択|Select All/ });
+    const selectAllButton = page.getByRole('button', { name: /全選択|Select All/ });
     await selectAllButton.click();
     await page.waitForTimeout(100);
     
@@ -561,7 +561,7 @@ test.describe('一括選択機能', () => {
     await expect(selectionCount).toContainText('3');
     
     // 選択解除ボタンをクリック
-    const deselectButton = page.locator('button').filter({ hasText: /選択解除|Deselect/ });
+    const deselectButton = page.getByRole('button', { name: /選択解除|Deselect/ });
     await deselectButton.click();
     await page.waitForTimeout(100);
     
@@ -603,14 +603,14 @@ test.describe('一括選択機能', () => {
     await page.waitForTimeout(100);
     
     // 最初の2つを選択
-    const checkboxes = page.locator('.tab-checkbox');
+    const checkboxes = page.locator(tabsPageSelectors.tabCard).locator('input[type="checkbox"]');
     await checkboxes.nth(0).click();
     await page.waitForTimeout(50);
     await checkboxes.nth(1).click();
     await page.waitForTimeout(100);
     
     // 一括削除ボタンをクリック
-    const bulkDeleteButton = page.locator('button').filter({ hasText: /一括削除|Delete Selected/ });
+    const bulkDeleteButton = page.getByRole('button', { name: /一括削除|Delete Selected/ });
     await bulkDeleteButton.click();
     await page.waitForTimeout(100);
     
@@ -653,7 +653,7 @@ test.describe('一括選択機能', () => {
     await page.waitForTimeout(100);
     
     // グループヘッダーのチェックボックスを確認
-    const groupCheckboxes = page.locator('.group-checkbox input[type="checkbox"]');
+    const groupCheckboxes = page.locator(tabsPageSelectors.groupCheckbox).locator('input[type="checkbox"]');
     await expect(groupCheckboxes).toHaveCount(2);
     
     // 最初のグループ(group-a.com)を選択
@@ -702,13 +702,13 @@ test.describe('グループ内正規表現検索', () => {
     await waitForPageLoad(page);
     
     // グループヘッダのフィルタトグルをクリック
-    const filterToggle = page.locator('.group-filter-toggle').first();
+    const filterToggle = page.locator(tabsPageSelectors.groupFilterToggle).first();
     await expect(filterToggle).toBeVisible();
     await filterToggle.click();
     await page.waitForTimeout(100);
     
     // フィルタ入力欄が表示される
-    const filterInput = page.locator('.group-filter-input').first();
+    const filterInput = page.locator(tabsPageSelectors.groupFilterInput).first();
     await expect(filterInput).toBeVisible();
   });
 
@@ -746,7 +746,7 @@ test.describe('グループ内正規表現検索', () => {
     await page.waitForTimeout(100);
     
     // 正規表現パターンを入力
-    const filterInput = page.locator('.group-filter-input').first();
+    const filterInput = page.locator(tabsPageSelectors.groupFilterInput).first();
     await filterInput.fill('^Apple');
     await page.waitForTimeout(300);
     
@@ -791,7 +791,7 @@ test.describe('グループ内正規表現検索', () => {
     await page.waitForTimeout(100);
     
     // 無効な正規表現パターンを入力
-    const filterInput = page.locator('.group-filter-input').first();
+    const filterInput = page.locator(tabsPageSelectors.groupFilterInput).first();
     await filterInput.fill('[invalid('); // 閉じ括弧がない
     await page.waitForTimeout(100);
     
@@ -822,8 +822,8 @@ test.describe('タブグループとして開く機能', () => {
     await page.reload();
     await waitForPageLoad(page);
     
-    // グループヘッダーの「タブグループとして開く」ボタンを確認（テキストで検索）
-    const openAsTabGroupButton = page.locator('.group-header button', { hasText: /タブグループとして開く|Open as Tab Group/i }).first();
+    // グループヘッダーの「タブグループとして開く」ボタンを確認
+    const openAsTabGroupButton = page.locator(tabsPageSelectors.groupOpenTabGroupButton).first();
     await expect(openAsTabGroupButton).toBeVisible();
   });
 
@@ -1014,7 +1014,7 @@ test.describe('大規模データパフォーマンステスト', () => {
     const toggleStart = performance.now();
     await viewModeToggle.click();
     await page.waitForTimeout(100);
-    const flatButton = page.locator('.view-mode-menu-item', { hasText: /フラット|Flat/i });
+    const flatButton = page.getByTestId('view-mode-flat');
     await flatButton.click();
     await page.waitForTimeout(300);
     const toggleTime = performance.now() - toggleStart;
@@ -1056,7 +1056,7 @@ test.describe('大規模データパフォーマンステスト', () => {
     await expect(selectionToolbar).toBeVisible();
     
     // 全選択ボタンをクリック（時間計測）
-    const selectAllButton = page.locator('button').filter({ hasText: /全選択|Select All/ });
+    const selectAllButton = page.locator(tabsPageSelectors.bulkSelectToggle);
     
     const selectStart = performance.now();
     await selectAllButton.click();
@@ -1069,7 +1069,7 @@ test.describe('大規模データパフォーマンステスト', () => {
     await expect(selectionCount).toContainText(LARGE_DATA_COUNT.toString());
     
     // 選択解除
-    const deselectButton = page.locator('button').filter({ hasText: /選択解除|Deselect/ });
+    const deselectButton = page.locator(tabsPageSelectors.bulkSelectToggle);
     await deselectButton.click();
     await page.waitForTimeout(100);
     
@@ -1357,7 +1357,7 @@ test.describe('カスタムグループ作成機能', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成したグループ名のヘッダーが表示されることを確認
-    const customGroupHeader = page.locator('.group-header').filter({ hasText: 'New Group From Tab' });
+    const customGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'New Group From Tab' });
     await expect(customGroupHeader).toBeVisible();
   });
 
@@ -1388,7 +1388,7 @@ test.describe('カスタムグループ作成機能', () => {
     await page.waitForTimeout(100);
     
     // 全選択
-    const selectAllButton = page.locator('button').filter({ hasText: /全選択|Select All/ });
+    const selectAllButton = page.locator(tabsPageSelectors.bulkSelectToggle);
     await selectAllButton.click();
     await page.waitForTimeout(100);
     
@@ -1448,7 +1448,7 @@ test.describe('タブ表示名変更機能', () => {
     await expect(tabCard).toBeVisible();
     
     // 鉛筆アイコンボタンをクリック
-    const renameButton = tabCard.locator('.tab-rename');
+    const renameButton = tabCard.locator(tabsPageSelectors.tabRenameButton);
     await expect(renameButton).toBeVisible();
     await renameButton.click();
     await page.waitForTimeout(100);
@@ -1481,7 +1481,7 @@ test.describe('タブ表示名変更機能', () => {
     
     // タブカードの鉛筆ボタンをクリック
     const tabCard = page.locator(tabsPageSelectors.tabCard).first();
-    const renameButton = tabCard.locator('.tab-rename');
+    const renameButton = tabCard.locator(tabsPageSelectors.tabRenameButton);
     await renameButton.click();
     await page.waitForTimeout(100);
     
@@ -1496,7 +1496,7 @@ test.describe('タブ表示名変更機能', () => {
     await page.waitForTimeout(300);
     
     // タブカードにカスタム表示名が表示される
-    const tabTitle = page.locator('.tab-title');
+    const tabTitle = page.locator(tabsPageSelectors.tabTitle);
     await expect(tabTitle).toContainText('My Custom Display Name');
   });
 
@@ -1519,12 +1519,12 @@ test.describe('タブ表示名変更機能', () => {
     await waitForPageLoad(page);
     
     // カスタム表示名が表示されていることを確認
-    const tabTitle = page.locator('.tab-title');
+    const tabTitle = page.locator(tabsPageSelectors.tabTitle);
     await expect(tabTitle).toContainText('Custom Name');
     
     // タブカードの鉛筆ボタンをクリック
     const tabCard = page.locator(tabsPageSelectors.tabCard).first();
-    const renameButton = tabCard.locator('.tab-rename');
+    const renameButton = tabCard.locator(tabsPageSelectors.tabRenameButton);
     await renameButton.click();
     await page.waitForTimeout(100);
     
@@ -1572,7 +1572,7 @@ test.describe('タブ表示名変更機能', () => {
     
     // タブカードの鉛筆ボタンをクリック
     const tabCard = page.locator(tabsPageSelectors.tabCard).first();
-    const renameButton = tabCard.locator('.tab-rename');
+    const renameButton = tabCard.locator(tabsPageSelectors.tabRenameButton);
     await renameButton.click();
     await page.waitForTimeout(100);
     

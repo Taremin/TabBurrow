@@ -2,7 +2,7 @@
  * ドメイングループ ピン機能のE2Eテスト
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, createTestTabData, clearTestData } from './helpers';
+import { tabsPageSelectors, waitForPageLoad, createTestTabData, clearTestData } from './helpers';
 
 test.describe('ドメイングループのピン機能', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -30,12 +30,12 @@ test.describe('ドメイングループのピン機能', () => {
     await waitForPageLoad(page);
 
     // ドメイングループヘッダーを見つける
-    const domainGroupHeader = page.locator('.group-header.domain-group').first();
+    const domainGroupHeader = page.locator(`${tabsPageSelectors.groupHeader}.domain-group`).first();
     await domainGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await domainGroupHeader.hover();
 
     // ピンボタンが存在することを確認
-    const pinButton = domainGroupHeader.locator('.group-pin');
+    const pinButton = domainGroupHeader.locator(tabsPageSelectors.pinButton);
     await expect(pinButton).toBeVisible();
   });
 
@@ -46,7 +46,7 @@ test.describe('ドメイングループのピン機能', () => {
     await waitForPageLoad(page);
 
     // example.comのグループをピン留め
-    const exampleGroupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const exampleGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await exampleGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await exampleGroupHeader.hover();
 
@@ -57,7 +57,7 @@ test.describe('ドメイングループのピン機能', () => {
     await expect(exampleGroupHeader.locator('.group-pin-icon')).toBeVisible();
     
     // ピンボタンにpinnedクラスがあることを確認
-    await expect(exampleGroupHeader.locator('.group-pin.pinned')).toBeVisible();
+    await expect(exampleGroupHeader.locator(`${tabsPageSelectors.pinButton}.pinned`)).toBeVisible();
   });
 
   test('ピン留めグループはリロード後も維持される', async ({ context, extensionId }) => {
@@ -67,10 +67,10 @@ test.describe('ドメイングループのピン機能', () => {
     await waitForPageLoad(page);
 
     // example.comのグループをピン留め
-    const exampleGroupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const exampleGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await exampleGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await exampleGroupHeader.hover();
-    await exampleGroupHeader.locator('.group-pin').click();
+    await exampleGroupHeader.locator(tabsPageSelectors.pinButton).click();
     await expect(exampleGroupHeader.locator('.group-pin-icon')).toBeVisible();
 
     // リロード
@@ -78,7 +78,7 @@ test.describe('ドメイングループのピン機能', () => {
     await waitForPageLoad(page);
 
     // ピン状態が維持されていることを確認
-    const reloadedHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const reloadedHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await expect(reloadedHeader.locator('.group-pin-icon')).toBeVisible();
   });
 
@@ -89,14 +89,14 @@ test.describe('ドメイングループのピン機能', () => {
     await waitForPageLoad(page);
 
     // ピン留め
-    const exampleGroupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const exampleGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await exampleGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await exampleGroupHeader.hover();
-    await exampleGroupHeader.locator('.group-pin').click();
+    await exampleGroupHeader.locator(tabsPageSelectors.pinButton).click();
     await expect(exampleGroupHeader.locator('.group-pin-icon')).toBeVisible();
 
     // ピン留め解除
-    await exampleGroupHeader.locator('.group-pin').click();
+    await exampleGroupHeader.locator(tabsPageSelectors.pinButton).click();
     
     // ピンアイコンが消えることを確認
     await expect(exampleGroupHeader.locator('.group-pin-icon')).not.toBeVisible();
@@ -120,11 +120,11 @@ test.describe('ドメイングループのピン機能', () => {
     await waitForPageLoad(page);
 
     // カスタムグループヘッダーを確認
-    const customGroupHeader = page.locator('.group-header.custom-group').first();
+    const customGroupHeader = page.locator(`${tabsPageSelectors.groupHeader}.custom-group`).first();
     await customGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await customGroupHeader.hover();
 
     // ピンボタンがないことを確認
-    await expect(customGroupHeader.locator('.group-pin')).not.toBeVisible();
+    await expect(customGroupHeader.locator(tabsPageSelectors.pinButton)).not.toBeVisible();
   });
 });

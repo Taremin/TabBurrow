@@ -515,7 +515,7 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await waitForPageLoad(page);
     
     // リンクチェック設定セクションが存在することを確認
-    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    const linkCheckSection = page.locator(optionsPageSelectors.linkCheckSection);
     await expect(linkCheckSection).toBeVisible();
   });
 
@@ -525,10 +525,10 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await waitForPageLoad(page);
     
     // リンクチェック設定セクションを探す
-    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    const linkCheckSection = page.locator(optionsPageSelectors.linkCheckSection);
     
     // ルール追加ボタンをクリック
-    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    const addRuleButton = linkCheckSection.locator(optionsPageSelectors.addRuleButton);
     await expect(addRuleButton).toBeVisible();
     await addRuleButton.click();
     
@@ -552,8 +552,8 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await waitForPageLoad(page);
     
     // ルール追加ボタンをクリック
-    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
-    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    const linkCheckSection = page.locator(optionsPageSelectors.linkCheckSection);
+    const addRuleButton = linkCheckSection.locator(optionsPageSelectors.addRuleButton);
     await addRuleButton.click();
     
     const dialog = page.locator('.dialog-overlay');
@@ -564,7 +564,7 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await saveButton.click();
     
     // エラーメッセージが表示されることを確認
-    const errorHint = dialog.locator('.form-hint').filter({ hasText: /入力|enter|required/i });
+    const errorHint = dialog.locator(optionsPageSelectors.conditionError);
     await expect(errorHint).toBeVisible();
     
     // ダイアログはまだ開いている
@@ -580,8 +580,8 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await waitForPageLoad(page);
     
     // ルール追加ボタンをクリック
-    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
-    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    const linkCheckSection = page.locator(optionsPageSelectors.linkCheckSection);
+    const addRuleButton = linkCheckSection.locator(optionsPageSelectors.addRuleButton);
     await addRuleButton.click();
     
     const dialog = page.locator('.dialog-overlay');
@@ -602,7 +602,7 @@ test.describe('設定画面 - リンクチェック設定', () => {
     
     // ルールリストに追加されたルールが表示される
     const rulesList = linkCheckSection.locator('.link-check-rules-list');
-    await expect(rulesList.locator('.link-check-rule-item').filter({ hasText: '418' })).toBeVisible();
+    await expect(rulesList.getByTestId('link-check-rule-item').filter({ hasText: '418' })).toBeVisible();
   });
 
   test('既存ルールを編集できる', async ({ context, extensionId }) => {
@@ -611,10 +611,10 @@ test.describe('設定画面 - リンクチェック設定', () => {
     await waitForPageLoad(page);
     
     // リンクチェック設定セクション
-    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    const linkCheckSection = page.locator(optionsPageSelectors.linkCheckSection);
     
     // デフォルトルール（404）の編集ボタンをクリック
-    const ruleItem = linkCheckSection.locator('.link-check-rule-item').filter({ hasText: '404' }).first();
+    const ruleItem = linkCheckSection.getByTestId('link-check-rule-item').filter({ hasText: '404' }).first();
     await expect(ruleItem).toBeVisible();
     
     const editButton = ruleItem.locator('.btn-icon').first();
@@ -645,7 +645,7 @@ test.describe('設定画面 - アイコンクリック設定', () => {
     await waitForPageLoad(page);
     
     // アイコンクリック設定セクションが存在することを確認
-    const iconClickSection = page.locator('.settings-section').filter({ hasText: /アイコンクリック|Icon Click/ });
+    const iconClickSection = page.locator(optionsPageSelectors.iconClickSection);
     await expect(iconClickSection).toBeVisible();
   });
 
@@ -745,7 +745,7 @@ test.describe('設定画面 - デフォルト表示モード設定', () => {
     await waitForPageLoad(page);
     
     // デフォルト表示モード設定セクションが存在することを確認
-    const viewModeSection = page.locator('.settings-section').filter({ hasText: /デフォルト表示モード|Default View Mode/ });
+    const viewModeSection = page.locator(optionsPageSelectors.viewModeSection);
     await expect(viewModeSection).toBeVisible();
   });
 
@@ -931,7 +931,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションが存在することを確認
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     await expect(customGroupSection).toBeVisible();
   });
 
@@ -941,7 +941,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     // 新規グループ作成ボタンが存在することを確認
     const addButton = customGroupSection.locator('.add-group-button');
     await expect(addButton).toBeVisible();
@@ -953,7 +953,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     // 新規グループ作成ボタンをクリック
     const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
@@ -977,7 +977,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     // 新規グループ作成ボタンをクリック
     const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
@@ -997,7 +997,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成されたグループが一覧に表示される
-    const groupItem = customGroupSection.locator('.custom-group-name').filter({ hasText: groupName });
+    const groupItem = customGroupSection.getByTestId('custom-group-name').filter({ hasText: groupName });
     await expect(groupItem).toBeVisible();
   });
 
@@ -1007,7 +1007,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     // まず新規グループを作成
     const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
@@ -1021,7 +1021,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成されたグループの編集ボタンをクリック
-    const groupItem = customGroupSection.locator('.custom-group-item').filter({ hasText: originalName });
+    const groupItem = customGroupSection.getByTestId('custom-group-item').filter({ hasText: originalName });
     await expect(groupItem).toBeVisible();
     
     const editButton = groupItem.locator('.btn-icon:has(.lucide-pencil)');
@@ -1041,7 +1041,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 新しい名前で表示される
-    const renamedGroup = customGroupSection.locator('.custom-group-name').filter({ hasText: newName });
+    const renamedGroup = customGroupSection.getByTestId('custom-group-name').filter({ hasText: newName });
     await expect(renamedGroup).toBeVisible();
   });
 
@@ -1051,7 +1051,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     // まず新規グループを作成
     const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
@@ -1065,7 +1065,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await expect(dialog).not.toBeVisible();
     
     // 作成されたグループの削除ボタンをクリック
-    const groupItem = customGroupSection.locator('.custom-group-item').filter({ hasText: groupName });
+    const groupItem = customGroupSection.getByTestId('custom-group-item').filter({ hasText: groupName });
     await expect(groupItem).toBeVisible();
     
     const deleteButton = groupItem.locator('.btn-danger-icon');
@@ -1091,7 +1091,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
     await waitForPageLoad(page);
     
     // カスタムグループ設定セクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     // 新規グループ作成ボタンをクリック
     const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
@@ -1147,7 +1147,7 @@ test.describe('Dialog Overlay Fullscreen', () => {
     await waitForPageLoad(page);
     
     // Find and click auto-close rule add button
-    const autoCloseSection = page.locator('.settings-section').filter({ hasText: /自動収納|Auto Close|Auto Stash/ });
+    const autoCloseSection = page.locator(optionsPageSelectors.autoCloseSection);
     
     // Enable auto-close if checkbox is not checked
     const enableCheckbox = page.locator('#autoCloseEnabled');
@@ -1178,10 +1178,10 @@ test.describe('Dialog Overlay Fullscreen', () => {
     await waitForPageLoad(page);
     
     // Find link check settings section
-    const linkCheckSection = page.locator('.settings-section').filter({ hasText: /リンクチェック|Link Check/ });
+    const linkCheckSection = page.locator(optionsPageSelectors.linkCheckSection);
     
     // Click add rule button
-    const addRuleButton = linkCheckSection.locator('.btn-primary').filter({ hasText: /ルール追加|Add Rule/ });
+    const addRuleButton = linkCheckSection.locator(optionsPageSelectors.addRuleButton);
     await expect(addRuleButton).toBeVisible();
     await addRuleButton.click();
     
@@ -1274,7 +1274,7 @@ test.describe('Dialog Overlay Fullscreen', () => {
     await waitForPageLoad(page);
     
     // Find custom groups section and click add group button
-    const customGroupSection = page.locator('.settings-section').filter({ hasText: /カスタムグループ|Custom Groups/ });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     const addButton = customGroupSection.locator('.add-group-button');
     await addButton.click();
     

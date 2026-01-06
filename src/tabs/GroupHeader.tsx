@@ -184,6 +184,7 @@ export const GroupHeader = memo(function GroupHeader({
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(e); }}
       title={isCollapsed ? t('tabManager.group.expandButton') : t('tabManager.group.collapseButton')}
+      data-testid="group-header"
     >
       {/* グループカラーバー */}
       {color && (
@@ -195,6 +196,7 @@ export const GroupHeader = memo(function GroupHeader({
             className="group-checkbox"
             title={isAllSelected ? t('tabManager.selection.deselectGroup') : t('tabManager.selection.selectGroup')}
             onClick={e => e.stopPropagation()}
+            data-testid="group-checkbox"
           >
             <input
               ref={checkboxRef}
@@ -232,6 +234,7 @@ export const GroupHeader = memo(function GroupHeader({
                   value={filterPattern}
                   onChange={handleFilterChange}
                   onClick={e => e.stopPropagation()}
+                  data-testid="group-filter-input"
                 />
                 {!isValidPattern && (
                   <span className="group-filter-error" title={t('tabManager.groupFilter.invalidPattern')}>
@@ -244,6 +247,7 @@ export const GroupHeader = memo(function GroupHeader({
               className={`group-filter-toggle ${showFilter || hasActiveFilter ? 'active' : ''}`}
               onClick={toggleFilter}
               title={t('tabManager.groupFilter.placeholder')}
+              data-testid="group-filter-toggle"
             >
               <Search size={16} />
             </button>
@@ -254,6 +258,7 @@ export const GroupHeader = memo(function GroupHeader({
             className="group-edit" 
             title={isCustomGroup ? t('tabManager.customGroup.edit') : t('settings.domainGroups.editAlias')}
             onClick={handleRename}
+            data-testid="group-rename-button"
           >
             <Pencil size={16} />
           </button>
@@ -263,6 +268,7 @@ export const GroupHeader = memo(function GroupHeader({
             className={`group-pin ${isPinned ? 'pinned' : ''}`}
             title={isPinned ? t('tabManager.group.unpinButton') : t('tabManager.group.pinButton')}
             onClick={handleTogglePin}
+            data-testid="group-pin-button"
           >
             <Pin size={16} />
           </button>
@@ -271,6 +277,7 @@ export const GroupHeader = memo(function GroupHeader({
           className="group-open" 
           title={t('tabManager.group.openButton')}
           onClick={(e) => handleButtonClick(e, handleOpen)}
+          data-testid="group-open-button"
         >
           {t('tabManager.group.openButton')}
         </button>
@@ -279,6 +286,7 @@ export const GroupHeader = memo(function GroupHeader({
             className="group-open" 
             title={t('tabManager.group.openAsTabGroupButton')}
             onClick={(e) => handleButtonClick(e, handleOpenAsTabGroup)}
+            data-testid="group-open-tab-group-button"
           >
             {t('tabManager.group.openAsTabGroupButton')}
           </button>
@@ -287,6 +295,7 @@ export const GroupHeader = memo(function GroupHeader({
           className="group-delete" 
           title={t('tabManager.group.deleteButton')}
           onClick={(e) => handleButtonClick(e, handleDelete)}
+          data-testid="group-delete-button"
         >
           {t('tabManager.group.deleteButton')}
         </button>

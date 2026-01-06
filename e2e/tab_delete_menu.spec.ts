@@ -1,5 +1,5 @@
 import { test, expect, getExtensionUrl } from './fixtures';
-import { clearTestData, createTestTabData, createCustomGroupData, waitForPageLoad } from './helpers';
+import { clearTestData, createTestTabData, createCustomGroupData, waitForPageLoad, tabsPageSelectors } from './helpers';
 
 test.describe('タブカードの削除メニュー機能', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -41,7 +41,7 @@ test.describe('タブカードの削除メニュー機能', () => {
     await waitForPageLoad(page);
     
     // Custom Tab を探す
-    const tabCard = page.locator('.tab-card', { hasText: 'Custom Tab' });
+    const tabCard = page.locator(tabsPageSelectors.tabCard, { hasText: 'Custom Tab' });
     await expect(tabCard).toBeVisible();
     await expect(tabCard).toHaveAttribute('data-group-type', 'custom');
     
@@ -49,7 +49,7 @@ test.describe('タブカードの削除メニュー機能', () => {
     await tabCard.hover();
     
     // ゴミ箱ボタンをクリック
-    const deleteBtn = tabCard.locator('.tab-delete');
+    const deleteBtn = tabCard.locator(tabsPageSelectors.tabDeleteButton);
     await deleteBtn.click();
 
     // 削除メニューが表示されることを確認
@@ -63,9 +63,9 @@ test.describe('タブカードの削除メニュー機能', () => {
     await page.goto(`chrome-extension://${extensionId}/tabs.html`);
     await waitForPageLoad(page);
     
-    const tabCard = page.locator('.tab-card', { hasText: 'Custom Tab' });
+    const tabCard = page.locator(tabsPageSelectors.tabCard, { hasText: 'Custom Tab' });
     await tabCard.hover();
-    await tabCard.locator('.tab-delete').click();
+    await tabCard.locator(tabsPageSelectors.tabDeleteButton).click();
 
     const menu = page.locator('.delete-menu-portal');
     await expect(menu).toBeVisible();
@@ -74,22 +74,22 @@ test.describe('タブカードの削除メニュー機能', () => {
     await menu.getByTestId('remove-from-group').click();
 
     // カスタムグループ（Test Group）からタブが消えることを確認
-    await expect(page.locator('.group-header', { hasText: 'Test Group' })).toHaveCount(0);
+    await expect(page.locator(tabsPageSelectors.groupHeader, { hasText: 'Test Group' })).toHaveCount(0);
 
     // ドメイングループ（example.com）には出現することを確認
-    const domainGroupSectionHeader = page.locator('.group-header', { hasText: /example\.com/ });
+    const domainGroupSectionHeader = page.locator(tabsPageSelectors.groupHeader, { hasText: /example\.com/ });
     await expect(domainGroupSectionHeader).toBeVisible();
     
-    await expect(page.locator('.tab-card', { hasText: 'Custom Tab' })).toBeVisible();
+    await expect(page.locator(tabsPageSelectors.tabCard, { hasText: 'Custom Tab' })).toBeVisible();
   });
 
   test('「タブを削除」をクリックすると、システムから完全に削除される', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/tabs.html`);
     await waitForPageLoad(page);
     
-    const tabCard = page.locator('.tab-card', { hasText: 'Custom Tab' });
+    const tabCard = page.locator(tabsPageSelectors.tabCard, { hasText: 'Custom Tab' });
     await tabCard.hover();
-    await tabCard.locator('.tab-delete').click();
+    await tabCard.locator(tabsPageSelectors.tabDeleteButton).click();
 
     const menu = page.locator('.delete-menu-portal');
     await expect(menu).toBeVisible();
@@ -98,24 +98,24 @@ test.describe('タブカードの削除メニュー機能', () => {
     await menu.getByTestId('delete-tab').click();
 
     // タブが完全に消えることを確認
-    await expect(page.locator('.tab-card', { hasText: 'Custom Tab' })).toHaveCount(0);
+    await expect(page.locator(tabsPageSelectors.tabCard, { hasText: 'Custom Tab' })).toHaveCount(0);
   });
 
   test('ドメイングループ内ではゴミ箱ボタンをクリックすると即座に削除される', async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/tabs.html`);
     await waitForPageLoad(page);
     
-    const tabCard = page.locator('.tab-card', { hasText: 'Normal Tab' });
+    const tabCard = page.locator(tabsPageSelectors.tabCard, { hasText: 'Normal Tab' });
     await expect(tabCard).toBeVisible();
     
     await tabCard.hover();
-    await tabCard.locator('.tab-delete').click();
+    await tabCard.locator(tabsPageSelectors.tabDeleteButton).click();
 
     // 削除メニューが表示されないことを確認
     const deleteMenu = page.locator('.delete-menu-portal');
     await expect(deleteMenu).not.toBeVisible();
 
     // タブが削除されたことを確認
-    await expect(page.locator('.tab-card', { hasText: 'Normal Tab' })).toHaveCount(0);
+    await expect(page.locator(tabsPageSelectors.tabCard, { hasText: 'Normal Tab' })).toHaveCount(0);
   });
 });

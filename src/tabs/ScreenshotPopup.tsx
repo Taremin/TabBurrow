@@ -113,6 +113,7 @@ export const ScreenshotPopup = memo(function ScreenshotPopup({
         left: popupPosition.left,
         top: popupPosition.top,
       }}
+      data-testid="screenshot-popup"
     >
       {screenshotUrl && (
         <img src={screenshotUrl} alt="Screenshot" />

@@ -105,7 +105,7 @@ export function LinkCheckRuleDialog({ isOpen, editingRule, onSave, onClose }: Li
               }}
             />
             {conditionError ? (
-              <div className="form-hint" style={{ color: 'var(--danger-color)' }}>
+              <div className="form-hint" style={{ color: 'var(--danger-color)' }} data-testid="condition-error">
                 {conditionError}
               </div>
             ) : (

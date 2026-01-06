@@ -110,6 +110,7 @@ export function App() {
           icon="🌐"
           title={t('settings.language.title')}
           description={t('settings.language.description')}
+          dataTestId="language-section"
         >
           <LanguageSettings
             value={settings.locale}
@@ -123,6 +124,7 @@ export function App() {
           icon="🎨"
           title={t('settings.appearance.title')}
           description={t('settings.appearance.description')}
+          dataTestId="appearance-section"
         >
           <AppearanceSettings
             value={settings.theme}
@@ -136,6 +138,7 @@ export function App() {
           icon="🗒️"
           title={t('settings.viewMode.title')}
           description={t('settings.viewMode.description')}
+          dataTestId="view-mode-section"
         >
           <ViewModeSettings
             viewMode={settings.defaultViewMode}
@@ -155,6 +158,7 @@ export function App() {
           icon="🔢"
           title={t('settings.sort.title')}
           description={t('settings.sort.description')}
+          dataTestId="sort-section"
         >
           <SortSettings
             groupSort={settings.groupSort}
@@ -171,6 +175,7 @@ export function App() {
           icon="👁"
           title={t('settings.iconClick.title')}
           description={t('settings.iconClick.description')}
+          dataTestId="icon-click-section"
         >
           <IconClickSettings
             applyRules={settings.iconClickApplyRules}
@@ -190,6 +195,7 @@ export function App() {
           icon="⏰"
           title={t('settings.autoClose.title')}
           description={t('settings.autoClose.description')}
+          dataTestId="auto-close-section"
         >
           <AutoCloseSettings
             enabled={settings.autoCloseEnabled}
@@ -210,6 +216,7 @@ export function App() {
           icon="📂"
           title={t('settings.restore.title')}
           description={t('settings.restore.description')}
+          dataTestId="restore-section"
         >
           <RestoreSettings
             mode={settings.restoreMode}
@@ -226,6 +233,7 @@ export function App() {
           icon="🔗"
           title={t('linkCheck.settings.title')}
           description={t('linkCheck.settings.rulesHint')}
+          dataTestId="link-check-section"
         >
           <LinkCheckSettings
             rules={settings.linkCheckRules}
@@ -248,6 +256,7 @@ export function App() {
           icon="📀"
           title={t('settings.backup.title')}
           description={t('settings.backup.description')}
+          dataTestId="backup-section"
         >
           <BackupSettings
             enabled={settings.autoBackupEnabled}
@@ -272,6 +281,7 @@ export function App() {
         icon={<Tag size={20} />} // Lucide icon import needed? App already imports alert/Folder. Need Tag.
         title={t('settings.domainGroups.title')}
         description={t('settings.domainGroups.description')}
+        dataTestId="domain-groups-section"
       >
         <DomainGroupSettings
           aliases={settings.domainGroupAliases || {}}
@@ -283,6 +293,7 @@ export function App() {
         icon={<Folder size={20} />}
         title={t('settings.customGroups.title')}
         description={t('settings.customGroups.description')}
+        dataTestId="custom-groups-section"
       >
         <CustomGroupSettings
           showGroupedTabsInDomainGroups={settings.showGroupedTabsInDomainGroups}
@@ -295,6 +306,7 @@ export function App() {
         icon={<Pin size={20} />}
         title={t('settings.pinnedDomainGroups.title')}
         description={t('settings.pinnedDomainGroups.description')}
+        dataTestId="pinned-domain-groups-section"
       >
       <PinnedDomainGroupSettings
           pinnedDomainGroups={settings.pinnedDomainGroups || []}

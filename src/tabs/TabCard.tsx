@@ -273,6 +273,7 @@ export const TabCard = memo(function TabCard({
         onMouseLeave={isCompact ? handleMouseLeave : undefined}
         data-group-type={currentGroupType}
         data-tab-id={tab.id}
+        data-testid="tab-card"
       >
         {/* 選択モード時のチェックボックス */}
         {isSelectionMode && (
@@ -314,7 +315,7 @@ export const TabCard = memo(function TabCard({
                 onError={(e) => (e.currentTarget.style.display = 'none')}
               />
             )}
-            <span>{tab.displayName || tab.title}</span>
+            <span data-testid="tab-title">{tab.displayName || tab.title}</span>
             {/* コンパクト表示時: displayNameがあれば編集済みアイコン（タイトル末尾に表示） */}
             {isCompact && tab.displayName && (
               <span className="tab-displayname-indicator"><Pencil size={12} /></span>
@@ -326,11 +327,11 @@ export const TabCard = memo(function TabCard({
           </div>
           {/* URL行: グループタグ/バッジを含む */}
           <div className={`tab-url-row ${isCompact ? 'tab-url-row-compact' : ''}`}>
-            <div className={`tab-url ${isCompact ? 'tab-url-compact' : ''}`}>{tab.url}</div>
+            <div className={`tab-url ${isCompact ? 'tab-url-compact' : ''}`} data-testid="tab-url">{tab.url}</div>
             {showGroupTags && (
               isCompact ? (
                 /* コンパクト表示: バッジ */
-                <span className="group-badge" title={groupsToShow.join(', ')}>
+                <span className="group-badge" title={groupsToShow.join(', ')} data-testid="group-badge">
                   <Tag size={12} />{groupsToShow.length}
                 </span>
               ) : (
@@ -345,6 +346,7 @@ export const TabCard = memo(function TabCard({
                         onNavigateToGroup?.(groupName);
                       }}
                       title={groupName}
+                      data-testid="group-tag"
                     >
                       {groupName}
                     </button>
@@ -370,6 +372,7 @@ export const TabCard = memo(function TabCard({
             <button 
               className="tab-rename" 
               title={t('tabManager.tabCard.rename')}
+              data-testid="tab-rename-button"
               onClick={(e) => {
                 e.stopPropagation();
                 onRenameTab(tab.id);
@@ -382,6 +385,7 @@ export const TabCard = memo(function TabCard({
             ref={buttonRef}
             className="tab-group-action" 
             title={t('tabManager.tabCard.customGroups')}
+            data-testid="tab-group-button"
             onClick={handleToggleGroupMenu}
           >
             <Folder size={16} />
@@ -390,6 +394,7 @@ export const TabCard = memo(function TabCard({
             ref={deleteButtonRef}
             className="tab-delete" 
             title={t('tabManager.tabCard.deleteButton')}
+            data-testid="tab-delete-button"
             onClick={handleDelete}
           >
             <Trash2 size={16} />

@@ -1,6 +1,6 @@
 
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, clearTestData, createCustomGroupData } from './helpers';
+import { waitForPageLoad, clearTestData, createCustomGroupData, tabsPageSelectors } from './helpers';
 
 test.describe('ナビゲーション不具合の再現', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -59,29 +59,29 @@ test.describe('ナビゲーション不具合の再現', () => {
     await waitForPageLoad(page);
 
     // --- 通常のスクロール検証 ---
-    const firstTabInA = page.locator('.tab-card').first();
-    const groupBTag = firstTabInA.locator('.group-tag', { hasText: 'Group B' });
+    const firstTabInA = page.locator(tabsPageSelectors.tabCard).first();
+    const groupBTag = firstTabInA.getByTestId('group-tag').filter({ hasText: 'Group B' });
     await expect(groupBTag).toBeVisible();
 
     console.log('Testing normal scroll...');
     await groupBTag.click();
     await page.waitForTimeout(1000);
 
-    const groupBHeader = page.locator('.group-header', { hasText: 'Group B' });
+    const groupBHeader = page.locator(tabsPageSelectors.groupHeader, { hasText: 'Group B' });
     await expect(groupBHeader).toBeVisible();
 
     // --- 折りたたみ展開検証 ---
     console.log('Testing expand and scroll...');
     // Group B を折りたたむ
     await groupBHeader.click();
-    await expect(page.locator('.tab-card', { hasText: 'Tab B 0' })).not.toBeVisible();
+    await expect(page.locator(tabsPageSelectors.tabCard, { hasText: 'Tab B 0' })).not.toBeVisible();
 
     // Group A のバッジをクリックして展開スクロールさせる
     await groupBTag.click();
     await page.waitForTimeout(2000);
 
     // 展開されていることを確認
-    await expect(page.locator('.tab-card', { hasText: 'Tab B 0' })).toBeVisible();
+    await expect(page.locator(tabsPageSelectors.tabCard, { hasText: 'Tab B 0' })).toBeVisible();
     
     // スクロール位置 (Yが小さいこと)
     const box = await groupBHeader.boundingBox();

@@ -277,6 +277,7 @@ export function CustomGroupSettings({
               className="form-checkbox"
               checked={showGroupedTabsInDomainGroups}
               onChange={(e) => onShowGroupedTabsInDomainGroupsChange(e.target.checked)}
+              data-testid="show-grouped-tabs-checkbox"
             />
             <span className="checkbox-custom"></span>
             <span>{t('settings.customGroups.showInDomainGroups')}</span>
@@ -307,6 +308,7 @@ export function CustomGroupSettings({
                 onDragOver={(e) => handleDragOver(e, group.name)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, group.name)}
+                data-testid="custom-group-item"
               >
                 <span className="drag-handle" title={t('settings.customGroups.dragHint')}>
                   <GripVertical size={16} />
@@ -315,7 +317,7 @@ export function CustomGroupSettings({
                   <span className="custom-group-icon">
                     <Folder size={16} />
                   </span>
-                  <span className="custom-group-name">{group.name}</span>
+                  <span className="custom-group-name" data-testid="custom-group-name">{group.name}</span>
                   <span className="custom-group-count">
                     ({t('settings.customGroups.tabCount', { count: tabCounts.get(group.name) || 0 })})
                   </span>
@@ -336,6 +338,7 @@ export function CustomGroupSettings({
                     onClick={() => openEditDialog(group)}
                     title={t('settings.customGroups.editGroup')}
                     aria-label={t('settings.customGroups.editGroup')}
+                    data-testid="edit-group-button"
                   >
                     <Pencil size={16} />
                   </button>
@@ -345,6 +348,7 @@ export function CustomGroupSettings({
                     onClick={() => openDeleteDialog(group)}
                     title={t('settings.customGroups.deleteGroup')}
                     aria-label={t('settings.customGroups.deleteGroup')}
+                    data-testid="delete-group-button"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -360,6 +364,7 @@ export function CustomGroupSettings({
         type="button"
         className="btn btn-primary add-group-button"
         onClick={openCreateDialog}
+        data-testid="add-group-button"
       >
         <FolderPlus size={16} />
         <span>{t('settings.customGroups.addGroup')}</span>

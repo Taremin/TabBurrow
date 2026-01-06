@@ -9,27 +9,44 @@ import type { Page } from '@playwright/test';
 export const tabsPageSelectors = {
   // ヘッダー
   header: '.header',
-  searchInput: 'input[placeholder]',
+  searchInput: '.search-input', // クラス名を維持しつつ
   settingsLink: 'a[href="options.html"]',
+  dateFilterToggle: '[data-testid="date-filter-toggle"]',
+  createGroupButton: '[data-testid="create-group-button"]',
+  bulkSelectToggle: '[data-testid="bulk-select-toggle"]',
+  bulkMoveButton: '[data-testid="bulk-move-button"]',
+  bulkDeleteButton: '[data-testid="bulk-delete-button"]',
+  bulkOpenTabGroupButton: '[data-testid="bulk-open-tab-group-button"]',
   
   // タブリスト
   tabList: '.tab-list',
-  tabCard: '.tab-card',
-  tabTitle: '.tab-title',
-  tabUrl: '.tab-url',
+  tabCard: '[data-testid="tab-card"]',
+  tabTitle: '[data-testid="tab-title"]',
+  tabUrl: '[data-testid="tab-url"]',
   
   // グループ
-  groupHeader: '.group-header',
+  groupHeader: '[data-testid="group-header"]',
   groupTitle: '.group-title',
+  groupCheckbox: '[data-testid="group-checkbox"]',
+  groupFilterToggle: '[data-testid="group-filter-toggle"]',
+  groupFilterInput: '[data-testid="group-filter-input"]',
+  groupOpenTabGroupButton: '[data-testid="group-open-tab-group-button"]',
   
   // ボタン
-  deleteButton: '.delete-btn',
-  openButton: '.open-btn',
+  groupRenameButton: '[data-testid="group-rename-button"]',
+  pinButton: '[data-testid="group-pin-button"]',
+  groupActionButton: '[data-testid="group-action-button"]',
+  tabRenameButton: '[data-testid="tab-rename-button"]',
+  tabGroupButton: '[data-testid="tab-group-button"]',
+  tabDeleteButton: '[data-testid="tab-delete-button"]',
   
   // 確認ダイアログ
   confirmDialog: '.confirm-dialog',
   confirmButton: '.confirm-btn',
   cancelButton: '.cancel-btn',
+  
+  // その他
+  screenshotPopup: '[data-testid="screenshot-popup"]',
 };
 
 /**
@@ -52,6 +69,24 @@ export const optionsPageSelectors = {
   // 自動収納設定
   autoCloseEnabled: 'input[name="autoCloseEnabled"]',
   autoCloseSeconds: 'input[name="autoCloseSeconds"]',
+  
+  // セクション
+  languageSection: '[data-testid="language-section"]',
+  appearanceSection: '[data-testid="appearance-section"]',
+  viewModeSection: '[data-testid="view-mode-section"]',
+  sortSection: '[data-testid="sort-section"]',
+  iconClickSection: '[data-testid="icon-click-section"]',
+  autoCloseSection: '[data-testid="auto-close-section"]',
+  restoreSection: '[data-testid="restore-section"]',
+  linkCheckSection: '[data-testid="link-check-section"]',
+  backupSection: '[data-testid="backup-section"]',
+  domainGroupsSection: '[data-testid="domain-groups-section"]',
+  customGroupsSection: '[data-testid="custom-groups-section"]',
+  pinnedDomainGroupsSection: '[data-testid="pinned-domain-groups-section"]',
+  
+  // ボタン
+  addRuleButton: '[data-testid="add-rule-button"]',
+  conditionError: '[data-testid="condition-error"]',
   
   // 保存ボタン
   submitButton: 'button[type="submit"]',

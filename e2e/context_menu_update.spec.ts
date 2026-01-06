@@ -3,7 +3,7 @@
  * UI操作時にバックグラウンドへ更新メッセージが送信されるかを確認
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, clearTestData, createCustomGroupData } from './helpers';
+import { waitForPageLoad, clearTestData, createCustomGroupData, optionsPageSelectors } from './helpers';
 
 test.describe('コンテキストメニュー更新通知', () => {
   // メッセージングをスパイするためのスクリプト
@@ -41,7 +41,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // 1. カスタムグループ新規作成
     const groupName = 'TestMenuSyncGroup';
-    await page.locator('.custom-groups-settings .add-group-button').click();
+    await page.locator(optionsPageSelectors.customGroupsSection).getByTestId('add-group-button').click();
     
     // ダイアログ操作
     const createDialog = page.locator('.dialog');
@@ -77,7 +77,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     // 2. カスタムグループ名変更
     const newGroupName = 'RenamedSyncGroup';
     // 編集ボタンをクリック
-    await page.locator('.custom-groups-settings .custom-group-item').filter({ hasText: groupName }).locator('button[title*="編集"], button[title*="Edit"]').click();
+    await page.locator(optionsPageSelectors.customGroupsSection).getByTestId('custom-group-item').filter({ hasText: groupName }).getByTestId('edit-group-button').click();
     
     // ダイアログ操作
     const renameDialog = page.locator('.dialog');
@@ -114,7 +114,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // 3. カスタムグループ削除
     // 削除ボタンをクリック
-    await page.locator('.custom-groups-settings .custom-group-item').filter({ hasText: newGroupName }).locator('button[title*="削除"], button[title*="Delete"]').click();
+    await page.locator(optionsPageSelectors.customGroupsSection).getByTestId('custom-group-item').filter({ hasText: newGroupName }).getByTestId('delete-group-button').click();
     
     // 確認ダイアログの表示確認と削除実行
     const confirmDialog = page.locator('.dialog');
@@ -151,14 +151,14 @@ test.describe('コンテキストメニュー更新通知', () => {
     // メッセージログをクリア（リロードでクリアされているはずだが念のため）
     await page.evaluate(() => (window as any).__sentMessages = []);
     
-    const group1 = page.locator('.custom-group-item').filter({ hasText: 'Group1' });
-    const group2 = page.locator('.custom-group-item').filter({ hasText: 'Group2' });
+    const group1 = page.getByTestId('custom-group-item').filter({ hasText: 'Group1' });
+    const group2 = page.getByTestId('custom-group-item').filter({ hasText: 'Group2' });
     
     // Group1をGroup2の下にドラッグ
     await group1.dragTo(group2, { targetPosition: { x: 50, y: 40 } });
     
     // 並び替え完了確認 (UI上での順序変更)
-    const items = page.locator('.custom-group-item');
+    const items = page.getByTestId('custom-group-item');
     await expect(items.nth(0)).toHaveText(/Group2/);
     await expect(items.nth(1)).toHaveText(/Group1/);
     

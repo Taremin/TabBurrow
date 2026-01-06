@@ -2,7 +2,7 @@
  * ドメイングループ名変更機能のE2Eテスト
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { tabsPageSelectors, waitForPageLoad, createTestTabData, clearTestData } from './helpers';
+import { tabsPageSelectors, optionsPageSelectors, waitForPageLoad, createTestTabData, clearTestData } from './helpers';
 
 test.describe('ドメイングループ名変更', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -32,7 +32,7 @@ test.describe('ドメイングループ名変更', () => {
     await waitForPageLoad(page);
 
     // グループヘッダーを探す (example.com)
-    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const groupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await groupHeader.scrollIntoViewIfNeeded();
     await groupHeader.hover();
@@ -62,13 +62,13 @@ test.describe('ドメイングループ名変更', () => {
 
     // グループ名が更新されていることを確認
     // リネーム後は表示名が変わるので、古い名前でのフィルタリングを外して新しい名前を待つ
-    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Example Domain' }).first();
+    const renamedGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'My Example Domain' }).first();
     await expect(renamedGroupHeader.locator('.group-domain')).toHaveText('My Example Domain');
 
     // リロードしても維持されるか確認
     await page.reload();
     await waitForPageLoad(page);
-    const reloadedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Example Domain' }).first();
+    const reloadedGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'My Example Domain' }).first();
     await expect(reloadedGroupHeader).toBeVisible();
   });
 
@@ -80,7 +80,7 @@ test.describe('ドメイングループ名変更', () => {
     await waitForPageLoad(page);
 
     // まずタブマネージャーでエイリアスを設定
-    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const groupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await groupHeader.scrollIntoViewIfNeeded();
     await groupHeader.hover();
@@ -98,7 +98,7 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.url()).toContain('options.html');
 
     // ドメイングループ設定セクションを探す
-    const domainSettings = page.locator('.domain-groups-settings');
+    const domainSettings = page.locator(optionsPageSelectors.domainGroupsSection);
     await expect(domainSettings).toBeVisible();
 
     // エイリアスが表示されているか確認
@@ -127,7 +127,7 @@ test.describe('ドメイングループ名変更', () => {
     await page.locator('.dialog-overlay .btn-danger').click();
 
     // 重要：設定を保存するために「更新」ボタンをクリック
-    const saveButton = page.locator('button[type="submit"]');
+    const saveButton = page.locator(optionsPageSelectors.submitButton);
     await expect(saveButton).toBeVisible();
     await saveButton.click();
     
@@ -144,9 +144,9 @@ test.describe('ドメイングループ名変更', () => {
     await waitForPageLoad(page);
     
     // 元のドメイン名に戻っているはず（.group-domain 要素を直接確認）
-    const groupHeaderFinal = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const groupHeaderFinal = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await expect(groupHeaderFinal.locator('.group-domain')).toHaveText('example.com');
-    await expect(page.locator('.group-header').filter({ hasText: 'Updated Alias' })).not.toBeVisible();
+    await expect(page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'Updated Alias' })).not.toBeVisible();
   });
 
   test('エイリアス設定後、グループヘッダーに元のドメイン名が薄く表示される', async ({ context, extensionId }) => {
@@ -156,7 +156,7 @@ test.describe('ドメイングループ名変更', () => {
     await waitForPageLoad(page);
 
     // グループヘッダーを探す (example.com)
-    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const groupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await groupHeader.scrollIntoViewIfNeeded();
     await groupHeader.hover();
@@ -179,7 +179,7 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.locator('.dialog')).not.toBeVisible();
 
     // グループヘッダーを再度取得
-    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Custom Alias' }).first();
+    const renamedGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'My Custom Alias' }).first();
     await expect(renamedGroupHeader).toBeVisible();
 
     // エイリアス名が表示されている
@@ -194,7 +194,7 @@ test.describe('ドメイングループ名変更', () => {
     await page.reload();
     await waitForPageLoad(page);
 
-    const reloadedGroupHeader = page.locator('.group-header').filter({ hasText: 'My Custom Alias' }).first();
+    const reloadedGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'My Custom Alias' }).first();
     await expect(reloadedGroupHeader.locator('.group-domain')).toHaveText('My Custom Alias');
     await expect(reloadedGroupHeader.locator('.group-original-domain')).toHaveText('example.com');
   });
@@ -206,15 +206,15 @@ test.describe('ドメイングループ名変更', () => {
     await waitForPageLoad(page);
 
     // まずエイリアスを設定
-    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const groupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await groupHeader.scrollIntoViewIfNeeded();
     await groupHeader.hover();
-    await groupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
+    await groupHeader.evaluate((el, selector) => {
+      const btn = el.querySelector(selector) as HTMLElement;
       if (btn) btn.click();
       else throw new Error('Edit button not found');
-    });
+    }, tabsPageSelectors.groupRenameButton);
 
     const dialogInput = page.locator('.dialog input');
     await expect(dialogInput).toBeVisible();
@@ -223,15 +223,15 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.locator('.dialog')).not.toBeVisible();
 
     // 再度編集ダイアログを開き、初期値が設定したエイリアスになっていることを確認
-    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'First Alias' }).first();
+    const renamedGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'First Alias' }).first();
     await renamedGroupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await renamedGroupHeader.scrollIntoViewIfNeeded();
     await renamedGroupHeader.hover();
-    await renamedGroupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
+    await renamedGroupHeader.evaluate((el, selector) => {
+      const btn = el.querySelector(selector) as HTMLElement;
       if (btn) btn.click();
       else throw new Error('Edit button not found');
-    });
+    }, tabsPageSelectors.groupRenameButton);
 
     const dialogInput2 = page.locator('.dialog input');
     await expect(dialogInput2).toBeVisible();
@@ -248,15 +248,15 @@ test.describe('ドメイングループ名変更', () => {
     await waitForPageLoad(page);
 
     // まずエイリアスを設定
-    const groupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const groupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await groupHeader.scrollIntoViewIfNeeded();
     await groupHeader.hover();
-    await groupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
+    await groupHeader.evaluate((el, selector) => {
+      const btn = el.querySelector(selector) as HTMLElement;
       if (btn) btn.click();
       else throw new Error('Edit button not found');
-    });
+    }, tabsPageSelectors.groupRenameButton);
 
     const dialogInput = page.locator('.dialog input');
     await expect(dialogInput).toBeVisible();
@@ -265,17 +265,17 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.locator('.dialog')).not.toBeVisible();
 
     // エイリアスが設定されたことを確認
-    const renamedGroupHeader = page.locator('.group-header').filter({ hasText: 'Temporary Alias' }).first();
+    const renamedGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'Temporary Alias' }).first();
     await expect(renamedGroupHeader).toBeVisible();
 
     // 再度編集ダイアログを開き、空文字に変更
     await renamedGroupHeader.scrollIntoViewIfNeeded();
     await renamedGroupHeader.hover();
-    await renamedGroupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
+    await renamedGroupHeader.evaluate((el, selector) => {
+      const btn = el.querySelector(selector) as HTMLElement;
       if (btn) btn.click();
       else throw new Error('Edit button not found');
-    });
+    }, tabsPageSelectors.groupRenameButton);
 
     const dialogInput2 = page.locator('.dialog input');
     await expect(dialogInput2).toBeVisible();
@@ -294,7 +294,7 @@ test.describe('ドメイングループ名変更', () => {
     await expect(page.locator('.dialog')).not.toBeVisible();
 
     // 元のドメイン名に戻っていることを確認
-    const originalGroupHeader = page.locator('.group-header').filter({ hasText: 'example.com' }).first();
+    const originalGroupHeader = page.locator(tabsPageSelectors.groupHeader).filter({ hasText: 'example.com' }).first();
     await expect(originalGroupHeader.locator('.group-domain')).toHaveText('example.com');
     // 元ドメイン表示は非表示になっている
     await expect(originalGroupHeader.locator('.group-original-domain')).not.toBeVisible();

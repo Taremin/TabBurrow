@@ -2,7 +2,7 @@
  * カラーピッカーコンポーネントのE2Eテスト
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, createCustomGroupData, clearTestData } from './helpers';
+import { waitForPageLoad, createCustomGroupData, clearTestData, optionsPageSelectors } from './helpers';
 
 test.describe('カラーピッカー', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -26,9 +26,7 @@ test.describe('カラーピッカー', () => {
     await waitForPageLoad(page);
     
     // カスタムグループセクションを探す
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     // カラーピッカートリガーボタンを探す
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
@@ -50,9 +48,7 @@ test.describe('カラーピッカー', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
     await colorPickerTrigger.click();
@@ -74,9 +70,7 @@ test.describe('カラーピッカー', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
     await colorPickerTrigger.click();
@@ -103,9 +97,7 @@ test.describe('カラーピッカー', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     // スクロールしてカスタムグループセクションを表示
     await customGroupSection.scrollIntoViewIfNeeded();
@@ -152,9 +144,7 @@ test.describe('カラーピッカー', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
     await colorPickerTrigger.click();
@@ -180,9 +170,7 @@ test.describe('カラーピッカー', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
     
@@ -208,9 +196,7 @@ test.describe('カラーピッカー', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const customGroupSection = page.locator('.settings-section').filter({ 
-      hasText: /カスタムグループ|Custom Groups/ 
-    });
+    const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
     await colorPickerTrigger.click();
