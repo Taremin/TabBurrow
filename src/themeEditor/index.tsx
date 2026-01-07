@@ -1,10 +1,10 @@
 /**
- * TabBurrow - 設定画面エントリポイント
+ * TabBurrow - テーマエディタ エントリポイント
  */
 
 import { createRoot } from 'react-dom/client';
 import browser from '../browserApi.js';
-import { App } from './App';
+import { App } from './App.js';
 import { I18nProvider } from '../common/i18nContext.js';
 import { getSettings } from '../settings.js';
 import { applyTheme } from '../theme.js';

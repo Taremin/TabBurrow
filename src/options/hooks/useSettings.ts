@@ -26,7 +26,6 @@ export interface UseSettingsReturn {
   reload: () => Promise<void>;
 }
 
-// デフォルト設定
 const defaultSettings: Settings = {
   autoCloseEnabled: false,
   autoCloseSeconds: 300,
@@ -57,6 +56,8 @@ const defaultSettings: Settings = {
   pinnedDomainGroups: [],
   maximizeWidth: false,
   pinTabManager: true,
+  screenshotEnabled: true,
+  screenshotUpdateIntervalMinutes: 5,
 };
 
 /**
@@ -109,7 +110,7 @@ export function useSettings(): UseSettingsReturn {
     
     // テーマは即時プレビュー
     if (key === 'theme') {
-      applyTheme(value as Settings['theme']);
+      void applyTheme(value as Settings['theme']);
     }
   }, []);
 
@@ -144,7 +145,7 @@ export function useSettings(): UseSettingsReturn {
       }
 
       // テーマを確定適用
-      applyTheme(validated.theme);
+      await applyTheme(validated.theme);
 
       // Background Scriptに通知
       notifySettingsChanged();

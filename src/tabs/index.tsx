@@ -13,14 +13,14 @@ import { applyTheme } from '../theme.js';
 async function init() {
   // テーマを適用
   const settings = await getSettings();
-  applyTheme(settings.theme);
+  await applyTheme(settings.theme);
 
   // 設定変更メッセージを監視してテーマを再適用
   browser.runtime.onMessage.addListener(async (message: unknown) => {
     const msg = message as { type?: string };
     if (msg.type === 'settings-changed') {
       const newSettings = await getSettings();
-      applyTheme(newSettings.theme);
+      await applyTheme(newSettings.theme);
     }
   });
 

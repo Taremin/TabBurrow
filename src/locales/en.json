@@ -45,7 +45,10 @@
             "label": "Theme",
             "system": "System Default",
             "dark": "Dark Mode",
-            "light": "Light Mode"
+            "light": "Light Mode",
+            "editThemes": "Edit Themes",
+            "custom": "Custom",
+            "noCustomThemes": "No custom themes. Create one from \"Edit Themes\"."
         },
         "autoClose": {
             "title": "Auto Stash",
@@ -476,6 +479,69 @@
                 "save": "Save",
                 "cancel": "Cancel"
             }
+        }
+    },
+    "themeEditor": {
+        "title": "Theme Editor",
+        "backToSettings": "Back to Settings",
+        "themeList": "Theme List",
+        "newTheme": "New Theme",
+        "newThemeName": "New Theme",
+        "noThemeSelected": "No theme selected",
+        "createFirstTheme": "Create a new theme or select an existing one from the left panel.",
+        "import": "Import",
+        "export": "Export",
+        "importTitle": "Import Themes",
+        "exportTitle": "Export Themes",
+        "importPlaceholder": "Paste JSON here...",
+        "importButton": "Import",
+        "copyToClipboard": "Copy to Clipboard",
+        "copied": "Copied!",
+        "importError": {
+            "empty": "Please enter JSON",
+            "invalid": "Invalid JSON format"
+        },
+        "deleteConfirmTitle": "Delete Theme",
+        "deleteConfirmMessage": "Delete \"{name}\"?",
+        "themeNamePlaceholder": "Enter theme name",
+        "preview": {
+            "title": "Preview"
+        },
+        "category": {
+            "background": "Background",
+            "text": "Text",
+            "border": "Border",
+            "accent": "Accent",
+            "status": "Status",
+            "shadow": "Shadow",
+            "font": "Font"
+        },
+        "color": {
+            "bgPrimary": "Primary Background",
+            "bgSecondary": "Secondary Background",
+            "bgTertiary": "Tertiary Background",
+            "textPrimary": "Primary Text",
+            "textSecondary": "Secondary Text",
+            "textMuted": "Muted Text",
+            "borderColor": "Border",
+            "domainGroupBorder": "Domain Group Border",
+            "accentColor": "Accent",
+            "accentHover": "Accent Hover",
+            "accentLight": "Accent Light",
+            "accentSubtleSolid": "Accent Subtle",
+            "dangerColor": "Danger",
+            "dangerHover": "Danger Hover",
+            "dangerLight": "Danger Light",
+            "successColor": "Success",
+            "successLight": "Success Light",
+            "warningColor": "Warning",
+            "warningLight": "Warning Light",
+            "shadowSm": "Small Shadow",
+            "shadowMd": "Medium Shadow",
+            "shadowLg": "Large Shadow",
+            "fontFamily": "Font Family",
+            "fontSizeBase": "Base Font Size",
+            "fontSizeSmall": "Small Font Size"
         }
     },
     "credits": {

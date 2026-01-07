@@ -67,6 +67,10 @@ function copyStaticFiles(distDir, browser) {
     copyFileSync('src/credits.html', join(distDir, 'credits.html'));
     copyFileSync('src/credits.css', join(distDir, 'credits.css'));
 
+    // theme-editor.html/css
+    copyFileSync('src/theme-editor.html', join(distDir, 'theme-editor.html'));
+    copyFileSync('src/theme-editor.css', join(distDir, 'theme-editor.css'));
+
     // 共通CSSをコピー
     const commonDir = join(distDir, 'common');
     ensureDir(commonDir);
@@ -106,6 +110,7 @@ async function build(distDir, browser) {
             'src/tabs/index.tsx',
             'src/options/index.tsx',
             'src/credits/index.tsx',
+            'src/themeEditor/index.tsx',
         ],
         bundle: true,
         outdir: distDir,

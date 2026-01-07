@@ -45,7 +45,10 @@
             "label": "テーマ",
             "system": "システム設定に従う",
             "dark": "ダークモード",
-            "light": "ライトモード"
+            "light": "ライトモード",
+            "editThemes": "テーマを編集",
+            "custom": "カスタム",
+            "noCustomThemes": "カスタムテーマがありません。「テーマを編集」から作成できます。"
         },
         "autoClose": {
             "title": "自動収納",
@@ -476,6 +479,69 @@
                 "save": "保存",
                 "cancel": "キャンセル"
             }
+        }
+    },
+    "themeEditor": {
+        "title": "テーマエディタ",
+        "backToSettings": "設定に戻る",
+        "themeList": "テーマ一覧",
+        "newTheme": "新規作成",
+        "newThemeName": "新しいテーマ",
+        "noThemeSelected": "テーマが選択されていません",
+        "createFirstTheme": "左のパネルから新規テーマを作成するか、既存のテーマを選択してください。",
+        "import": "インポート",
+        "export": "エクスポート",
+        "importTitle": "テーマをインポート",
+        "exportTitle": "テーマをエクスポート",
+        "importPlaceholder": "ここにJSONを貼り付けてください...",
+        "importButton": "インポート",
+        "copyToClipboard": "クリップボードにコピー",
+        "copied": "コピーしました!",
+        "importError": {
+            "empty": "JSONを入力してください",
+            "invalid": "無効なJSON形式です"
+        },
+        "deleteConfirmTitle": "テーマを削除",
+        "deleteConfirmMessage": "「{name}」を削除しますか？",
+        "themeNamePlaceholder": "テーマ名を入力",
+        "preview": {
+            "title": "プレビュー"
+        },
+        "category": {
+            "background": "背景色",
+            "text": "テキスト色",
+            "border": "ボーダー",
+            "accent": "アクセント",
+            "status": "ステータス色",
+            "shadow": "シャドウ",
+            "font": "フォント"
+        },
+        "color": {
+            "bgPrimary": "メイン背景",
+            "bgSecondary": "セカンダリ背景",
+            "bgTertiary": "ターシャリ背景",
+            "textPrimary": "メインテキスト",
+            "textSecondary": "サブテキスト",
+            "textMuted": "薄いテキスト",
+            "borderColor": "ボーダー",
+            "domainGroupBorder": "ドメイングループボーダー",
+            "accentColor": "アクセント",
+            "accentHover": "ホバー",
+            "accentLight": "薄いアクセント",
+            "accentSubtleSolid": "微細アクセント",
+            "dangerColor": "危険",
+            "dangerHover": "危険ホバー",
+            "dangerLight": "薄い危険色",
+            "successColor": "成功",
+            "successLight": "薄い成功色",
+            "warningColor": "警告",
+            "warningLight": "薄い警告色",
+            "shadowSm": "小シャドウ",
+            "shadowMd": "中シャドウ",
+            "shadowLg": "大シャドウ",
+            "fontFamily": "フォントファミリー",
+            "fontSizeBase": "基本フォントサイズ",
+            "fontSizeSmall": "小フォントサイズ"
         }
     },
     "credits": {
