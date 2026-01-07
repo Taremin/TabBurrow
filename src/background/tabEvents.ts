@@ -12,6 +12,7 @@ import { updateContextMenuVisibility } from './contextMenu.js';
 
 // 現在のアクティブタブを追跡（タブ切替時に前のタブをキャッシュするため）
 let currentActiveTabId: number | null = null;
+const SETTLE_DELAY_MS = 500; // 描画バッファ更新待ち時間
 
 /**
  * タブイベントリスナーを設定
@@ -45,8 +46,6 @@ async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): P
   updateTabLastActiveTime(activeInfo.tabId);
 
   // 前のタブ（非アクティブになったタブ）の最終アクティブ時刻も更新
-  // これを行わないと、長時間アクティブだったタブを切り替えた直後に
-  // 自動収納のタイマーによって即座に閉じられてしまう可能性がある
   if (previousTabId !== null) {
     updateTabLastActiveTime(previousTabId);
   }
@@ -64,59 +63,9 @@ async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): P
     updateContextMenuVisibility(currentTab);
   }
 
-  // 拡張機能のページはスクリーンショット対象外
-  if (currentTab?.url?.startsWith('chrome-extension://') ||
-      currentTab?.url?.startsWith('moz-extension://')) {
-    return;
-  }
-
-  // 前のタブが存在する場合、スクリーンショットをキャッシュ
-  if (previousTabId !== null) {
-    try {
-      // 前のタブがまだ存在するか確認
-      const previousTab = await browser.tabs.get(previousTabId).catch(() => null);
-      if (previousTab && previousTab.windowId !== undefined) {
-        // 前のタブのウィンドウでスクリーンショットを取得
-        // ※注意: captureVisibleTab は現在アクティブなタブを撮影するため、
-        // タブ切替直後に前のタブを撮影することはできない
-        // 代わりに、新しいアクティブタブの windowId を使用
-        const targetTabId = activeInfo.tabId;
-        const dataURL = await captureTab(activeInfo.windowId);
-        
-        // キャプチャ完了後、タブがまだアクティブか検証（レースコンディション対策）
-        if (currentActiveTabId !== targetTabId) {
-          console.log(`[Screenshot] タブ切替検出: キャプチャを破棄 (target=${targetTabId}, current=${currentActiveTabId})`);
-          return;
-        }
-        
-        if (dataURL) {
-          const blob = await resizeScreenshot(dataURL);
-          // 新しくアクティブになったタブのスクリーンショットをキャッシュ
-          setScreenshot(targetTabId, blob);
-        }
-      }
-    } catch (error) {
-      console.warn('タブ切替時のスクリーンショット取得エラー:', error);
-    }
-  } else {
-    // 初回のタブアクティブ化時
-    try {
-      const targetTabId = activeInfo.tabId;
-      const dataURL = await captureTab(activeInfo.windowId);
-      
-      // キャプチャ完了後、タブがまだアクティブか検証（レースコンディション対策）
-      if (currentActiveTabId !== targetTabId) {
-        console.log(`[Screenshot] タブ切替検出: キャプチャを破棄 (target=${targetTabId}, current=${currentActiveTabId})`);
-        return;
-      }
-      
-      if (dataURL) {
-        const blob = await resizeScreenshot(dataURL);
-        setScreenshot(targetTabId, blob);
-      }
-    } catch (error) {
-      console.warn('初回タブのスクリーンショット取得エラー:', error);
-    }
+  // スクリーンショット取得（すでにロード完了している場合のみ）
+  if (currentTab?.status === 'complete') {
+    captureActiveTabWithSettleDelay(activeInfo.tabId, activeInfo.windowId);
   }
 }
 
@@ -173,27 +122,63 @@ async function handleTabUpdated(
     updateContextMenuVisibility(tab);
   }
   
-  // 読み込み完了かつアクティブなタブの場合のみ
-  // 拡張機能のページはスクリーンショット対象外
-  if (changeInfo.status === 'complete' && tab.active && tab.windowId !== undefined &&
-      !tab.url?.startsWith('chrome-extension://') && !tab.url?.startsWith('moz-extension://')) {
-    try {
-      const targetTabId = tabId;
-      const dataURL = await captureTab(tab.windowId);
-      
-      // キャプチャ完了後、タブがまだアクティブか検証（レースコンディション対策）
-      if (currentActiveTabId !== targetTabId) {
-        console.log(`[Screenshot] タブ切替検出: キャプチャを破棄 (target=${targetTabId}, current=${currentActiveTabId})`);
-        return;
-      }
-      
-      if (dataURL) {
-        const blob = await resizeScreenshot(dataURL);
-        setScreenshot(targetTabId, blob);
-      }
-    } catch (error) {
-      console.warn('タブ更新時のスクリーンショット取得エラー:', error);
+  // 読み込み完了かつアクティブなタブの場合のみキャプチャ
+  if (changeInfo.status === 'complete' && tab.active && tab.windowId !== undefined) {
+    captureActiveTabWithSettleDelay(tabId, tab.windowId);
+  }
+}
+
+/**
+ * 遅延を入れてアクティブタブをキャプチャ
+ * @param tabId 期待されるアクティブタブID
+ * @param windowId キャプチャ対象のウィンドウ
+ */
+async function captureActiveTabWithSettleDelay(tabId: number, windowId: number): Promise<void> {
+  try {
+    // 描画が安定するまで少し待つ（特にタブ切替直後）
+    await new Promise(resolve => setTimeout(resolve, SETTLE_DELAY_MS));
+
+    const tab = await browser.tabs.get(tabId).catch(() => null);
+    if (!tab || !tab.active || tab.windowId !== windowId) {
+      console.log(`[Screenshot] キャプチャ中止: タブが非アクティブまたは存在しません (tabId=${tabId})`);
+      return;
     }
+
+    // 拡張機能のページはスクリーンショット対象外
+    if (tab.url?.startsWith('chrome-extension://') ||
+        tab.url?.startsWith('moz-extension://') ||
+        tab.url?.startsWith('about:') ||
+        tab.url?.startsWith('chrome:')) {
+      return;
+    }
+
+    const dataURL = await captureTab(windowId);
+    if (dataURL) {
+      const blob = await resizeScreenshot(dataURL);
+      setScreenshot(tabId, blob);
+    }
+  } catch (error) {
+    console.warn('[Screenshot] キャプチャエラー:', error);
+  }
+}
+
+/**
+ * 全ウィンドウのアクティブタブのスクリーンショットを更新
+ */
+export async function captureActiveTabsInAllWindows(): Promise<void> {
+  console.log('[Screenshot] 全ウィンドウのアクティブタブをキャプチャ開始');
+  try {
+    const windows = await browser.windows.getAll({ populate: true });
+    for (const win of windows) {
+      if (win.id === undefined) continue;
+      const activeTab = win.tabs?.find(t => t.active);
+      if (activeTab && activeTab.id !== undefined) {
+        // 各ウィンドウごとに非同期で実行（順次処理は screenshotQueue が担当）
+        captureActiveTabWithSettleDelay(activeTab.id, win.id);
+      }
+    }
+  } catch (error) {
+    console.error('[Screenshot] 全ウィンドウキャプチャエラー:', error);
   }
 }
 

@@ -136,6 +136,10 @@ export interface Settings {
   pinnedDomainGroups: PinnedDomainGroup[];     // ピン留めされたドメイングループ（順序付き）
   maximizeWidth: boolean;                    // 横幅を最大まで使用するか
   pinTabManager: boolean;                    // タブ管理画面を固定タブとして開くか
+
+  // スクリーンショット設定
+  screenshotEnabled: boolean;                // スクリーンショットを有効にするか
+  screenshotUpdateIntervalMinutes: number;   // 自動更新間隔（分）
 }
 
 // デフォルト設定
@@ -178,6 +182,8 @@ const DEFAULT_SETTINGS: Settings = {
   pinnedDomainGroups: [],            // ピン留めなし
   maximizeWidth: false,              // デフォルトはオフ
   pinTabManager: true,               // デフォルトはオン
+  screenshotEnabled: true,           // デフォルトはオン
+  screenshotUpdateIntervalMinutes: 5, // デフォルト5分
 };
 
 const STORAGE_KEY = 'settings';

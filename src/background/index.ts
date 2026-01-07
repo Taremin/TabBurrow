@@ -14,7 +14,7 @@ import { applyLocaleSetting } from '../i18n.js';
 import { saveAndCloseTabs, openTabManagerPage } from './tabSaver.js';
 import { initAutoClose, handleAutoCloseAlarm } from './autoClose.js';
 import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus, initContextMenuVisibility } from './contextMenu.js';
-import { setupTabEventListeners } from './tabEvents.js';
+import { setupTabEventListeners, captureActiveTabsInAllWindows } from './tabEvents.js';
 import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker.js';
 import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup.js';
 import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage.js';
@@ -110,6 +110,14 @@ async function initializeAll(): Promise<void> {
     // 自動バックアップを初期化（アラーム設定含む）
     await initAutoBackup();
     
+    // スクリーンショット定期更新を初期化
+    await initScreenshotUpdate();
+
+    // 初期化時に現在のアクティブタブを取得
+    if (settings.screenshotEnabled) {
+      captureActiveTabsInAllWindows();
+    }
+    
     console.log('[Background] initializeAll() 完了');
   } catch (error) {
     console.error('[Background] 初期化中にエラーが発生しました:', error);
@@ -172,6 +180,8 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
         updateContextMenuTitles();
         // 自動バックアップを再初期化
         await initAutoBackup();
+        // スクリーンショット定期更新を再初期化
+        await initScreenshotUpdate();
       });
       return Promise.resolve({ success: true });
 
@@ -276,6 +286,14 @@ browser.alarms.onAlarm.addListener((alarm) => {
   handleAutoCloseAlarm(alarm);
   // バックアップアラーム
   handleBackupAlarm(alarm);
+  // スクリーンショット更新アラーム
+  if (alarm.name === 'screenshot-update') {
+    getSettings().then(settings => {
+      if (settings.screenshotEnabled) {
+        captureActiveTabsInAllWindows();
+      }
+    });
+  }
 });
 
 // コンテキストメニューがクリックされたときの処理
@@ -283,4 +301,22 @@ browser.contextMenus.onClicked.addListener(handleContextMenuClick);
 
 // タブイベントリスナーを設定
 setupTabEventListeners();
+
+/**
+ * スクリーンショット定期更新を初期化
+ */
+async function initScreenshotUpdate(): Promise<void> {
+  const settings = await getSettings();
+  
+  // 既存のアラームを削除
+  await browser.alarms.clear('screenshot-update');
+  
+  if (settings.screenshotEnabled && settings.screenshotUpdateIntervalMinutes > 0) {
+    browser.alarms.create('screenshot-update', {
+      periodInMinutes: settings.screenshotUpdateIntervalMinutes,
+      delayInMinutes: settings.screenshotUpdateIntervalMinutes, // 初回も指定間隔後
+    });
+    console.log(`[Screenshot] 定期更新アラームを設定: ${settings.screenshotUpdateIntervalMinutes}分ごと`);
+  }
+}
 

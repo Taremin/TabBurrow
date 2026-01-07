@@ -136,6 +136,13 @@
             },
             "pinnedTabsHint": "Pinned tabs are not stashed. Suspend may not work due to browser limitations."
         },
+        "screenshot": {
+            "title": "Screenshots",
+            "description": "Configure screenshot capture settings for the tab manager.",
+            "enableLabel": "Enable screenshot capture",
+            "intervalLabel": "Auto-update interval (minutes)",
+            "intervalHint": "Periodically update screenshots of active tabs (1-60 minutes)."
+        },
         "dataManagement": {
             "title": "Data Management",
             "tabData": "Tab Data",

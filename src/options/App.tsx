@@ -16,6 +16,7 @@ import { IconClickSettings } from './components/IconClickSettings.js';
 import { RestoreSettings } from './components/RestoreSettings.js';
 import { LinkCheckSettings } from './components/LinkCheckSettings.js';
 import { BackupSettings } from './components/BackupSettings.js';
+import { ScreenshotSettings } from './components/ScreenshotSettings.js';
 import { DataManagement } from './components/DataManagement.js';
 import { CustomGroupSettings } from './components/CustomGroupSettings.js';
 import { DomainGroupSettings } from './components/DomainGroupSettings.js';
@@ -271,6 +272,23 @@ export function App() {
             onIntervalPresetChange={(value) => updateSetting('autoBackupIntervalPreset', value)}
             onIntervalMinutesChange={(value) => updateSetting('autoBackupIntervalMinutes', value)}
             onKeepCountChange={(value) => updateSetting('autoBackupKeepCount', value)}
+          />
+        </SettingsSection>
+        
+        {/* スクリーンショット設定 */}
+        <SettingsSection
+          icon="📸"
+          title={t('settings.screenshot.title')}
+          description={t('settings.screenshot.description')}
+          dataTestId="screenshot-section"
+        >
+          <ScreenshotSettings
+            enabled={settings.screenshotEnabled}
+            intervalMinutes={settings.screenshotUpdateIntervalMinutes}
+            savedEnabled={savedSettings.screenshotEnabled}
+            savedIntervalMinutes={savedSettings.screenshotUpdateIntervalMinutes}
+            onEnabledChange={(value) => updateSetting('screenshotEnabled', value)}
+            onIntervalMinutesChange={(value) => updateSetting('screenshotUpdateIntervalMinutes', value)}
           />
         </SettingsSection>
 
