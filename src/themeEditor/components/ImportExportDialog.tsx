@@ -3,8 +3,9 @@
  */
 
 import { useState, useCallback } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Upload, Download } from 'lucide-react';
 import { useTranslation } from '../../common/i18nContext.js';
+import { Dialog } from '../../common/Dialog.js';
 
 interface ImportExportDialogProps {
   isOpen: boolean;
@@ -58,57 +59,63 @@ export function ImportExportDialog({ isOpen, mode, onClose, onImport, exportJson
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
+  const title = mode === 'import'
+    ? t('themeEditor.importTitle', { defaultValue: 'テーマをインポート' })
+    : t('themeEditor.exportTitle', { defaultValue: 'テーマをエクスポート' });
+
+  const icon = mode === 'import' ? <Upload size={20} /> : <Download size={20} />;
+
+  const actions = (
+    <>
+      <button className="btn btn-secondary" onClick={handleClose}>
+        {t('common.cancel')}
+      </button>
+      {mode === 'import' ? (
+        <button className="btn btn-primary" onClick={handleImport}>
+          {t('themeEditor.importButton', { defaultValue: 'インポート' })}
+        </button>
+      ) : (
+        <button className="btn btn-primary" onClick={handleCopy}>
+          {copied ? <Check size={16} /> : <Copy size={16} />}
+          <span>{copied
+            ? t('themeEditor.copied', { defaultValue: 'コピーしました!' })
+            : t('themeEditor.copyToClipboard', { defaultValue: 'クリップボードにコピー' })}
+          </span>
+        </button>
+      )}
+    </>
+  );
 
   return (
-    <div className="dialog-overlay" onClick={handleClose}>
-      <div className="dialog import-export-dialog" onClick={e => e.stopPropagation()}>
-        <h2 className="dialog-title">
-          {mode === 'import'
-            ? t('themeEditor.importTitle', { defaultValue: 'テーマをインポート' })
-            : t('themeEditor.exportTitle', { defaultValue: 'テーマをエクスポート' })}
-        </h2>
-
-        {mode === 'import' ? (
-          <>
-            <textarea
-              className="json-textarea"
-              value={inputJson}
-              onChange={e => {
-                setInputJson(e.target.value);
-                setError(null);
-              }}
-              placeholder={t('themeEditor.importPlaceholder', { defaultValue: 'ここにJSONを貼り付けてください...' })}
-            />
-            {error && <p style={{ color: 'var(--danger-color)', marginTop: '8px' }}>{error}</p>}
-          </>
-        ) : (
+    <Dialog
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={title}
+      icon={icon}
+      actions={actions}
+      width={600}
+    >
+      {mode === 'import' ? (
+        <>
           <textarea
             className="json-textarea"
-            value={exportJson || ''}
-            readOnly
+            value={inputJson}
+            onChange={e => {
+              setInputJson(e.target.value);
+              setError(null);
+            }}
+            placeholder={t('themeEditor.importPlaceholder', { defaultValue: 'ここにJSONを貼り付けてください...' })}
           />
-        )}
-
-        <div className="dialog-actions">
-          <button className="btn btn-secondary" onClick={handleClose}>
-            {t('common.cancel')}
-          </button>
-          {mode === 'import' ? (
-            <button className="btn btn-primary" onClick={handleImport}>
-              {t('themeEditor.importButton', { defaultValue: 'インポート' })}
-            </button>
-          ) : (
-            <button className="btn btn-primary" onClick={handleCopy}>
-              {copied ? <Check size={16} /> : <Copy size={16} />}
-              <span>{copied
-                ? t('themeEditor.copied', { defaultValue: 'コピーしました!' })
-                : t('themeEditor.copyToClipboard', { defaultValue: 'クリップボードにコピー' })}
-              </span>
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+          {error && <p style={{ color: 'var(--danger-color)', marginTop: '8px' }}>{error}</p>}
+        </>
+      ) : (
+        <textarea
+          className="json-textarea"
+          value={exportJson || ''}
+          readOnly
+        />
+      )}
+    </Dialog>
   );
 }
+
