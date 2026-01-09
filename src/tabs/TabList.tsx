@@ -390,7 +390,13 @@ export function TabList({
   }, [groups, collapsedGroups, onToggleCollapse]);
 
   const itemContent = useCallback((index: number) => {
-    const { tab, groupName, groupType } = flatTabs[index];
+    const item = flatTabs[index];
+    // レースコンディションで flatTabs[index] が undefined になる可能性があるため
+    // 早期リターンで空要素を返す
+    if (!item) {
+      return null;
+    }
+    const { tab, groupName, groupType } = item;
     return (
       <TabCard
         key={`${groupName}-${tab.id}`} // 同じタブが複数グループに表示されるためキーを変更
@@ -459,7 +465,7 @@ export function TabList({
       ) : (
         <GroupedVirtuoso
           ref={virtuosoRef}
-          key="grouped-view"
+          key={`grouped-${tabs.length}-${groups.length}`}
           groupCounts={groupCounts}
           groupContent={groupContent}
           itemContent={itemContent}
