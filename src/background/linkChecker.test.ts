@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { checkLinks } from './linkChecker.js';
-import * as storage from '../storage.js';
-import * as settings from '../settings.js';
+import { checkLinks } from './linkChecker';
+import * as storage from '../storage';
+import * as settings from '../settings';
 
 // モックの定義
 vi.mock('../storage.js', () => ({

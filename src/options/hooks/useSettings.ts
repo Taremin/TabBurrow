@@ -4,15 +4,15 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import browser from '../../browserApi.js';
+import browser from '../../browserApi';
 import {
   getSettings,
   saveSettings,
   notifySettingsChanged,
   type Settings,
-} from '../../settings.js';
-import { applyLocaleSetting } from '../../i18n.js';
-import { applyTheme } from '../../theme.js';
+} from '../../settings';
+import { applyLocaleSetting } from '../../i18n';
+import { applyTheme } from '../../theme';
 
 // フックの戻り値型
 export interface UseSettingsReturn {

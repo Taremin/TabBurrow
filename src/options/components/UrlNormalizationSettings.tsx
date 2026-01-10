@@ -4,12 +4,12 @@
 
 import { useState, useCallback, useMemo } from 'react';
 import { Edit2, Trash2, Plus } from 'lucide-react';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { UrlNormalizationRule } from '../../settings.js';
-import { applyUrlNormalization } from '../../utils/url.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { UrlNormalizationRule } from '../../settings';
+import { applyUrlNormalization } from '../../utils/url';
 import { UrlNormalizationRuleDialog } from './UrlNormalizationRuleDialog';
-import { applyNormalizationToExisting, type NormalizationApplyResult } from '../../storage.js';
-import { NormalizationResultDialog } from '../../common/NormalizationResultDialog.js';
+import { applyNormalizationToExisting, type NormalizationApplyResult } from '../../storage';
+import { NormalizationResultDialog } from '../../common/NormalizationResultDialog';
 
 interface UrlNormalizationSettingsProps {
   enabled: boolean;

@@ -10,7 +10,7 @@ vi.mock('./customTheme.js', () => ({
   clearCustomThemeStyles: vi.fn(),
 }));
 
-import { applyTheme, getSystemTheme, isCustomTheme, extractCustomThemeId, createCustomThemeSetting } from './theme.js';
+import { applyTheme, getSystemTheme, isCustomTheme, extractCustomThemeId, createCustomThemeSetting } from './theme';
 
 describe('theme', () => {
   beforeEach(() => {

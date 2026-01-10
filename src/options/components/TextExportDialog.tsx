@@ -4,13 +4,13 @@
  */
 
 import { memo, useCallback, useState, useMemo } from 'react';
-import { DialogOverlay } from '../../common/DialogOverlay.js';
-import { useTranslation } from '../../common/i18nContext.js';
+import { DialogOverlay } from '../../common/DialogOverlay';
+import { useTranslation } from '../../common/i18nContext';
 import {
   type TabExportData,
   type ExportFormat,
   formatTabsData,
-} from '../../exportImport.js';
+} from '../../exportImport';
 
 interface TextExportDialogProps {
   isOpen: boolean;

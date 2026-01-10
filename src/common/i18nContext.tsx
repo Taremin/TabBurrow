@@ -4,15 +4,15 @@
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import { 
   t as translate, 
   applyLocaleSetting, 
   getCurrentLocale, 
   type SupportedLocale, 
   type LocaleSetting 
-} from '../i18n.js';
-import { getSettings } from '../settings.js';
+} from '../i18n';
+import { getSettings } from '../settings';
 
 // コンテキストの型
 interface I18nContextType {

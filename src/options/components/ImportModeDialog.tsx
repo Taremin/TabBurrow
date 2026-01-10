@@ -2,9 +2,9 @@
  * TabBurrow - インポートモード選択ダイアログ
  */
 
-import { DialogOverlay } from '../../common/DialogOverlay.js';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { ImportMode } from '../../exportImport.js';
+import { DialogOverlay } from '../../common/DialogOverlay';
+import { useTranslation } from '../../common/i18nContext';
+import type { ImportMode } from '../../exportImport';
 
 interface ImportModeDialogProps {
   isOpen: boolean;

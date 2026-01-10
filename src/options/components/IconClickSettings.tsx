@@ -2,8 +2,8 @@
  * TabBurrow - アイコンクリック設定コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import type { PinnedTabAction } from '../../settings.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { PinnedTabAction } from '../../settings';
 
 interface IconClickSettingsProps {
   applyRules: boolean;

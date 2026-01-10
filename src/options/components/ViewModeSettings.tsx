@@ -2,8 +2,8 @@
  * TabBurrow - デフォルト表示モード設定コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import type { ViewMode, DisplayDensity } from '../../settings.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { ViewMode, DisplayDensity } from '../../settings';
 
 interface ViewModeSettingsProps {
   viewMode: ViewMode;

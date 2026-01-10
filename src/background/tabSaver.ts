@@ -3,13 +3,13 @@
  * タブの収納（保存してタブを閉じる）、タブ管理画面を開く処理を担当
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import type { Tabs } from 'webextension-polyfill';
-import { saveTabs, type SavedTab } from '../storage.js';
-import { getScreenshot } from '../screenshotCache.js';
-import { captureTab, resizeScreenshot } from './screenshot.js';
-import { extractDomain, applyUrlNormalization } from '../utils/url.js';
-import { getSettings } from '../settings.js';
+import { saveTabs, type SavedTab } from '../storage';
+import { getScreenshot } from '../screenshotCache';
+import { captureTab, resizeScreenshot } from './screenshot';
+import { extractDomain, applyUrlNormalization } from '../utils/url';
+import { getSettings } from '../settings';
 
 /**
  * タブのスクリーンショットを取得（アクティブタブかキャッシュから）

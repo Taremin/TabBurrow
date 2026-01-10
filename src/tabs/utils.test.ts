@@ -2,7 +2,7 @@
  * tabs/utils.ts のユニットテスト
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { formatDateTime, formatBytes, escapeHtml } from './utils.js';
+import { formatDateTime, formatBytes, escapeHtml } from './utils';
 
 describe('utils', () => {
   describe('formatDateTime', () => {

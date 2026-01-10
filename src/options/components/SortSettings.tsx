@@ -2,8 +2,8 @@
  * TabBurrow - ソート順設定コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import type { GroupSortType, ItemSortType } from '../../settings.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { GroupSortType, ItemSortType } from '../../settings';
 
 interface SortSettingsProps {
   groupSort: GroupSortType;

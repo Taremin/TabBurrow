@@ -3,7 +3,7 @@
  */
 
 import { Trash2 } from 'lucide-react';
-import type { CustomTheme } from '../../customTheme.js';
+import type { CustomTheme } from '../../customTheme';
 
 interface ThemeListProps {
   themes: CustomTheme[];

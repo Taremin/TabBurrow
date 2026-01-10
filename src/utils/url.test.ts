@@ -1,4 +1,4 @@
-import { extractDomain, applyUrlNormalization, generateRegexFromUrls } from './url.js';
+import { extractDomain, applyUrlNormalization, generateRegexFromUrls } from './url';
 
 describe('extractDomain', () => {
   // Existing tests...

@@ -3,8 +3,8 @@
  * コンテキストメニュー機能のテスト
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import browser from '../browserApi.js';
-import { handleContextMenuClick, isSaveableUrl, updateContextMenuVisibility } from './contextMenu.js';
+import browser from '../browserApi';
+import { handleContextMenuClick, isSaveableUrl, updateContextMenuVisibility } from './contextMenu';
 import type { Menus, Tabs } from 'webextension-polyfill';
 
 // browser APIのモック

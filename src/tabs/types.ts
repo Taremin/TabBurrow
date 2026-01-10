@@ -3,13 +3,13 @@
  */
 
 // ソート関連の型はsettings.tsからre-export
-export type { GroupSortType, ItemSortType } from '../settings.js';
+export type { GroupSortType, ItemSortType } from '../settings';
 
 // ストレージの型をre-export
-export type { GroupType, SavedTab, CustomGroupMeta } from '../storage.js';
+export type { GroupType, SavedTab, CustomGroupMeta } from '../storage';
 
 // SavedTabをインポート（interface内で使用するため）
-import type { SavedTab } from '../storage.js';
+import type { SavedTab } from '../storage';
 
 // グループの型（汎用）
 export interface TabGroup {
@@ -31,7 +31,7 @@ export interface DateRangeFilter {
 }
 
 // 表示モード・表示密度はsettings.tsからre-export（一元管理）
-export type { ViewMode, DisplayDensity } from '../settings.js';
+export type { ViewMode, DisplayDensity } from '../settings';
 
 // グループごとのフィルタ状態（正規表現パターン）
 export interface GroupFilter {

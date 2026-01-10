@@ -4,7 +4,7 @@
  * 注: extractDomainのテストはsrc/utils/url.test.tsに移動済み
  */
 import { describe, it, expect } from 'vitest';
-import { createSavedTab } from './tabSaver.js';
+import { createSavedTab } from './tabSaver';
 
 // テスト用のモックタブを作成するヘルパー関数
 function createMockTab(overrides: Partial<chrome.tabs.Tab> = {}): chrome.tabs.Tab {

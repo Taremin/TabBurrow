@@ -4,7 +4,7 @@
 
 import { memo, useCallback, useMemo } from 'react';
 import type { DateRangeFilter } from './types';
-import { useTranslation } from '../common/i18nContext.js';
+import { useTranslation } from '../common/i18nContext';
 
 interface DateRangeFilterProps {
   dateRange: DateRangeFilter;

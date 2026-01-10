@@ -3,9 +3,9 @@
  * Browser Storage APIを使用して設定を永続化
  */
 
-import browser from './browserApi.js';
-import type { LocaleSetting } from './i18n.js';
-import type { ThemeSetting } from './theme.js';
+import browser from './browserApi';
+import type { LocaleSetting } from './i18n';
+import type { ThemeSetting } from './theme';
 
 
 // タブ復元モードの型定義

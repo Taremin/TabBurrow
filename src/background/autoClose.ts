@@ -3,12 +3,12 @@
  * 非アクティブタブの自動収納を担当
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import type { Alarms, Tabs } from 'webextension-polyfill';
-import { getSettings, matchAutoCloseRule, type Settings } from '../settings.js';
-import { saveAndCloseTabs, getTabScreenshot, createSavedTab } from './tabSaver.js';
-import { extractDomain, applyUrlNormalization } from '../utils/url.js';
-import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../storage.js';
+import { getSettings, matchAutoCloseRule, type Settings } from '../settings';
+import { saveAndCloseTabs, getTabScreenshot, createSavedTab } from './tabSaver';
+import { extractDomain, applyUrlNormalization } from '../utils/url';
+import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../storage';
 
 // 自動収納のアラーム名
 export const AUTO_CLOSE_ALARM_NAME = 'auto-close-tabs';

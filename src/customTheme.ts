@@ -3,7 +3,7 @@
  * ユーザー定義のカスタムテーマの型定義とストレージ操作
  */
 
-import browser from './browserApi.js';
+import browser from './browserApi';
 
 // テーマカラー設定の型定義
 export interface ThemeColors {

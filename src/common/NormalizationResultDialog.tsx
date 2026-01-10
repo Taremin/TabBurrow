@@ -5,9 +5,9 @@
 
 import { memo } from 'react';
 import { CheckCircle, ArrowRight } from 'lucide-react';
-import { useTranslation } from './i18nContext.js';
-import { Dialog } from './Dialog.js';
-import type { NormalizationApplyResult } from '../storage.js';
+import { useTranslation } from './i18nContext';
+import { Dialog } from './Dialog';
+import type { NormalizationApplyResult } from '../storage';
 
 interface NormalizationResultDialogProps {
   isOpen: boolean;

@@ -2,7 +2,7 @@
  * TabBurrow - スクリーンショット設定コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
+import { useTranslation } from '../../common/i18nContext';
 
 interface ScreenshotSettingsProps {
   enabled: boolean;

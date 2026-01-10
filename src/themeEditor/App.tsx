@@ -4,7 +4,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Settings, Palette, Plus, Download, Upload, ArrowLeft } from 'lucide-react';
-import { useTranslation } from '../common/i18nContext.js';
+import { useTranslation } from '../common/i18nContext';
 import {
   getCustomThemes,
   saveCustomTheme,
@@ -13,11 +13,11 @@ import {
   exportThemesToJson,
   importThemeFromJson,
   type CustomTheme,
-} from '../customTheme.js';
-import { ThemeList } from './components/ThemeList.js';
-import { ThemeEditor } from './components/ThemeEditor.js';
-import { ImportExportDialog } from './components/ImportExportDialog.js';
-import { ConfirmDialog } from '../common/ConfirmDialog.js';
+} from '../customTheme';
+import { ThemeList } from './components/ThemeList';
+import { ThemeEditor } from './components/ThemeEditor';
+import { ImportExportDialog } from './components/ImportExportDialog';
+import { ConfirmDialog } from '../common/ConfirmDialog';
 
 export function App() {
   const { t, locale } = useTranslation();

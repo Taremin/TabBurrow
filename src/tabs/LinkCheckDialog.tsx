@@ -4,14 +4,14 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import browser from '../browserApi.js';
-import { t } from '../i18n.js';
-import type { LinkCheckAction } from '../settings.js';
-import { deleteMultipleTabs, assignMultipleTabsToGroup, getAllCustomGroups } from '../storage.js';
-import type { CustomGroupMeta } from '../dbSchema.js';
+import browser from '../browserApi';
+import { t } from '../i18n';
+import type { LinkCheckAction } from '../settings';
+import { deleteMultipleTabs, assignMultipleTabsToGroup, getAllCustomGroups } from '../storage';
+import type { CustomGroupMeta } from '../dbSchema';
 import { CheckCircle, XCircle, AlertTriangle, Minus, Clock, X } from 'lucide-react';
-import { ConfirmDialog } from '../common/ConfirmDialog.js';
-import { PromptDialog } from '../common/PromptDialog.js';
+import { ConfirmDialog } from '../common/ConfirmDialog';
+import { PromptDialog } from '../common/PromptDialog';
 
 // ======================
 // 型定義

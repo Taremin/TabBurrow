@@ -3,11 +3,11 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { DialogOverlay } from '../../common/DialogOverlay.js';
-import browser from '../../browserApi.js';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { BackupIntervalPreset } from '../../settings.js';
-import type { BackupRecord } from '../../dbSchema.js';
+import { DialogOverlay } from '../../common/DialogOverlay';
+import browser from '../../browserApi';
+import { useTranslation } from '../../common/i18nContext';
+import type { BackupIntervalPreset } from '../../settings';
+import type { BackupRecord } from '../../dbSchema';
 
 interface BackupSettingsProps {
   enabled: boolean;

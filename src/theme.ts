@@ -3,7 +3,7 @@
  * テーマの適用と管理
  */
 
-import { getCustomTheme, applyThemeColors, clearCustomThemeStyles } from './customTheme.js';
+import { getCustomTheme, applyThemeColors, clearCustomThemeStyles } from './customTheme';
 
 // テーマ設定の型定義
 // 'system' | 'dark' | 'light' | 'custom-{id}'

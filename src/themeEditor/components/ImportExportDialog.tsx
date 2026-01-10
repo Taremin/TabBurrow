@@ -4,8 +4,8 @@
 
 import { useState, useCallback } from 'react';
 import { Copy, Check, Upload, Download } from 'lucide-react';
-import { useTranslation } from '../../common/i18nContext.js';
-import { Dialog } from '../../common/Dialog.js';
+import { useTranslation } from '../../common/i18nContext';
+import { Dialog } from '../../common/Dialog';
 
 interface ImportExportDialogProps {
   isOpen: boolean;

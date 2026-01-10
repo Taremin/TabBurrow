@@ -13,7 +13,7 @@ import {
   parseUrlList,
   parseMarkdown,
   detectTextFormat,
-} from './exportImport.js';
+} from './exportImport';
 
 
 describe('exportImport', () => {

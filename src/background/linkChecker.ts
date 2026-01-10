@@ -3,10 +3,10 @@
  * 保存されたタブのURLに対してHEADリクエストを送信し、リンク切れを検出
  */
 
-import { getAllTabs } from '../storage.js';
-import { getSettings, type LinkCheckAction, type LinkCheckRule } from '../settings.js';
-import type { SavedTab } from '../dbSchema.js';
-import { extractDomain } from '../utils/url.js';
+import { getAllTabs } from '../storage';
+import { getSettings, type LinkCheckAction, type LinkCheckRule } from '../settings';
+import type { SavedTab } from '../dbSchema';
+import { extractDomain } from '../utils/url';
 
 // ======================
 // インターフェース定義

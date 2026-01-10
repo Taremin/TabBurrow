@@ -8,8 +8,8 @@ import {
   tabLastActiveTime,
   getCachedSettings,
   setCachedSettings,
-} from './autoClose.js';
-import type { Settings } from '../settings.js';
+} from './autoClose';
+import type { Settings } from '../settings';
 
 describe('autoClose', () => {
   describe('AUTO_CLOSE_ALARM_NAME', () => {

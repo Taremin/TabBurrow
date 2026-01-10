@@ -5,7 +5,7 @@
 
 import { memo, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { useDialog } from './hooks/useDialog.js';
+import { useDialog } from './hooks/useDialog';
 
 interface DialogOverlayProps {
   /** ダイアログが開いているかどうか */

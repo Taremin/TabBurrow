@@ -4,7 +4,7 @@
  */
 
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
-import { useTranslation } from '../common/i18nContext.js';
+import { useTranslation } from '../common/i18nContext';
 import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin } from 'lucide-react';
 
 interface GroupHeaderProps {

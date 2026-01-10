@@ -3,9 +3,9 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { CustomGroupSettings } from './CustomGroupSettings.js';
-import * as storage from '../../storage.js';
-import type { CustomGroupMeta, SavedTab } from '../../storage.js';
+import { CustomGroupSettings } from './CustomGroupSettings';
+import * as storage from '../../storage';
+import type { CustomGroupMeta, SavedTab } from '../../storage';
 
 // storage モジュールをモック
 vi.mock('../../storage.js', () => ({

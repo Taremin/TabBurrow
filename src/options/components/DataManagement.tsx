@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useTranslation } from '../../common/i18nContext.js';
+import { useTranslation } from '../../common/i18nContext';
 import {
   exportSettings,
   importSettings,
@@ -17,12 +17,12 @@ import {
   type SettingsExportData,
   type TabExportData,
   type ImportMode,
-} from '../../exportImport.js';
-import { notifySettingsChanged } from '../../settings.js';
-import { ImportModeDialog } from './ImportModeDialog.js';
-import { TextExportDialog } from './TextExportDialog.js';
-import { TextImportDialog } from './TextImportDialog.js';
-import { AlertDialog } from '../../common/AlertDialog.js';
+} from '../../exportImport';
+import { notifySettingsChanged } from '../../settings';
+import { ImportModeDialog } from './ImportModeDialog';
+import { TextExportDialog } from './TextExportDialog';
+import { TextImportDialog } from './TextImportDialog';
+import { AlertDialog } from '../../common/AlertDialog';
 import { Database, Download, Upload, FileJson, ClipboardPaste } from 'lucide-react';
 
 interface DataManagementProps {

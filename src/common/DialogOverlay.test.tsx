@@ -4,8 +4,8 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { DialogOverlay } from './DialogOverlay.js';
-import { I18nProvider } from './i18nContext.js';
+import { DialogOverlay } from './DialogOverlay';
+import { I18nProvider } from './i18nContext';
 
 // テスト用ラッパー
 function renderWithI18n(ui: React.ReactElement) {

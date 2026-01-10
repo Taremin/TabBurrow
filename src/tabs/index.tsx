@@ -3,11 +3,11 @@
  */
 
 import { createRoot } from 'react-dom/client';
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import { App } from './App';
-import { I18nProvider } from '../common/i18nContext.js';
-import { getSettings } from '../settings.js';
-import { applyTheme } from '../theme.js';
+import { I18nProvider } from '../common/i18nContext';
+import { getSettings } from '../settings';
+import { applyTheme } from '../theme';
 
 // DOMContentLoaded時に初期化
 async function init() {

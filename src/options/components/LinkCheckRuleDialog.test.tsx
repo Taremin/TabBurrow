@@ -3,8 +3,8 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { LinkCheckRuleDialog } from './LinkCheckRuleDialog.js';
-import type { LinkCheckRule } from '../../settings.js';
+import { LinkCheckRuleDialog } from './LinkCheckRuleDialog';
+import type { LinkCheckRule } from '../../settings';
 
 describe('LinkCheckRuleDialog', () => {
   const defaultProps = {

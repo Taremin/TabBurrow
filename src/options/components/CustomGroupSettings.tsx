@@ -4,9 +4,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Folder, FolderPlus, Pencil, Trash2, GripVertical } from 'lucide-react';
-import { useTranslation } from '../../common/i18nContext.js';
-import { ConfirmDialog } from '../../common/ConfirmDialog.js';
-import { PromptDialog } from '../../common/PromptDialog.js';
+import { useTranslation } from '../../common/i18nContext';
+import { ConfirmDialog } from '../../common/ConfirmDialog';
+import { PromptDialog } from '../../common/PromptDialog';
 import {
   getAllCustomGroups,
   createCustomGroup,
@@ -15,9 +15,9 @@ import {
   getAllTabs,
   updateCustomGroupOrder,
   updateCustomGroupColor,
-} from '../../storage.js';
-import type { CustomGroupMeta, SavedTab } from '../../storage.js';
-import { ColorPicker } from '../../common/ColorPicker.js';
+} from '../../storage';
+import type { CustomGroupMeta, SavedTab } from '../../storage';
+import { ColorPicker } from '../../common/ColorPicker';
 
 interface CustomGroupSettingsProps {
   showGroupedTabsInDomainGroups?: boolean;

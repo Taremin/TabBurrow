@@ -1,8 +1,8 @@
-import browser from '../../browserApi.js';
+import browser from '../../browserApi';
 import type { Tabs } from 'webextension-polyfill';
-import { findTabByUrl, deleteTab } from '../../storage.js';
-import { t } from '../../i18n.js';
-import { getSettings, saveSettings, escapeRegexPattern, type AutoCloseRule } from '../../settings.js';
+import { findTabByUrl, deleteTab } from '../../storage';
+import { t } from '../../i18n';
+import { getSettings, saveSettings, escapeRegexPattern, type AutoCloseRule } from '../../settings';
 
 export interface UpdateContextMenuVisibilityType {
   (tab: Tabs.Tab): Promise<void>;

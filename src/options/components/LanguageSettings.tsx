@@ -2,8 +2,8 @@
  * TabBurrow - 言語設定コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import type { LocaleSetting } from '../../i18n.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { LocaleSetting } from '../../i18n';
 
 interface LanguageSettingsProps {
   value: LocaleSetting;

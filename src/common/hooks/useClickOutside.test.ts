@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
 import { useRef, type RefObject } from 'react';
-import { useClickOutside } from './useClickOutside.js';
+import { useClickOutside } from './useClickOutside';
 
 // requestAnimationFrameのモック（即時実行）
 beforeEach(() => {

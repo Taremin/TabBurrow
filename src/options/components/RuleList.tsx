@@ -2,8 +2,8 @@
  * TabBurrow - ルール一覧コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import type { AutoCloseRule } from '../../settings.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { AutoCloseRule } from '../../settings';
 
 interface RuleListProps {
   rules: AutoCloseRule[];

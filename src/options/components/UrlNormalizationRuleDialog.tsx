@@ -3,10 +3,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { UrlNormalizationRule } from '../../settings.js';
-import { Dialog } from '../../common/Dialog.js';
-import { NormalizationRuleForm, NormalizationRuleIcon } from '../../common/NormalizationRuleForm.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { UrlNormalizationRule } from '../../settings';
+import { Dialog } from '../../common/Dialog';
+import { NormalizationRuleForm, NormalizationRuleIcon } from '../../common/NormalizationRuleForm';
 
 interface UrlNormalizationRuleDialogProps {
   isOpen: boolean;

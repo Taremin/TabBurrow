@@ -3,10 +3,10 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { useTranslation } from '../../common/i18nContext.js';
-import { applyThemeColors, type CustomTheme, type ThemeColors } from '../../customTheme.js';
-import { ColorSection } from './ColorSection.js';
-import { ThemePreview } from './ThemePreview.js';
+import { useTranslation } from '../../common/i18nContext';
+import { applyThemeColors, type CustomTheme, type ThemeColors } from '../../customTheme';
+import { ColorSection } from './ColorSection';
+import { ThemePreview } from './ThemePreview';
 
 interface ThemeEditorProps {
   theme: CustomTheme;

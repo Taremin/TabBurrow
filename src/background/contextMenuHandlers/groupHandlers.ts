@@ -1,9 +1,9 @@
-import browser from '../../browserApi.js';
+import browser from '../../browserApi';
 import type { Tabs } from 'webextension-polyfill';
-import { getAllCustomGroups, createCustomGroup } from '../../storage.js';
-import { t } from '../../i18n.js';
-import { getSettings, saveSettings, escapeRegexPattern, type AutoCloseRule } from '../../settings.js';
-import { handleSaveToCustomGroup } from './saveHandlers.js';
+import { getAllCustomGroups, createCustomGroup } from '../../storage';
+import { t } from '../../i18n';
+import { getSettings, saveSettings, escapeRegexPattern, type AutoCloseRule } from '../../settings';
+import { handleSaveToCustomGroup } from './saveHandlers';
 
 export interface UpdateCustomGroupMenusType {
   (): Promise<void>;

@@ -3,9 +3,9 @@
  * タブデータと設定のバックアップ・復元
  */
 
-import { getAllTabs, saveTabs, deleteAllTabs, type SavedTab } from './storage.js';
-import { getSettings, saveSettings, type Settings } from './settings.js';
-import { extractDomain } from './utils/url.js';
+import { getAllTabs, saveTabs, deleteAllTabs, type SavedTab } from './storage';
+import { getSettings, saveSettings, type Settings } from './settings';
+import { extractDomain } from './utils/url';
 
 // エクスポートデータのバージョン
 const EXPORT_VERSION = 1;

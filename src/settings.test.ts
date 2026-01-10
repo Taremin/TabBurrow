@@ -10,7 +10,7 @@ import {
   createAutoCloseRule,
   type AutoCloseRule,
   type RuleOrderType,
-} from './settings.js';
+} from './settings';
 
 describe('settings', () => {
   describe('getDefaultSettings', () => {

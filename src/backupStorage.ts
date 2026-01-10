@@ -13,8 +13,8 @@ import {
   type CustomGroupMeta,
   type BackupTab,
   type BackupRecord,
-} from './dbSchema.js';
-import { getAllTabs, getAllCustomGroups, saveTabs, deleteAllTabs } from './storage.js';
+} from './dbSchema';
+import { getAllTabs, getAllCustomGroups, saveTabs, deleteAllTabs } from './storage';
 
 // バックアップ関連の型を再エクスポート
 export type { BackupTab, BackupRecord };

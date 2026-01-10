@@ -9,7 +9,7 @@ import {
   clearCache,
   getCacheSize,
   hasScreenshot,
-} from './screenshotCache.js';
+} from './screenshotCache';
 
 describe('screenshotCache', () => {
   // 各テスト前にキャッシュをクリア

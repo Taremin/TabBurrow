@@ -8,7 +8,7 @@ import {
   setCurrentLocale,
   t,
   applyLocaleSetting,
-} from './i18n.js';
+} from './i18n';
 
 describe('i18n', () => {
   // 各テスト前に言語をリセット

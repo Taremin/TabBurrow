@@ -4,7 +4,7 @@
  */
 
 import { memo, ReactNode } from 'react';
-import { DialogOverlay } from './DialogOverlay.js';
+import { DialogOverlay } from './DialogOverlay';
 
 interface DialogProps {
   isOpen: boolean;

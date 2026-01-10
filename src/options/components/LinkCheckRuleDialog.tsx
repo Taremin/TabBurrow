@@ -3,9 +3,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { DialogOverlay } from '../../common/DialogOverlay.js';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { LinkCheckRule, LinkCheckAction } from '../../settings.js';
+import { DialogOverlay } from '../../common/DialogOverlay';
+import { useTranslation } from '../../common/i18nContext';
+import type { LinkCheckRule, LinkCheckAction } from '../../settings';
 
 interface LinkCheckRuleDialogProps {
   isOpen: boolean;

@@ -1,7 +1,7 @@
 import { memo, useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, SearchOptions, GroupSortType, ItemSortType } from './types';
-import { useTranslation } from '../common/i18nContext.js';
-import { useClickOutside } from '../common/hooks/useClickOutside.js';
+import { useTranslation } from '../common/i18nContext';
+import { useClickOutside } from '../common/hooks/useClickOutside';
 import { DateRangeFilterComponent } from './DateRangeFilter';
 import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus, CheckSquare, Square } from 'lucide-react';
 

@@ -6,7 +6,7 @@
 import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { GroupedVirtuoso, Virtuoso, GroupedVirtuosoHandle } from 'react-virtuoso';
 import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter } from './types';
-import type { PinnedDomainGroup } from '../settings.js';
+import type { PinnedDomainGroup } from '../settings';
 import { TabCard } from './TabCard';
 import { GroupHeader } from './GroupHeader';
 

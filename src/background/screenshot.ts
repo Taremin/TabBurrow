@@ -3,7 +3,7 @@
  * キャプチャ、リサイズ、キュー処理を担当
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 
 /**
  * スクリーンショット取得キュー

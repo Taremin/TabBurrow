@@ -4,9 +4,9 @@
  */
 
 import { memo, useCallback, useState, useMemo } from 'react';
-import { DialogOverlay } from '../../common/DialogOverlay.js';
-import { useTranslation } from '../../common/i18nContext.js';
-import { detectTextFormat } from '../../exportImport.js';
+import { DialogOverlay } from '../../common/DialogOverlay';
+import { useTranslation } from '../../common/i18nContext';
+import { detectTextFormat } from '../../exportImport';
 
 interface TextImportDialogProps {
   isOpen: boolean;

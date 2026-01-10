@@ -3,7 +3,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { SettingsSection } from './SettingsSection.js';
+import { SettingsSection } from './SettingsSection';
 
 describe('SettingsSection', () => {
   const defaultProps = {

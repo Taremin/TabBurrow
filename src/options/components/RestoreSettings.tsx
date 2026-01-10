@@ -2,8 +2,8 @@
  * TabBurrow - タブ復元設定コンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import type { RestoreMode } from '../../settings.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { RestoreMode } from '../../settings';
 
 interface RestoreSettingsProps {
   mode: RestoreMode;

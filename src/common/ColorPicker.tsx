@@ -7,8 +7,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
 import { Palette, X } from 'lucide-react';
-import { useClickOutside } from './hooks/useClickOutside.js';
-import { useTranslation } from './i18nContext.js';
+import { useClickOutside } from './hooks/useClickOutside';
+import { useTranslation } from './i18nContext';
 
 // プリセットカラー（10色 + なし）
 const PRESET_COLORS = [

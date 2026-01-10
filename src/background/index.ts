@@ -5,19 +5,19 @@
  * このファイルはメインエントリポイントとして、各モジュールを統合します。
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import type { Tabs } from 'webextension-polyfill';
-import { getSettings, matchAutoCloseRule } from '../settings.js';
-import { applyLocaleSetting } from '../i18n.js';
+import { getSettings, matchAutoCloseRule } from '../settings';
+import { applyLocaleSetting } from '../i18n';
 
 // モジュールのインポート
-import { saveAndCloseTabs, openTabManagerPage } from './tabSaver.js';
-import { initAutoClose, handleAutoCloseAlarm } from './autoClose.js';
-import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus, initContextMenuVisibility } from './contextMenu.js';
-import { setupTabEventListeners, captureActiveTabsInAllWindows } from './tabEvents.js';
-import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker.js';
-import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup.js';
-import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage.js';
+import { saveAndCloseTabs, openTabManagerPage } from './tabSaver';
+import { initAutoClose, handleAutoCloseAlarm } from './autoClose';
+import { createContextMenus, handleContextMenuClick, updateContextMenuTitles, updateCustomGroupMenus, initContextMenuVisibility } from './contextMenu';
+import { setupTabEventListeners, captureActiveTabsInAllWindows } from './tabEvents';
+import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker';
+import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup';
+import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage';
 
 /**
  * 拡張アイコンがクリックされたときの処理

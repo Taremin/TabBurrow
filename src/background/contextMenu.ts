@@ -3,29 +3,29 @@
  * 右クリックメニューの作成・更新・ハンドリングを担当
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import type { Menus, Tabs } from 'webextension-polyfill';
-import { getAllCustomGroups, createCustomGroup, findTabByUrl } from '../storage.js';
-import { t } from '../i18n.js';
-import { openTabManagerPage } from './tabSaver.js';
-import { getSettings, matchAutoCloseRule } from '../settings.js';
+import { getAllCustomGroups, createCustomGroup, findTabByUrl } from '../storage';
+import { t } from '../i18n';
+import { openTabManagerPage } from './tabSaver';
+import { getSettings, matchAutoCloseRule } from '../settings';
 
 // ハンドラのインポート
-import { isSaveableUrl } from './contextMenuHandlers/utils.js';
+import { isSaveableUrl } from './contextMenuHandlers/utils';
 export { isSaveableUrl }; // 外部への再エクスポート
 import { 
   handleSaveAllIncludingPinned, 
   handleStashThisPage, 
   handleSaveToCustomGroup 
-} from './contextMenuHandlers/saveHandlers.js';
+} from './contextMenuHandlers/saveHandlers';
 import { 
   handleCreateNewGroupAndSave, 
   handleCreateGroupFromPattern 
-} from './contextMenuHandlers/groupHandlers.js';
+} from './contextMenuHandlers/groupHandlers';
 import { 
   handleRemoveAndClose, 
   handleExcludeFromAutoClose 
-} from './contextMenuHandlers/actionHandlers.js';
+} from './contextMenuHandlers/actionHandlers';
 
 // メニューIDの定数
 // ページコンテキストメニュー用

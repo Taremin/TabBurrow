@@ -8,9 +8,9 @@ import { createPortal } from 'react-dom';
 import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
-import { useTranslation } from '../common/i18nContext.js';
-import { useClickOutside } from '../common/hooks/useClickOutside.js';
-import { ScreenshotPopup } from './ScreenshotPopup.js';
+import { useTranslation } from '../common/i18nContext';
+import { useClickOutside } from '../common/hooks/useClickOutside';
+import { ScreenshotPopup } from './ScreenshotPopup';
 import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check, X } from 'lucide-react';
 
 interface TabCardProps {

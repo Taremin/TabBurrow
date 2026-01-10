@@ -2,9 +2,9 @@
  * カラーセクションコンポーネント
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
-import { ColorInput } from './ColorInput.js';
-import type { ThemeColors } from '../../customTheme.js';
+import { useTranslation } from '../../common/i18nContext';
+import { ColorInput } from './ColorInput';
+import type { ThemeColors } from '../../customTheme';
 
 interface ColorSectionProps {
   title: string;

@@ -5,11 +5,11 @@
 
 import { useState, useCallback } from 'react';
 import { Folder } from 'lucide-react';
-import { useTranslation } from '../../common/i18nContext.js';
-import { ConfirmDialog } from '../../common/ConfirmDialog.js';
-import { DraggableList, DraggableListItem } from './DraggableList.js';
-import type { PinnedDomainGroup } from '../../settings.js';
-import { ColorPicker } from '../../common/ColorPicker.js';
+import { useTranslation } from '../../common/i18nContext';
+import { ConfirmDialog } from '../../common/ConfirmDialog';
+import { DraggableList, DraggableListItem } from './DraggableList';
+import type { PinnedDomainGroup } from '../../settings';
+import { ColorPicker } from '../../common/ColorPicker';
 
 interface PinnedDomainGroupSettingsProps {
   pinnedDomainGroups: PinnedDomainGroup[];

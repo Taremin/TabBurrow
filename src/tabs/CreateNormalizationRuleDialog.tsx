@@ -3,11 +3,11 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useTranslation } from '../common/i18nContext.js';
-import { generateRegexFromUrls, applyUrlNormalization } from '../utils/url.js';
-import { Dialog } from '../common/Dialog.js';
-import { NormalizationRuleForm, NormalizationRuleIcon } from '../common/NormalizationRuleForm.js';
-import type { UrlNormalizationRule } from '../settings.js';
+import { useTranslation } from '../common/i18nContext';
+import { generateRegexFromUrls, applyUrlNormalization } from '../utils/url';
+import { Dialog } from '../common/Dialog';
+import { NormalizationRuleForm, NormalizationRuleIcon } from '../common/NormalizationRuleForm';
+import type { UrlNormalizationRule } from '../settings';
 
 interface CreateNormalizationRuleDialogProps {
   isOpen: boolean;

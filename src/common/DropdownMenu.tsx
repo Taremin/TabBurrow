@@ -5,7 +5,7 @@
 
 import { useState, useRef, useCallback, useEffect, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { useClickOutside } from './hooks/useClickOutside.js';
+import { useClickOutside } from './hooks/useClickOutside';
 
 export type DropdownPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
 

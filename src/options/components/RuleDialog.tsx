@@ -3,9 +3,9 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { DialogOverlay } from '../../common/DialogOverlay.js';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { AutoCloseRule } from '../../settings.js';
+import { DialogOverlay } from '../../common/DialogOverlay';
+import { useTranslation } from '../../common/i18nContext';
+import type { AutoCloseRule } from '../../settings';
 
 interface RuleDialogProps {
   isOpen: boolean;

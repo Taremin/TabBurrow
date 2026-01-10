@@ -3,10 +3,10 @@
  * 定期的なタブ情報のバックアップを担当
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import type { Alarms } from 'webextension-polyfill';
-import { getSettings, getBackupIntervalMinutes } from '../settings.js';
-import { createBackup, pruneOldBackups } from '../backupStorage.js';
+import { getSettings, getBackupIntervalMinutes } from '../settings';
+import { createBackup, pruneOldBackups } from '../backupStorage';
 
 // アラーム名
 const BACKUP_ALARM_NAME = 'auto-backup';

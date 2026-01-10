@@ -3,7 +3,7 @@
  * URL操作の共通関数
  */
 
-import type { UrlNormalizationRule } from '../settings.js';
+import type { UrlNormalizationRule } from '../settings';
 
 /**
  * URLからドメイン（ホスト名）を抽出する

@@ -21,7 +21,7 @@ import {
   saveTabsForCustomGroup,
   resetDBInstance,
   type SavedTab,
-} from './storage.js';
+} from './storage';
 
 // テスト用のモックタブを作成
 function createMockTab(overrides: Partial<SavedTab> = {}): SavedTab {

@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { GroupHeader } from './GroupHeader.js';
+import { GroupHeader } from './GroupHeader';
 
 describe('GroupHeader', () => {
   const defaultProps = {

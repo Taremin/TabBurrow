@@ -3,29 +3,29 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
-import { platform } from '../platform.js';
+import { platform } from '../platform';
 import type { Tabs } from 'webextension-polyfill';
-import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings.js';
-import type { GroupFilter, SearchOptions } from './types.js';
-import { DEFAULT_SEARCH_OPTIONS } from './types.js';
-import { Header } from './Header.js';
-import { TabList } from './TabList.js';
-import { ConfirmDialog } from '../common/ConfirmDialog.js';
-import { LinkCheckDialog } from './LinkCheckDialog.js';
-import { PromptDialog } from '../common/PromptDialog.js';
-import { CreateNormalizationRuleDialog } from './CreateNormalizationRuleDialog.js';
-import { NormalizationResultDialog } from '../common/NormalizationResultDialog.js';
-import type { NormalizationApplyResult } from '../storage.js';
-import { useTranslation } from '../common/i18nContext.js';
+import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings';
+import type { GroupFilter, SearchOptions } from './types';
+import { DEFAULT_SEARCH_OPTIONS } from './types';
+import { Header } from './Header';
+import { TabList } from './TabList';
+import { ConfirmDialog } from '../common/ConfirmDialog';
+import { LinkCheckDialog } from './LinkCheckDialog';
+import { PromptDialog } from '../common/PromptDialog';
+import { CreateNormalizationRuleDialog } from './CreateNormalizationRuleDialog';
+import { NormalizationResultDialog } from '../common/NormalizationResultDialog';
+import type { NormalizationApplyResult } from '../storage';
+import { useTranslation } from '../common/i18nContext';
 
 // Custom Hooks
-import { useTabs } from './hooks/useTabs.js';
-import { useGroups } from './hooks/useGroups.js';
-import { useSearch } from './hooks/useSearch.js';
-import { useSelection } from './hooks/useSelection.js';
-import { useDialogs, type DialogState } from './hooks/useDialogs.js';
+import { useTabs } from './hooks/useTabs';
+import { useGroups } from './hooks/useGroups';
+import { useSearch } from './hooks/useSearch';
+import { useSelection } from './hooks/useSelection';
+import { useDialogs, type DialogState } from './hooks/useDialogs';
 
 
 

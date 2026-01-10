@@ -3,10 +3,10 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { AutoCloseRule, RuleOrderType } from '../../settings.js';
-import { RuleList } from './RuleList.js';
-import { RuleDialog } from './RuleDialog.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { AutoCloseRule, RuleOrderType } from '../../settings';
+import { RuleList } from './RuleList';
+import { RuleDialog } from './RuleDialog';
 
 interface AutoCloseSettingsProps {
   enabled: boolean;

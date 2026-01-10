@@ -3,8 +3,8 @@
  * 使用ライブラリとライセンス情報を表示
  */
 
-import browser from '../browserApi.js';
-import { useTranslation } from '../common/i18nContext.js';
+import browser from '../browserApi';
+import { useTranslation } from '../common/i18nContext';
 
 // ライブラリ情報の型定義
 interface LibraryInfo {

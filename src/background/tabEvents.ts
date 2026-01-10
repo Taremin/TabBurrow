@@ -3,12 +3,12 @@
  * タブの作成、削除、切替、更新イベントを担当
  */
 
-import browser from '../browserApi.js';
+import browser from '../browserApi';
 import type { Tabs } from 'webextension-polyfill';
-import { setScreenshot, deleteScreenshot } from '../screenshotCache.js';
-import { captureTab, resizeScreenshot } from './screenshot.js';
-import { tabLastActiveTime, updateTabLastActiveTime, removeTabLastActiveTime } from './autoClose.js';
-import { updateContextMenuVisibility } from './contextMenu.js';
+import { setScreenshot, deleteScreenshot } from '../screenshotCache';
+import { captureTab, resizeScreenshot } from './screenshot';
+import { tabLastActiveTime, updateTabLastActiveTime, removeTabLastActiveTime } from './autoClose';
+import { updateContextMenuVisibility } from './contextMenu';
 
 // 現在のアクティブタブを追跡（タブ切替時に前のタブをキャッシュするため）
 let currentActiveTabId: number | null = null;

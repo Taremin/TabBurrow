@@ -3,7 +3,7 @@
  * タブ管理画面のUIをモックして、テーマの見た目をプレビュー
  */
 
-import { useTranslation } from '../../common/i18nContext.js';
+import { useTranslation } from '../../common/i18nContext';
 import { ChevronDown, Search, Settings, ExternalLink, Trash2, FolderOpen, Pin } from 'lucide-react';
 
 export function ThemePreview() {

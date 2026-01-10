@@ -4,9 +4,9 @@
 
 import { useState, useCallback } from 'react';
 import { Tag, Pencil, Trash2, Plus } from 'lucide-react';
-import { useTranslation } from '../../common/i18nContext.js';
-import { ConfirmDialog } from '../../common/ConfirmDialog.js';
-import { PromptDialog } from '../../common/PromptDialog.js';
+import { useTranslation } from '../../common/i18nContext';
+import { ConfirmDialog } from '../../common/ConfirmDialog';
+import { PromptDialog } from '../../common/PromptDialog';
 
 interface DomainGroupSettingsProps {
   aliases: Record<string, string>;

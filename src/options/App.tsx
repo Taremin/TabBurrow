@@ -3,27 +3,27 @@
  */
 
 import { useState, useCallback } from 'react';
-import browser from '../browserApi.js';
-import { useTranslation } from '../common/i18nContext.js';
-import { useSettings } from './hooks/useSettings.js';
-import { SettingsSection } from './components/SettingsSection.js';
-import { LanguageSettings } from './components/LanguageSettings.js';
-import { AppearanceSettings } from './components/AppearanceSettings.js';
-import { ViewModeSettings } from './components/ViewModeSettings.js';
-import { SortSettings } from './components/SortSettings.js';
-import { AutoCloseSettings } from './components/AutoCloseSettings.js';
-import { UrlNormalizationSettings } from './components/UrlNormalizationSettings.js';
-import { IconClickSettings } from './components/IconClickSettings.js';
-import { RestoreSettings } from './components/RestoreSettings.js';
-import { LinkCheckSettings } from './components/LinkCheckSettings.js';
-import { BackupSettings } from './components/BackupSettings.js';
-import { ScreenshotSettings } from './components/ScreenshotSettings.js';
-import { DataManagement } from './components/DataManagement.js';
-import { CustomGroupSettings } from './components/CustomGroupSettings.js';
-import { DomainGroupSettings } from './components/DomainGroupSettings.js';
-import { PinnedDomainGroupSettings } from './components/PinnedDomainGroupSettings.js';
-import { Dialog } from '../common/Dialog.js';
-import { Layout } from '../common/Layout.js';
+import browser from '../browserApi';
+import { useTranslation } from '../common/i18nContext';
+import { useSettings } from './hooks/useSettings';
+import { SettingsSection } from './components/SettingsSection';
+import { LanguageSettings } from './components/LanguageSettings';
+import { AppearanceSettings } from './components/AppearanceSettings';
+import { ViewModeSettings } from './components/ViewModeSettings';
+import { SortSettings } from './components/SortSettings';
+import { AutoCloseSettings } from './components/AutoCloseSettings';
+import { UrlNormalizationSettings } from './components/UrlNormalizationSettings';
+import { IconClickSettings } from './components/IconClickSettings';
+import { RestoreSettings } from './components/RestoreSettings';
+import { LinkCheckSettings } from './components/LinkCheckSettings';
+import { BackupSettings } from './components/BackupSettings';
+import { ScreenshotSettings } from './components/ScreenshotSettings';
+import { DataManagement } from './components/DataManagement';
+import { CustomGroupSettings } from './components/CustomGroupSettings';
+import { DomainGroupSettings } from './components/DomainGroupSettings';
+import { PinnedDomainGroupSettings } from './components/PinnedDomainGroupSettings';
+import { Dialog } from '../common/Dialog';
+import { Layout } from '../common/Layout';
 import { AlertTriangle, Folder, Tag, Pin } from 'lucide-react';
 
 export function App() {

@@ -13,9 +13,9 @@ import {
   type SavedTab,
   type CustomGroupMeta,
   type GroupType,
-} from './dbSchema.js';
-import browser from './browserApi.js';
-import type { UrlNormalizationRule } from './settings.js';
+} from './dbSchema';
+import browser from './browserApi';
+import type { UrlNormalizationRule } from './settings';
 
 // 型を再エクスポート（後方互換性のため）
 export type { SavedTab, CustomGroupMeta, GroupType };

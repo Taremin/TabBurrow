@@ -5,7 +5,7 @@
  * Firefox Android等の制限環境でのフォールバック処理に使用
  */
 
-import browser from './browserApi.js';
+import browser from './browserApi';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const browserAny = browser as any;

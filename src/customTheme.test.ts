@@ -13,7 +13,7 @@ import {
   LIGHT_THEME_DEFAULTS,
   DARK_THEME_DEFAULTS,
   type CustomTheme,
-} from './customTheme.js';
+} from './customTheme';
 
 // browserApiをモック
 vi.mock('./browserApi.js', () => ({

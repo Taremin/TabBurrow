@@ -1,6 +1,6 @@
 import { memo, ReactNode } from 'react';
 import { Activity, ArrowDown, HelpCircle } from 'lucide-react';
-import { useTranslation } from './i18nContext.js';
+import { useTranslation } from './i18nContext';
 
 /** プレビュー結果の型 */
 export interface NormalizationPreviewResult {

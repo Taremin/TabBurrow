@@ -3,8 +3,8 @@
  */
 
 import { memo } from 'react';
-import { DialogOverlay } from './DialogOverlay.js';
-import { useTranslation } from './i18nContext.js';
+import { DialogOverlay } from './DialogOverlay';
+import { useTranslation } from './i18nContext';
 import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {

@@ -3,9 +3,9 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useTranslation } from '../../common/i18nContext.js';
-import type { LinkCheckRule, LinkCheckAction } from '../../settings.js';
-import { LinkCheckRuleDialog } from './LinkCheckRuleDialog.js';
+import { useTranslation } from '../../common/i18nContext';
+import type { LinkCheckRule, LinkCheckAction } from '../../settings';
+import { LinkCheckRuleDialog } from './LinkCheckRuleDialog';
 import { Pencil, Trash2 } from 'lucide-react';
 
 interface LinkCheckSettingsProps {

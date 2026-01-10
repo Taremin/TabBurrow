@@ -4,9 +4,9 @@
 
 import { useState, useEffect } from 'react';
 import { Palette } from 'lucide-react';
-import { useTranslation } from '../../common/i18nContext.js';
-import { isCustomTheme, createCustomThemeSetting, type ThemeSetting } from '../../theme.js';
-import { getCustomThemes, type CustomTheme } from '../../customTheme.js';
+import { useTranslation } from '../../common/i18nContext';
+import { isCustomTheme, createCustomThemeSetting, type ThemeSetting } from '../../theme';
+import { getCustomThemes, type CustomTheme } from '../../customTheme';
 
 interface AppearanceSettingsProps {
   value: ThemeSetting;

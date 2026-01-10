@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ConfirmDialog } from './ConfirmDialog.js';
+import { ConfirmDialog } from './ConfirmDialog';
 
 describe('ConfirmDialog', () => {
   const defaultProps = {
