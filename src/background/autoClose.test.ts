@@ -9,7 +9,7 @@ import {
   getCachedSettings,
   setCachedSettings,
 } from './autoClose';
-import type { Settings } from '../settings';
+import { getDefaultSettings, type Settings } from '../settings';
 
 describe('autoClose', () => {
   describe('AUTO_CLOSE_ALARM_NAME', () => {
@@ -60,35 +60,11 @@ describe('autoClose', () => {
 
     it('設定をキャッシュして取得できる', () => {
       const mockSettings: Settings = {
+        ...getDefaultSettings(),
         autoCloseEnabled: true,
         autoCloseSeconds: 300,
-        autoCloseRules: [],
-        autoCloseRuleOrder: 'asc',
         locale: 'ja',
         theme: 'dark',
-        groupSort: 'count-desc',
-        itemSort: 'saved-desc',
-        restoreMode: 'lazy',
-        restoreIntervalMs: 100,
-        linkCheckRules: [],
-        linkCheckTimeoutMs: 10000,
-        linkCheckConcurrency: 5,
-        linkCheckDomainConcurrency: 1,
-        linkCheckDomainDelayMs: 100,
-        linkCheckUseGetFallback: true,
-        iconClickApplyRules: true,
-        iconClickPinnedAction: 'skip',
-        autoBackupEnabled: false,
-        autoBackupIntervalPreset: '24h',
-        autoBackupIntervalMinutes: 1440,
-        autoBackupKeepCount: 5,
-        defaultViewMode: 'grouped',
-        defaultDisplayDensity: 'normal',
-        showGroupedTabsInDomainGroups: false,
-        domainGroupAliases: {},
-        pinnedDomainGroups: [],
-        maximizeWidth: false,
-        pinTabManager: true,
       };
 
       setCachedSettings(mockSettings);
@@ -101,67 +77,22 @@ describe('autoClose', () => {
 
     it('キャッシュを上書きできる', () => {
       const settings1: Settings = {
+        ...getDefaultSettings(),
         autoCloseEnabled: false,
         autoCloseSeconds: 100,
-        autoCloseRules: [],
-        autoCloseRuleOrder: 'asc',
         locale: 'en',
         theme: 'light',
-        groupSort: 'count-desc',
-        itemSort: 'saved-desc',
         restoreMode: 'normal',
-        restoreIntervalMs: 100,
-        linkCheckRules: [],
-        linkCheckTimeoutMs: 10000,
-        linkCheckConcurrency: 5,
-        linkCheckDomainConcurrency: 1,
-        linkCheckDomainDelayMs: 100,
-        linkCheckUseGetFallback: true,
-        iconClickApplyRules: true,
-        iconClickPinnedAction: 'skip',
-        autoBackupEnabled: false,
-        autoBackupIntervalPreset: '24h',
-        autoBackupIntervalMinutes: 1440,
-        autoBackupKeepCount: 5,
-        defaultViewMode: 'grouped',
-        defaultDisplayDensity: 'normal',
-        showGroupedTabsInDomainGroups: false,
-        domainGroupAliases: {},
-        pinnedDomainGroups: [],
-        maximizeWidth: false,
-        pinTabManager: true,
       };
 
       const settings2: Settings = {
+        ...getDefaultSettings(),
         autoCloseEnabled: true,
         autoCloseSeconds: 600,
-        autoCloseRules: [],
         autoCloseRuleOrder: 'desc',
-        locale: 'ja',
-        theme: 'dark',
         groupSort: 'domain-asc',
         itemSort: 'title-asc',
-        restoreMode: 'lazy',
         restoreIntervalMs: 200,
-        linkCheckRules: [],
-        linkCheckTimeoutMs: 10000,
-        linkCheckConcurrency: 5,
-        linkCheckDomainConcurrency: 1,
-        linkCheckDomainDelayMs: 100,
-        linkCheckUseGetFallback: true,
-        iconClickApplyRules: true,
-        iconClickPinnedAction: 'skip',
-        autoBackupEnabled: false,
-        autoBackupIntervalPreset: '24h',
-        autoBackupIntervalMinutes: 1440,
-        autoBackupKeepCount: 5,
-        defaultViewMode: 'grouped',
-        defaultDisplayDensity: 'normal',
-        showGroupedTabsInDomainGroups: false,
-        domainGroupAliases: {},
-        pinnedDomainGroups: [],
-        maximizeWidth: false,
-        pinTabManager: true,
       };
 
       setCachedSettings(settings1);

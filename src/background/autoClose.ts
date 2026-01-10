@@ -7,8 +7,8 @@ import browser from '../browserApi';
 import type { Alarms, Tabs } from 'webextension-polyfill';
 import { getSettings, matchAutoCloseRule, type Settings } from '../settings';
 import { saveAndCloseTabs, getTabScreenshot, createSavedTab } from './tabSaver';
-import { extractDomain, applyUrlNormalization } from '../utils/url';
-import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../storage';
+import { applyUrlNormalization } from '../utils/url';
+import { saveTabs, saveTabsForCustomGroup } from '../storage';
 
 // 自動収納のアラーム名
 export const AUTO_CLOSE_ALARM_NAME = 'auto-close-tabs';
@@ -138,7 +138,6 @@ export function removeTabLastActiveTime(tabId: number): void {
  */
 export async function initAutoClose(): Promise<void> {
   const settings = await getSettings();
-  const oldSettings = cachedSettings;
   cachedSettings = settings;
   
   // storage.sessionから状態を復元

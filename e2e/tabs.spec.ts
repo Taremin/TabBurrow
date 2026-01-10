@@ -499,7 +499,7 @@ test.describe('一括選択機能', () => {
     await waitForPageLoad(page);
     
     // 選択モードボタンをクリック
-    const selectionToggle = page.locator('[data-testid=\"selection-mode-toggle\"]');
+    const selectionToggle = page.locator('[data-testid="selection-mode-toggle"]');
     await expect(selectionToggle).toBeVisible();
     await selectionToggle.click();
     await page.waitForTimeout(100);
@@ -539,7 +539,7 @@ test.describe('一括選択機能', () => {
     await waitForPageLoad(page);
     
     // 選択モードに切り替え
-    const selectionToggle = page.locator('[data-testid=\"selection-mode-toggle\"]');
+    const selectionToggle = page.locator('[data-testid="selection-mode-toggle"]');
     await selectionToggle.click();
     await page.waitForTimeout(100);
     
@@ -598,7 +598,7 @@ test.describe('一括選択機能', () => {
     await expect(tabCards).toHaveCount(3);
     
     // 選択モードに切り替え
-    const selectionToggle = page.locator('[data-testid=\"selection-mode-toggle\"]');
+    const selectionToggle = page.locator('[data-testid="selection-mode-toggle"]');
     await selectionToggle.click();
     await page.waitForTimeout(100);
     
@@ -917,10 +917,7 @@ test.describe('大規模データパフォーマンステスト', () => {
     // スクロールコンテナを取得
     const tabGroups = page.locator('.tab-groups');
     await expect(tabGroups).toBeVisible();
-    
-    // 初期表示のタブ数を記録
-    const initialCards = await page.locator(tabsPageSelectors.tabCard).count();
-    
+
     // スクロールダウン
     const scrollStart = performance.now();
     await tabGroups.evaluate(el => {

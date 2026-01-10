@@ -9,6 +9,7 @@ import {
   getSettings,
   saveSettings,
   notifySettingsChanged,
+  getDefaultSettings,
   type Settings,
 } from '../../settings';
 import { applyLocaleSetting } from '../../i18n';
@@ -26,39 +27,7 @@ export interface UseSettingsReturn {
   reload: () => Promise<void>;
 }
 
-const defaultSettings: Settings = {
-  autoCloseEnabled: false,
-  autoCloseSeconds: 300,
-  autoCloseRules: [],
-  autoCloseRuleOrder: 'asc',
-  locale: 'auto',
-  theme: 'system',
-  groupSort: 'count-desc',
-  itemSort: 'saved-desc',
-  restoreMode: 'lazy',
-  restoreIntervalMs: 100,
-  linkCheckRules: [],
-  linkCheckTimeoutMs: 10000,
-  linkCheckConcurrency: 5,
-  linkCheckDomainConcurrency: 1,
-  linkCheckDomainDelayMs: 100,
-  linkCheckUseGetFallback: true,
-  iconClickApplyRules: true,
-  iconClickPinnedAction: 'skip',
-  autoBackupEnabled: false,
-  autoBackupIntervalPreset: '24h',
-  autoBackupIntervalMinutes: 1440,
-  autoBackupKeepCount: 5,
-  defaultViewMode: 'grouped',
-  defaultDisplayDensity: 'normal',
-  showGroupedTabsInDomainGroups: false,
-  domainGroupAliases: {},
-  pinnedDomainGroups: [],
-  maximizeWidth: false,
-  pinTabManager: true,
-  screenshotEnabled: true,
-  screenshotUpdateIntervalMinutes: 5,
-};
+const defaultSettings = getDefaultSettings();
 
 /**
  * 設定管理フック

@@ -23,7 +23,6 @@ export function App() {
   const { t, locale } = useTranslation();
   const [themes, setThemes] = useState<CustomTheme[]>([]);
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
   
@@ -47,7 +46,7 @@ export function App() {
         setSelectedThemeId(loaded[0].id);
       }
     } finally {
-      setIsLoading(false);
+      // ロード完了
     }
   }, [selectedThemeId]);
 

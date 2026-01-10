@@ -420,10 +420,6 @@ export function TabList({
     );
   }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onRenameTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, handleNavigateToGroup]);
 
-  if (tabs.length === 0) {
-    return null;
-  }
-
   // フラット表示用のソート済みタブリスト
   const sortedFlatTabs = useMemo(() => {
     return sortTabsInGroup([...tabs], itemSort);
@@ -451,6 +447,10 @@ export function TabList({
       />
     );
   }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onRenameTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
+
+  if (tabs.length === 0) {
+    return null;
+  }
 
   return (
     <div className="tab-groups">

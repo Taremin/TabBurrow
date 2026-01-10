@@ -225,7 +225,6 @@ export async function checkLinks(
       }
 
       // 新しいリクエストを開始できる場合
-      let startedAny = false;
       for (const tabIndex of pendingTabIndices) {
         if (pendingPromises.size >= settings.linkCheckConcurrency) {
           break;
@@ -243,7 +242,6 @@ export async function checkLinks(
         // リクエストを開始
         domainQueue.recordStart(domain);
         pendingTabIndices.delete(tabIndex);
-        startedAny = true;
 
         const promise = (async () => {
           try {
@@ -441,7 +439,7 @@ async function checkSingleUrl(
             redirect: 'follow',
           });
           return { statusCode: getResponse.status };
-        } catch (getFallbackError) {
+        } catch (_getFallbackError) {
           // GETも失敗した場合は元のエラーを返す
         }
       }

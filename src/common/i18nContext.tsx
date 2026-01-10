@@ -8,9 +8,7 @@ import browser from '../browserApi';
 import { 
   t as translate, 
   applyLocaleSetting, 
-  getCurrentLocale, 
-  type SupportedLocale, 
-  type LocaleSetting 
+  type SupportedLocale
 } from '../i18n';
 import { getSettings } from '../settings';
 

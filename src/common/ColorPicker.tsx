@@ -46,8 +46,6 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
   const updatePosition = useCallback(() => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const scrollY = window.scrollY;
-      const scrollX = window.scrollX;
       
       // ボタンの直下に表示（body基準の絶対座標ではなくfixedで表示するため、スクロールを考慮しない）
       // ただしOptions画面などはbodyがscrollableなので、getBoundingClientRectが正しい

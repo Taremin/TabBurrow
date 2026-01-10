@@ -9,7 +9,6 @@ import {
   deleteCustomGroup,
   renameCustomGroup,
 } from '../../storage';
-import { useTabs } from './useTabs'; // 型定義などのため（循環参照に注意）
 
 // useTabsから必要な関数を受け取る形にするか、あるいは独自のデータフッチングを持つか。
 // ここでは状態を持たず、操作関数のみを提供する形がシンプルだが、

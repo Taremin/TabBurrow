@@ -123,7 +123,7 @@ describe('generateRegexFromUrls', () => {
     expect(result.replacement).toBe('https://example.com/user/$1/profile');
   });
 
-  it('URLが1つの場合は数字を \d+ にした提案を行う', () => {
+  it('URLが1つの場合は数字を \\d+ にした提案を行う', () => {
     const result = generateRegexFromUrls(['https://example.com/123']);
     expect(result.pattern).toBe('^https://example\\.com/\\d+$');
   });

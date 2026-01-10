@@ -2,7 +2,7 @@
  * storage.ts のユニットテスト
  * fake-indexeddbを使用してIndexedDB操作をテスト
  */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import 'fake-indexeddb/auto';
 import {
   saveTabs,

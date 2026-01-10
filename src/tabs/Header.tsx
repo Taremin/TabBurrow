@@ -7,7 +7,6 @@ import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activi
 
 interface HeaderProps {
   tabCount: number;
-  storageInfo: string;
   searchQuery: string;
   dateRange: DateRangeFilter;
   viewMode: ViewMode;
@@ -51,7 +50,6 @@ interface HeaderProps {
 
 export const Header = memo(function Header({
   tabCount,
-  storageInfo,
   searchQuery,
   dateRange,
   viewMode,

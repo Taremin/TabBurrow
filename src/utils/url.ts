@@ -87,9 +87,6 @@ export function generateRegexFromUrls(urls: string[]): { pattern: string; replac
   const escapedPrefix = escapeRegExp(commonPrefix);
   const escapedSuffix = escapeRegExp(commonSuffix);
   
-  // 置換後の提案: 可変部分を除去した形式
-  const replacement = commonPrefix + commonSuffix;
-  
   // 可変部分のパターン（とりあえず何でもマッチする形式）
   const pattern = `^${escapedPrefix}([^/]+)${escapedSuffix}$`;
   
@@ -109,7 +106,7 @@ export function generateRegexFromUrls(urls: string[]): { pattern: string; replac
     };
   }
 
-  let finalReplacement = commonPrefix + '$1' + commonSuffix;
+  const finalReplacement = commonPrefix + '$1' + commonSuffix;
   return {
     pattern,
     replacement: finalReplacement

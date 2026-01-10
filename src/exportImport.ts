@@ -28,6 +28,7 @@ export interface TabExportData {
     screenshot: string; // Base64
     lastAccessed: number;
     savedAt: number;
+    canonicalUrl?: string;
   }>;
 }
 
@@ -95,6 +96,7 @@ export async function exportTabs(): Promise<TabExportData> {
       screenshot: tab.screenshot ? await blobToBase64(tab.screenshot) : '',
       lastAccessed: tab.lastAccessed,
       savedAt: tab.savedAt,
+      canonicalUrl: tab.canonicalUrl,
     }))
   );
 
@@ -150,6 +152,7 @@ export async function importTabs(
       screenshot: base64ToBlob(tab.screenshot),
       lastAccessed: tab.lastAccessed,
       savedAt: tab.savedAt,
+      canonicalUrl: tab.canonicalUrl || tab.url,
     });
   }
 
@@ -224,7 +227,7 @@ export function selectAndReadJsonFile<T>(): Promise<T> {
         const text = await file.text();
         const data = JSON.parse(text) as T;
         resolve(data);
-      } catch (error) {
+      } catch (_error) {
         reject(new Error('JSONファイルの解析に失敗しました'));
       }
     };
@@ -441,6 +444,7 @@ export async function importTabsFromText(
       screenshot: new Blob(),
       lastAccessed: now,
       savedAt: now,
+      canonicalUrl: item.url,
     });
   }
 

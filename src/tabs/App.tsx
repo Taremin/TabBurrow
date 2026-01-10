@@ -8,8 +8,7 @@ import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import { platform } from '../platform';
 import type { Tabs } from 'webextension-polyfill';
 import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings';
-import type { GroupFilter, SearchOptions } from './types';
-import { DEFAULT_SEARCH_OPTIONS } from './types';
+import type { GroupFilter } from './types';
 import { Header } from './Header';
 import { TabList } from './TabList';
 import { ConfirmDialog } from '../common/ConfirmDialog';
@@ -25,7 +24,7 @@ import { useTabs } from './hooks/useTabs';
 import { useGroups } from './hooks/useGroups';
 import { useSearch } from './hooks/useSearch';
 import { useSelection } from './hooks/useSelection';
-import { useDialogs, type DialogState } from './hooks/useDialogs';
+import { useDialogs } from './hooks/useDialogs';
 
 
 
@@ -79,7 +78,6 @@ export function App() {
   const {
     searchQuery,
     searchOptions,
-    setSearchOptions, // handleSearch (filters logic updated internally)
     onSearchOptionsChange,
     dateRange,
     setDateRange,
@@ -103,19 +101,15 @@ export function App() {
     confirmDialog,
     showConfirmDialog,
     hideConfirmDialog,
-    setConfirmDialog,
     renameDialog,
     showRenameDialog,
     hideRenameDialog,
-    setRenameDialog,
     createGroupDialog,
     showCreateGroupDialog,
     hideCreateGroupDialog,
-    setCreateGroupDialog,
     tabRenameDialog,
     showTabRenameDialog,
     hideTabRenameDialog,
-    setTabRenameDialog,
   } = useDialogs();
 
   // Settings State
@@ -567,7 +561,6 @@ export function App() {
     <div className={`container ${maximizeWidth ? 'maximize-width' : ''}`}>
       <Header
         tabCount={tabCount}
-        storageInfo={storageInfo}
         searchQuery={searchQuery}
         onSearchChange={handleSearch}
         searchOptions={searchOptions}

@@ -2,7 +2,7 @@
  * TabBurrow - カスタムグループ設定コンポーネント
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Folder, FolderPlus, Pencil, Trash2, GripVertical } from 'lucide-react';
 import { useTranslation } from '../../common/i18nContext';
 import { ConfirmDialog } from '../../common/ConfirmDialog';
@@ -16,7 +16,7 @@ import {
   updateCustomGroupOrder,
   updateCustomGroupColor,
 } from '../../storage';
-import type { CustomGroupMeta, SavedTab } from '../../storage';
+import type { CustomGroupMeta } from '../../storage';
 import { ColorPicker } from '../../common/ColorPicker';
 
 interface CustomGroupSettingsProps {

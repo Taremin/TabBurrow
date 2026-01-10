@@ -107,7 +107,6 @@ test.describe('設定画面', () => {
     
     // 現在の言語設定を確認
     const jaOption = page.locator('input[name="locale"][value="ja"]');
-    const enOption = page.locator('input[name="locale"][value="en"]');
     const jaLabel = page.locator('label:has(input[name="locale"][value="ja"])');
     const enLabel = page.locator('label:has(input[name="locale"][value="en"])');
     
@@ -144,9 +143,7 @@ test.describe('設定画面', () => {
     await waitForPageLoad(page);
     
     // 言語設定を変更（未保存状態を作る）
-    // 言語設定を変更（未保存状態を作る）
     const currentJa = page.locator('input[name="locale"][value="ja"]');
-    const currentEn = page.locator('input[name="locale"][value="en"]');
     const jaLabel = page.locator('label:has(input[name="locale"][value="ja"])');
     const enLabel = page.locator('label:has(input[name="locale"][value="en"])');
 
@@ -1117,7 +1114,7 @@ test.describe('設定画面 - カスタムグループ管理', () => {
  * Helper function to verify dialog overlay CSS covers fullscreen
  * Checks that overlay has position: fixed and inset: 0 (or equivalent)
  */
-async function verifyOverlayFullscreen(page: import('@playwright/test').Page, overlay: import('@playwright/test').Locator) {
+async function verifyOverlayFullscreen(_page: import('@playwright/test').Page, overlay: import('@playwright/test').Locator) {
   // Get computed styles of the overlay
   const styles = await overlay.evaluate((el) => {
     const computed = window.getComputedStyle(el);

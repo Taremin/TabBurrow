@@ -85,7 +85,7 @@ test.describe('拡張機能の基本動作', () => {
 });
 
 test.describe('タブの保存と復元', () => {
-  test('新しいタブを開いて閉じる操作ができる', async ({ context, extensionId }) => {
+  test('新しいタブを開いて閉じる操作ができる', async ({ context }) => {
     // 新しいタブを開く
     const page = await context.newPage();
     await page.goto('https://example.com');

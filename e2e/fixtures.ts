@@ -21,6 +21,7 @@ export const test = base.extend<{
   extensionId: string;
 }>({
   // 拡張機能をロードしたコンテキストを作成
+  // eslint-disable-next-line no-empty-pattern
   context: async ({}, use) => {
     const context = await chromium.launchPersistentContext('', {
       headless: false,

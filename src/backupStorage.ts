@@ -6,7 +6,6 @@
 import {
   DB_NAME,
   DB_VERSION,
-  TABS_STORE_NAME,
   CUSTOM_GROUPS_STORE_NAME,
   BACKUPS_STORE_NAME,
   type SavedTab,
@@ -88,6 +87,7 @@ export async function createBackup(): Promise<BackupRecord> {
     screenshot: tab.screenshot,
     lastAccessed: tab.lastAccessed,
     savedAt: tab.savedAt,
+    canonicalUrl: tab.canonicalUrl,
   }));
   
   const now = Date.now();
@@ -199,6 +199,7 @@ export async function restoreFromBackup(
     screenshot: tab.screenshot,
     lastAccessed: tab.lastAccessed,
     savedAt: tab.savedAt,
+    canonicalUrl: tab.canonicalUrl,
   }));
   
   if (mode === 'overwrite') {

@@ -162,7 +162,6 @@ test.describe('テーマエディタ', () => {
     await expect(colorValueInput).toBeVisible();
     
     // 色を変更
-    const originalValue = await colorValueInput.inputValue();
     await colorValueInput.fill('#ff0000');
     
     // プレビュー領域が表示される

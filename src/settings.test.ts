@@ -9,7 +9,6 @@ import {
   escapeRegexPattern,
   createAutoCloseRule,
   type AutoCloseRule,
-  type RuleOrderType,
 } from './settings';
 
 describe('settings', () => {

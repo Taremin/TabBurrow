@@ -1,7 +1,7 @@
 import browser from '../../browserApi';
 import type { Tabs } from 'webextension-polyfill';
-import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../../storage';
-import { extractDomain, applyUrlNormalization } from '../../utils/url';
+import { saveTabs, saveTabsForCustomGroup } from '../../storage';
+import { applyUrlNormalization } from '../../utils/url';
 import { getTabScreenshot, saveAndCloseTabs, createSavedTab } from '../tabSaver';
 import { getSettings } from '../../settings';
 import { isSaveableUrl } from './utils';

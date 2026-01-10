@@ -125,7 +125,8 @@ export function DomainGroupSettings({ aliases, onAliasesChange }: DomainGroupSet
   const handleDeleteConfirm = useCallback(() => {
     if (!selectedDomain) return;
 
-    const { [selectedDomain]: _, ...rest } = aliases;
+    const rest = { ...aliases };
+    delete rest[selectedDomain];
     onAliasesChange(rest);
     setDeleteDialogOpen(false);
     setSelectedDomain(null);

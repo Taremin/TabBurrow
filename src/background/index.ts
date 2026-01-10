@@ -277,6 +277,8 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
         const backup = await getBackup(message.backupId!);
         return { success: true, jsonData, createdAt: backup?.createdAt };
       })();
+    default:
+      return false;
   }
 });
 

@@ -12,6 +12,8 @@
     "watch:firefox": "node esbuild.config.mjs --watch --firefox",
     "build:firefox-android": "node esbuild.config.mjs --firefox-android",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint src e2e",
+    "check": "npm run typecheck && npm run lint",
     "version:sync": "npx tsx scripts/sync-version.ts",
     "version": "npm run version:sync && git add src/manifest.*.json",
     "i18n:check": "npx tsx scripts/check-i18n.ts",
@@ -34,6 +36,7 @@
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -44,11 +47,16 @@
     "@types/react-dom": "^18.3.0",
     "@types/webextension-polyfill": "^0.12.4",
     "esbuild": "^0.24.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "fake-indexeddb": "^6.2.5",
+    "globals": "^17.0.0",
     "happy-dom": "^20.0.11",
     "rimraf": "^6.1.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.52.0",
     "vitest": "^2.1.8"
   },
   "keywords": [

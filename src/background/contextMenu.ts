@@ -5,7 +5,7 @@
 
 import browser from '../browserApi';
 import type { Menus, Tabs } from 'webextension-polyfill';
-import { getAllCustomGroups, createCustomGroup, findTabByUrl } from '../storage';
+import { getAllCustomGroups, findTabByUrl } from '../storage';
 import { t } from '../i18n';
 import { openTabManagerPage } from './tabSaver';
 import { getSettings, matchAutoCloseRule } from '../settings';

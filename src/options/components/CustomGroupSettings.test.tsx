@@ -49,9 +49,9 @@ describe('CustomGroupSettings', () => {
   ];
 
   const mockTabs: SavedTab[] = [
-    { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', group: '仕事用', groupType: 'custom', favIconUrl: '', screenshot: new Blob(), lastAccessed: 0, savedAt: 0 },
-    { id: '2', url: 'https://test.com', title: 'Test', domain: 'test.com', group: '仕事用', groupType: 'custom', favIconUrl: '', screenshot: new Blob(), lastAccessed: 0, savedAt: 0 },
-    { id: '3', url: 'https://ref.com', title: 'Ref', domain: 'ref.com', group: '参考資料', groupType: 'custom', favIconUrl: '', screenshot: new Blob(), lastAccessed: 0, savedAt: 0 },
+    { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', group: '仕事用', groupType: 'custom', favIconUrl: '', screenshot: new Blob(), lastAccessed: 0, savedAt: 0, canonicalUrl: 'https://example.com' },
+    { id: '2', url: 'https://test.com', title: 'Test', domain: 'test.com', group: '仕事用', groupType: 'custom', favIconUrl: '', screenshot: new Blob(), lastAccessed: 0, savedAt: 0, canonicalUrl: 'https://test.com' },
+    { id: '3', url: 'https://ref.com', title: 'Ref', domain: 'ref.com', group: '参考資料', groupType: 'custom', favIconUrl: '', screenshot: new Blob(), lastAccessed: 0, savedAt: 0, canonicalUrl: 'https://ref.com' },
   ];
 
   beforeEach(() => {

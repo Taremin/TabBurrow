@@ -79,7 +79,6 @@ export const TabCard = memo(function TabCard({
     rootMargin: '200px', // 200px手前から読み込み開始
   });
 
-  const isInCustomGroup = tab.groupType === 'custom';
 
   // 表示するグループタグを計算（現在表示中のグループ以外）
   const otherGroups = (tab.customGroups || []).filter(g => g !== currentGroupName);
@@ -177,11 +176,6 @@ export const TabCard = memo(function TabCard({
     setShowGroupMenu(false);
   }, [onMoveToGroup, tab.id]);
 
-  // グループから削除
-  const handleRemoveFromGroup = useCallback(() => {
-    onRemoveFromGroup(tab.id, currentGroupName);
-    setShowGroupMenu(false);
-  }, [onRemoveFromGroup, tab.id, currentGroupName]);
 
   // スクリーンショットホバー
   const [compactPopupUrl, setCompactPopupUrl] = useState<string | null>(null);

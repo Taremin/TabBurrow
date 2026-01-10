@@ -86,8 +86,6 @@ test.describe('URL正規化機能', () => {
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     
-    const normalizationSection = page.locator('[data-testid="url-normalization-section"]');
-    
     // ルール追加ボタンをクリック
     const addBtn = page.getByTestId('add-normalization-rule-button');
     await addBtn.click();

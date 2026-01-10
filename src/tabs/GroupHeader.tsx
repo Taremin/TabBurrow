@@ -81,14 +81,14 @@ export const GroupHeader = memo(function GroupHeader({
   }, [filterPattern]);
   
   // 選択状態の計算
-  const { isAllSelected, isPartiallySelected, selectedCountInGroup } = useMemo(() => {
+  const { isAllSelected, isPartiallySelected } = useMemo(() => {
     if (!isSelectionMode || groupTabIds.length === 0) {
-      return { isAllSelected: false, isPartiallySelected: false, selectedCountInGroup: 0 };
+      return { isAllSelected: false, isPartiallySelected: false };
     }
     const selectedCountInGroup = groupTabIds.filter(id => selectedTabIds.has(id)).length;
     const isAllSelected = selectedCountInGroup === groupTabIds.length;
     const isPartiallySelected = selectedCountInGroup > 0 && selectedCountInGroup < groupTabIds.length;
-    return { isAllSelected, isPartiallySelected, selectedCountInGroup };
+    return { isAllSelected, isPartiallySelected };
   }, [isSelectionMode, groupTabIds, selectedTabIds]);
   
   // indeterminate状態を設定
@@ -164,7 +164,7 @@ export const GroupHeader = memo(function GroupHeader({
   }, [name, onTogglePin]);
 
   // 折りたたみトグルのハンドラ
-  const handleToggleCollapse = useCallback((e?: React.MouseEvent | React.KeyboardEvent) => {
+  const handleToggleCollapse = useCallback(() => {
     // 伝播を止める必要はない（これが最上位のハンドラになるため）
     if (onToggleCollapse) {
       onToggleCollapse(name);
@@ -182,7 +182,7 @@ export const GroupHeader = memo(function GroupHeader({
       onClick={handleToggleCollapse}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(e); }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleToggleCollapse(); }}
       title={isCollapsed ? t('tabManager.group.expandButton') : t('tabManager.group.collapseButton')}
       data-testid="group-header"
     >

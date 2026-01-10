@@ -3,7 +3,7 @@
  * 設定画面でピン留めドメイングループの順序入れ替えと解除を管理
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Folder } from 'lucide-react';
 import { useTranslation } from '../../common/i18nContext';
 import { ConfirmDialog } from '../../common/ConfirmDialog';
@@ -41,7 +41,7 @@ export function PinnedDomainGroupSettings({
   const openUnpinDialog = useCallback((domain: string) => {
     setSelectedDomain(domain);
     setUnpinDialogOpen(true);
-  }, []);
+  }, [setSelectedDomain, setUnpinDialogOpen]);
   
   // ピン留め解除実行
   const handleUnpin = useCallback(() => {
@@ -50,10 +50,10 @@ export function PinnedDomainGroupSettings({
     }
     setUnpinDialogOpen(false);
     setSelectedDomain(null);
-  }, [selectedDomain, onUnpin]);
+  }, [selectedDomain, onUnpin, setUnpinDialogOpen, setSelectedDomain]);
   
   // DraggableList用のアイテムリスト作成
-  const items: DraggableListItem[] = pinnedDomainGroups.map(pinned => ({
+  const items: DraggableListItem[] = useMemo(() => pinnedDomainGroups.map(pinned => ({
     id: pinned.domain,
     name: domainGroupAliases[pinned.domain] || pinned.domain,
     icon: <Folder size={16} />,
@@ -64,7 +64,7 @@ export function PinnedDomainGroupSettings({
         onChange={(color) => onColorChange(pinned.domain, color)}
       />
     ) : undefined,
-  }));
+  })), [pinnedDomainGroups, domainGroupAliases, onColorChange]);
   
   // 順序変更
   const handleReorder = useCallback((newOrder: string[]) => {
