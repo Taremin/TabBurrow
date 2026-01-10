@@ -15,6 +15,9 @@ import { TabList } from './TabList.js';
 import { ConfirmDialog } from '../common/ConfirmDialog.js';
 import { LinkCheckDialog } from './LinkCheckDialog.js';
 import { PromptDialog } from '../common/PromptDialog.js';
+import { CreateNormalizationRuleDialog } from './CreateNormalizationRuleDialog.js';
+import { NormalizationResultDialog } from '../common/NormalizationResultDialog.js';
+import type { NormalizationApplyResult } from '../storage.js';
 import { useTranslation } from '../common/i18nContext.js';
 
 // Custom Hooks
@@ -130,6 +133,8 @@ export function App() {
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
+  const [isNormalizationRuleDialogOpen, setIsNormalizationRuleDialogOpen] = useState(false);
+  const [normalizationResult, setNormalizationResult] = useState<NormalizationApplyResult | null>(null);
 
   // Tab Count
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
@@ -426,6 +431,38 @@ export function App() {
     hideCreateGroupDialog();
   }, [createGroupDialog, selectedTabIds, customGroups, createGroup, moveTabToGroup, bulkMoveTabsToGroup, setSelectedTabIds, hideCreateGroupDialog, setIsSelectionMode]);
 
+  // URL Normalization Rule Logic
+  const handleRequestCreateNormalizationRule = useCallback(() => {
+    setIsNormalizationRuleDialogOpen(true);
+  }, []);
+
+  const handleSaveNormalizationRule = useCallback(async (rule: any, applyToExisting: boolean) => {
+    const { applyNormalizationToExisting } = await import('../storage.js');
+    try {
+      const currentSettings = await getSettings();
+      const updatedRules = [...(currentSettings.urlNormalizationRules || []), rule];
+      await saveSettings({
+        ...currentSettings,
+        urlNormalizationRules: updatedRules,
+        urlNormalizationEnabled: true,
+      });
+      notifySettingsChanged();
+      
+      if (applyToExisting) {
+        const result = await applyNormalizationToExisting(updatedRules);
+        setNormalizationResult(result);
+        await loadTabs(); // 統合されたタブを反映
+      }
+      
+      setIsNormalizationRuleDialogOpen(false);
+      setIsSelectionMode(false);
+      setSelectedTabIds(new Set());
+    } catch (error) {
+      console.error('Failed to save normalization rule:', error);
+      alert('Failed to save normalization rule');
+    }
+  }, [t, loadTabs, setIsSelectionMode, setSelectedTabIds]);
+
   // Tab Rename Logic
   const handleRequestTabRename = useCallback((tabId: string) => {
     const tab = allTabs.find(t => t.id === tabId);
@@ -562,6 +599,7 @@ export function App() {
         customGroups={customGroups}
         onCreateGroup={handleRequestCreateGroup}
         onRequestBulkMoveToNewGroup={handleRequestBulkMoveToNewGroup}
+        onCreateNormalizationRule={handleRequestCreateNormalizationRule}
         showGroupedTabsInDomainGroups={showGroupedTabsInDomainGroups}
         onToggleShowGroupedTabsInDomainGroups={handleToggleShowGroupedTabsInDomainGroups}
       />
@@ -674,6 +712,19 @@ export function App() {
         allowEmpty={true}
         onConfirm={handleConfirmTabRename}
         onCancel={hideTabRenameDialog}
+      />
+
+      <CreateNormalizationRuleDialog
+        isOpen={isNormalizationRuleDialogOpen}
+        selectedUrls={filteredTabs.filter(t => selectedTabIds.has(t.id)).map(t => t.url)}
+        onSave={handleSaveNormalizationRule}
+        onClose={() => setIsNormalizationRuleDialogOpen(false)}
+      />
+
+      <NormalizationResultDialog
+        isOpen={normalizationResult !== null}
+        result={normalizationResult}
+        onClose={() => setNormalizationResult(null)}
       />
     </div>
   );

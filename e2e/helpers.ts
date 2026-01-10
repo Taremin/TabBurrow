@@ -126,7 +126,7 @@ export async function createTestTabData(page: Page, tabData: {
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 5;
+  const DB_VERSION = 6;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -158,6 +158,7 @@ export async function createTestTabData(page: Page, tabData: {
             store.createIndex('title', 'title', { unique: false });
             store.createIndex('group', 'group', { unique: false });
             store.createIndex('groupType', 'groupType', { unique: false });
+            store.createIndex('canonicalUrl', 'canonicalUrl', { unique: false });
           }
           
           // customGroupsストアを作成
@@ -226,6 +227,7 @@ export async function createTestTabData(page: Page, tabData: {
       screenshot: screenshotBlob,
       lastAccessed: Date.now(),
       savedAt: Date.now(),
+      canonicalUrl: data.url, // デフォルトはURLそのまま
     };
     
     // displayNameが指定されている場合のみ追加
@@ -261,7 +263,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 } = {}): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 5;
+  const DB_VERSION = 6;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -290,6 +292,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
             store.createIndex('title', 'title', { unique: false });
             store.createIndex('group', 'group', { unique: false });
             store.createIndex('groupType', 'groupType', { unique: false });
+            store.createIndex('canonicalUrl', 'canonicalUrl', { unique: false });
           }
           
           // customGroupsストアを作成
@@ -336,6 +339,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
           screenshot: new Blob([]),
           lastAccessed: now - (count - i) * 1000, // 時間をずらして作成
           savedAt: now - (count - i) * 1000,
+          canonicalUrl: `https://${domain}/page/${i}`,
         };
         
         store.add(tab);
@@ -359,7 +363,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 export async function clearTestData(page: Page): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 5;
+  const DB_VERSION = 6;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -408,7 +412,7 @@ export async function createCustomGroupData(page: Page, groups: {
   sortOrder?: number;
 }[]): Promise<void> {
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 5;
+  const DB_VERSION = 6;
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   
   await page.evaluate(async ({ groups, dbConfig }) => {

@@ -61,6 +61,30 @@ vi.mock('./tabSaver.js', () => ({
   openTabManagerPage: vi.fn().mockResolvedValue(undefined),
   getTabScreenshot: vi.fn().mockResolvedValue(new Blob([], { type: 'image/jpeg' })),
   saveAndCloseTabs: vi.fn().mockResolvedValue(undefined),
+  createSavedTab: vi.fn().mockImplementation((tab: any, screenshot: any, savedAt: number, canonicalUrl?: string, overrides?: any) => ({
+    id: 'mock-id-' + tab.id,
+    url: tab.url,
+    title: tab.title || 'Untitled',
+    domain: new URL(tab.url).hostname,
+    group: overrides?.group || new URL(tab.url).hostname,
+    groupType: overrides?.groupType || 'domain',
+    savedAt,
+    canonicalUrl: canonicalUrl || tab.url,
+    screenshot,
+    customGroups: overrides?.customGroups || [],
+  })),
+}));
+
+// utils/url.jsのモック
+vi.mock('../utils/url.js', () => ({
+  extractDomain: (url: string) => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return 'unknown';
+    }
+  },
+  applyUrlNormalization: vi.fn().mockImplementation((url: string) => url),
 }));
 
 // settings.jsのモック
@@ -69,6 +93,8 @@ vi.mock('../settings.js', () => ({
     autoCloseEnabled: true,
     autoCloseRules: [],
     autoCloseRuleOrder: 'asc',
+    urlNormalizationEnabled: false,
+    urlNormalizationRules: [],
   }),
   saveSettings: vi.fn().mockResolvedValue(undefined),
   escapeRegexPattern: (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),

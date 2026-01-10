@@ -8,7 +8,8 @@ import type { Tabs } from 'webextension-polyfill';
 import { saveTabs, type SavedTab } from '../storage.js';
 import { getScreenshot } from '../screenshotCache.js';
 import { captureTab, resizeScreenshot } from './screenshot.js';
-import { extractDomain } from '../utils/url.js';
+import { extractDomain, applyUrlNormalization } from '../utils/url.js';
+import { getSettings } from '../settings.js';
 
 /**
  * タブのスクリーンショットを取得（アクティブタブかキャッシュから）
@@ -44,17 +45,20 @@ export async function getTabScreenshot(
 export function createSavedTab(
   tab: Tabs.Tab,
   screenshot: Blob,
-  savedAt: number
+  savedAt: number,
+  canonicalUrl: string,
+  overrides: { group?: string; groupType?: 'domain' | 'custom'; customGroups?: string[] } = {}
 ): SavedTab {
   const domain = extractDomain(tab.url!);
   return {
     id: crypto.randomUUID(),
     url: tab.url!,
+    canonicalUrl: canonicalUrl,
     title: tab.title || 'Untitled',
     domain,
-    group: domain,           // デフォルトはドメインでグループ化
-    groupType: 'domain',     // デフォルトはドメイングループ
-    customGroups: [],
+    group: overrides.group || domain,
+    groupType: overrides.groupType || 'domain',
+    customGroups: overrides.customGroups || [],
     favIconUrl: tab.favIconUrl || '',
     screenshot,
     lastAccessed: tab.lastAccessed || savedAt,
@@ -113,6 +117,7 @@ export async function saveAndCloseTabs(
   const { activeTabWindowId, openTabManager = false, logPrefix = '' } = options;
   const now = Date.now();
   const savedTabs: SavedTab[] = [];
+  const settings = await getSettings();
 
   // 各タブのスクリーンショットを取得して保存データを作成
   for (const tab of tabs) {
@@ -120,7 +125,10 @@ export async function saveAndCloseTabs(
 
     try {
       const screenshot = await getTabScreenshot(tab, { activeTabWindowId });
-      const savedTab = createSavedTab(tab, screenshot, now);
+      const canonicalUrl = settings.urlNormalizationEnabled 
+        ? applyUrlNormalization(tab.url!, settings.urlNormalizationRules || [])
+        : tab.url!;
+      const savedTab = createSavedTab(tab, screenshot, now, canonicalUrl);
       savedTabs.push(savedTab);
     } catch (error) {
       console.error(`${logPrefix}タブの保存に失敗: ${tab.url}`, error);

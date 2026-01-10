@@ -11,7 +11,7 @@
 export const DB_NAME = 'TabBurrowDB';
 
 /** データベースバージョン */
-export const DB_VERSION = 5;
+export const DB_VERSION = 6;
 
 /** タブストア名 */
 export const TABS_STORE_NAME = 'tabs';
@@ -35,6 +35,7 @@ export type GroupType = 'domain' | 'custom';
 export interface SavedTab {
   id: string;           // ユニークID (crypto.randomUUID())
   url: string;          // タブのURL
+  canonicalUrl: string; // 正規化されたURL（同一性判定に使用）
   title: string;        // ページタイトル
   displayName?: string; // ユーザー設定の表示名（未設定時はtitleを使用）
   domain: string;       // ドメイン（後方互換性のため保持）
@@ -65,6 +66,7 @@ export interface CustomGroupMeta {
 export interface BackupTab {
   id: string;
   url: string;
+  canonicalUrl: string;
   title: string;
   displayName?: string; // ユーザー設定の表示名
   domain: string;
@@ -133,6 +135,7 @@ export const BACKUPS_INDEXES = [
  */
 export function createTabData(overrides: {
   url: string;
+  canonicalUrl?: string;
   title: string;
   displayName?: string;
   domain?: string;
@@ -145,10 +148,12 @@ export function createTabData(overrides: {
   customGroups?: string[];
 }): SavedTab {
   const domain = overrides.domain || extractDomain(overrides.url);
+  const canonicalUrl = overrides.canonicalUrl || overrides.url;
   
   return {
     id: generateId(),
     url: overrides.url,
+    canonicalUrl: canonicalUrl,
     title: overrides.title,
     displayName: overrides.displayName,
     domain: domain,

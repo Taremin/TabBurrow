@@ -15,6 +15,7 @@ import {
   type GroupType,
 } from './dbSchema.js';
 import browser from './browserApi.js';
+import type { UrlNormalizationRule } from './settings.js';
 
 // 型を再エクスポート（後方互換性のため）
 export type { SavedTab, CustomGroupMeta, GroupType };
@@ -173,6 +174,30 @@ async function openDB(): Promise<IDBDatabase> {
           }
         };
       }
+
+      // バージョン6: URL正規化対応
+      if (oldVersion < 6) {
+        const tabStore = transaction.objectStore(STORE_NAME);
+        
+        // canonicalUrl インデックスを作成
+        if (!tabStore.indexNames.contains('canonicalUrl')) {
+          tabStore.createIndex('canonicalUrl', 'canonicalUrl', { unique: false });
+        }
+        
+        // 既存データのマイグレーション (canonicalUrl に url をセット)
+        const cursorRequest = tabStore.openCursor();
+        cursorRequest.onsuccess = (e) => {
+          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+          if (cursor) {
+            const tab = cursor.value;
+            if (!tab.canonicalUrl) {
+              tab.canonicalUrl = tab.url;
+              cursor.update(tab);
+            }
+            cursor.continue();
+          }
+        };
+      }
     };
   });
 }
@@ -195,6 +220,23 @@ export async function findTabByUrl(url: string): Promise<SavedTab | null> {
 }
 
 /**
+ * 正規化URLで既存のタブを検索
+ */
+export async function findTabByCanonicalUrl(canonicalUrl: string): Promise<SavedTab | null> {
+  const db = await openDB();
+  
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const index = store.index('canonicalUrl');
+    const request = index.get(canonicalUrl);
+
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+/**
  * 複数のタブを保存（同じURLがあれば上書き）
  */
 export async function saveTabs(tabs: SavedTab[]): Promise<void> {
@@ -203,7 +245,7 @@ export async function saveTabs(tabs: SavedTab[]): Promise<void> {
   // 保存対象のURLで既存タブを検索し、IDを取得
   const tabsToSave: SavedTab[] = [];
   for (const tab of tabs) {
-    const existing = await findTabByUrl(tab.url);
+    const existing = await findTabByCanonicalUrl(tab.canonicalUrl);
     if (existing) {
       // 既存タブがあればそのIDを引き継ぐ（上書き用）
       // 新しいスクリーンショットが空の場合は既存のスクリーンショットを引き継ぐ
@@ -245,7 +287,7 @@ export async function saveTabsForCustomGroup(tabs: SavedTab[]): Promise<void> {
   // 保存対象のURLで既存タブを検索し、IDを取得
   const tabsToSave: SavedTab[] = [];
   for (const tab of tabs) {
-    const existing = await findTabByUrl(tab.url);
+    const existing = await findTabByCanonicalUrl(tab.canonicalUrl);
     if (existing) {
       // 既存タブがあればそのIDを引き継ぐ（上書き用）
       // 新しいスクリーンショットが空の場合は既存のスクリーンショットを引き継ぐ
@@ -556,6 +598,83 @@ export async function getTabCount(): Promise<number> {
 
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  });
+}
+/**
+ * 正規化適用結果の型
+ */
+export interface NormalizationApplyResult {
+  /** 統合されたタブの数 */
+  mergedCount: number;
+  /** 変換詳細 */
+  details: Array<{
+    /** 正規化後のURL */
+    normalizedUrl: string;
+    /** 保持されたタブのID */
+    keptTabId: string;
+    /** 保持されたタブのURL */
+    keptUrl: string;
+    /** 削除されたタブのURL */
+    removedUrls: string[];
+  }>;
+}
+
+/**
+ * 既存の全タブに正規化ルールを適用し、重複を統合する
+ */
+export async function applyNormalizationToExisting(rules: UrlNormalizationRule[]): Promise<NormalizationApplyResult> {
+  const { applyUrlNormalization } = await import('./utils/url.js');
+  const allTabs = await getAllTabs();
+  
+  // canonicalUrl でグループ化
+  const groupedByCanonical = new Map<string, SavedTab[]>();
+  for (const tab of allTabs) {
+    const normalized = applyUrlNormalization(tab.url, rules);
+    const existing = groupedByCanonical.get(normalized) || [];
+    existing.push({ ...tab, canonicalUrl: normalized });
+    groupedByCanonical.set(normalized, existing);
+  }
+  
+  const db = await openDB();
+  let mergedCount = 0;
+  const details: NormalizationApplyResult['details'] = [];
+  
+  return new Promise<NormalizationApplyResult>((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    
+    transaction.oncomplete = () => resolve({ mergedCount, details });
+    transaction.onerror = () => reject(transaction.error);
+    
+    for (const [canonicalUrl, tabs] of groupedByCanonical.entries()) {
+      if (tabs.length > 1) {
+        // 保存日時が最新のものを探す
+        tabs.sort((a, b) => b.savedAt - a.savedAt);
+        const [latest, ...others] = tabs;
+        
+        // 最新のものを更新
+        store.put(latest);
+        
+        // 削除されるURLを収集
+        const removedUrls: string[] = [];
+        for (const other of others) {
+          store.delete(other.id);
+          removedUrls.push(other.url);
+          mergedCount++;
+        }
+        
+        // 統合情報を記録
+        details.push({
+          normalizedUrl: canonicalUrl,
+          keptTabId: latest.id,
+          keptUrl: latest.url,
+          removedUrls,
+        });
+      } else {
+        // 1つだけの場合も canonicalUrl を更新
+        store.put(tabs[0]);
+      }
+    }
   });
 }
 

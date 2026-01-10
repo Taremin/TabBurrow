@@ -6,8 +6,8 @@
 import browser from '../browserApi.js';
 import type { Alarms, Tabs } from 'webextension-polyfill';
 import { getSettings, matchAutoCloseRule, type Settings } from '../settings.js';
-import { saveAndCloseTabs, getTabScreenshot } from './tabSaver.js';
-import { extractDomain } from '../utils/url.js';
+import { saveAndCloseTabs, getTabScreenshot, createSavedTab } from './tabSaver.js';
+import { extractDomain, applyUrlNormalization } from '../utils/url.js';
 import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../storage.js';
 
 // 自動収納のアラーム名
@@ -292,20 +292,14 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
     if (!tab.id || !tab.url) continue;
     try {
       const screenshot = await getTabScreenshot(tab, {});
-      const domain = extractDomain(tab.url);
-      const savedTab: SavedTab = {
-        id: crypto.randomUUID(),
-        url: tab.url,
-        title: tab.title || 'Untitled',
-        domain,
+      const canonicalUrl = (cachedSettings?.urlNormalizationEnabled)
+        ? applyUrlNormalization(tab.url, cachedSettings?.urlNormalizationRules || [])
+        : tab.url;
+      const savedTab = createSavedTab(tab, screenshot, now, canonicalUrl, {
         group: groupName,
         groupType: 'custom',
-        customGroups: [groupName],
-        favIconUrl: tab.favIconUrl || '',
-        screenshot,
-        lastAccessed: tab.lastAccessed || now,
-        savedAt: now,
-      };
+        customGroups: [groupName]
+      });
       await saveTabsForCustomGroup([savedTab]);
       await browser.tabs.remove(tab.id);
       console.log(`自動収納: タブを「${groupName}」グループに収納しました: ${tab.url}`);
@@ -319,20 +313,10 @@ export async function handleAutoCloseAlarm(alarm: Alarms.Alarm): Promise<void> {
     if (!tab.id || !tab.url) continue;
     try {
       const screenshot = await getTabScreenshot(tab, {});
-      const domain = extractDomain(tab.url);
-      const savedTab: SavedTab = {
-        id: crypto.randomUUID(),
-        url: tab.url,
-        title: tab.title || 'Untitled',
-        domain,
-        group: domain,
-        groupType: 'domain',
-        customGroups: [],
-        favIconUrl: tab.favIconUrl || '',
-        screenshot,
-        lastAccessed: tab.lastAccessed || now,
-        savedAt: now,
-      };
+      const canonicalUrl = (cachedSettings?.urlNormalizationEnabled)
+        ? applyUrlNormalization(tab.url, cachedSettings?.urlNormalizationRules || [])
+        : tab.url;
+      const savedTab = createSavedTab(tab, screenshot, now, canonicalUrl);
       await saveTabs([savedTab]);
       console.log(`自動収納: タブを保存しました（閉じない）: ${tab.url}`);
     } catch (error) {

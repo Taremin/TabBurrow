@@ -3,6 +3,7 @@
         "settings": "設定",
         "save": "保存",
         "cancel": "キャンセル",
+        "close": "閉じる",
         "delete": "削除",
         "tabs": "タブ",
         "tabCount": "{count} タブ",
@@ -87,6 +88,33 @@
                 "selectGroup": "グループを選択",
                 "save": "保存",
                 "cancel": "キャンセル"
+            }
+        },
+        "urlNormalization": {
+            "title": "URL正規化",
+            "enableLabel": "URL正規化を有効にする",
+            "description": "類似したURL（小説の各話など）を一つの正規化されたURLとして扱い、重複を避けて集約します。",
+            "rulesTitle": "正規化ルール",
+            "rulesDescription": "正規表現置換を使用して、複数のURLを一つの共通形式に変換します。",
+            "addRule": "ルールを追加",
+            "editRule": "ルールを編集",
+            "noRules": "ルールがありません",
+            "simulatorTitle": "シミュレータ",
+            "simulatorPlaceholder": "テストするURLを入力",
+            "simulatorResult": "正規化後の結果：",
+            "dialog": {
+                "name": "ルール名",
+                "pattern": "検索パターン（正規表現）",
+                "replacement": "置換形式（$1, $2など）",
+                "applyToExisting": "既存のタブに即時適用して統合する",
+                "applyConfirm": "このルールを既存の全タブに適用しますか？同じ正規化URLを持つタブは、最新のものを残して統合されます。この操作は元に戻せません。",
+                "applySuccess": "{count} 個のタブを統合しました"
+            },
+            "resultDialog": {
+                "title": "正規化ルール適用結果",
+                "detailsTitle": "統合されたタブ",
+                "mergedFrom": "{count} 件を統合",
+                "andMore": "他 {count} 件..."
             }
         },
         "viewMode": {
@@ -394,6 +422,7 @@
             "bulkMoveToGroup": "グループに移動",
             "bulkRemoveFromGroup": "グループから外す",
             "openAsTabGroup": "タブグループとして開く",
+            "createNormalizationRule": "正規化ルール作成",
             "confirmDeleteTitle": "選択したタブを削除",
             "confirmDeleteMessage": "{count}件のタブを削除しますか？この操作は取り消せません。"
         },

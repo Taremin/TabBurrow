@@ -38,7 +38,7 @@ describe('tabSaver', () => {
       const mockScreenshot = new Blob(['test'], { type: 'image/jpeg' });
       const savedAt = 1000000001000;
 
-      const result = createSavedTab(mockTab, mockScreenshot, savedAt);
+      const result = createSavedTab(mockTab, mockScreenshot, savedAt, mockTab.url!);
 
       expect(result.url).toBe('https://example.com/page');
       expect(result.title).toBe('Example Page');
@@ -50,6 +50,7 @@ describe('tabSaver', () => {
       expect(result.lastAccessed).toBe(1000000000000);
       expect(result.savedAt).toBe(savedAt);
       expect(result.id).toBeDefined();
+      expect(result.canonicalUrl).toBe(mockTab.url);
     });
 
     it('タイトルがない場合は"Untitled"を使用する', () => {
@@ -59,7 +60,7 @@ describe('tabSaver', () => {
       });
       const mockScreenshot = new Blob([], { type: 'image/jpeg' });
       
-      const result = createSavedTab(mockTab, mockScreenshot, Date.now());
+      const result = createSavedTab(mockTab, mockScreenshot, Date.now(), mockTab.url!);
       
       expect(result.title).toBe('Untitled');
     });
@@ -72,7 +73,7 @@ describe('tabSaver', () => {
       });
       const mockScreenshot = new Blob([], { type: 'image/jpeg' });
       
-      const result = createSavedTab(mockTab, mockScreenshot, Date.now());
+      const result = createSavedTab(mockTab, mockScreenshot, Date.now(), mockTab.url!);
       
       expect(result.favIconUrl).toBe('');
     });
@@ -86,7 +87,7 @@ describe('tabSaver', () => {
       const mockScreenshot = new Blob([], { type: 'image/jpeg' });
       const savedAt = 1234567890000;
       
-      const result = createSavedTab(mockTab, mockScreenshot, savedAt);
+      const result = createSavedTab(mockTab, mockScreenshot, savedAt, mockTab.url!);
       
       expect(result.lastAccessed).toBe(savedAt);
     });

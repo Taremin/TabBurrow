@@ -26,7 +26,7 @@ test.describe('ナビゲーション不具合の再現', () => {
 
     await page.evaluate(async () => {
       const db = await new Promise<IDBDatabase>((resolve) => {
-        const req = indexedDB.open('TabBurrowDB', 5);
+        const req = indexedDB.open('TabBurrowDB', 6);
         req.onsuccess = () => resolve(req.result);
       });
       const trans = db.transaction(['tabs'], 'readwrite');
@@ -35,20 +35,24 @@ test.describe('ナビゲーション不具合の再現', () => {
       
       // Group A (2 tabs)
       for (let i = 0; i < 2; i++) {
+        const url = `https://a.example.com/${i}`;
         store.add({
-          id: `a-${i}`, url: `https://a.example.com/${i}`, title: `Tab A ${i}`,
+          id: `a-${i}`, url, title: `Tab A ${i}`,
           domain: 'a.example.com', group: 'Group A', groupType: 'custom', 
           customGroups: ['Group A', 'Group B'],
-          lastAccessed: now - i * 1000, savedAt: now - i * 1000, screenshot: new Blob([]), favIconUrl: ''
+          lastAccessed: now - i * 1000, savedAt: now - i * 1000, screenshot: new Blob([]), favIconUrl: '',
+          canonicalUrl: url
         });
       }
       // Group B (2 tabs)
       for (let i = 0; i < 2; i++) {
+        const url = `https://b.example.com/${i}`;
         store.add({
-          id: `b-${i}`, url: `https://b.example.com/${i}`, title: `Tab B ${i}`,
+          id: `b-${i}`, url, title: `Tab B ${i}`,
           domain: 'b.example.com', group: 'Group B', groupType: 'custom', 
           customGroups: ['Group B'],
-          lastAccessed: now - i * 1000 - 100000, savedAt: now - i * 1000 - 100000, screenshot: new Blob([]), favIconUrl: ''
+          lastAccessed: now - i * 1000 - 100000, savedAt: now - i * 1000 - 100000, screenshot: new Blob([]), favIconUrl: '',
+          canonicalUrl: url
         });
       }
       return new Promise((resolve) => trans.oncomplete = resolve);

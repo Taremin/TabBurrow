@@ -12,6 +12,7 @@ import { AppearanceSettings } from './components/AppearanceSettings.js';
 import { ViewModeSettings } from './components/ViewModeSettings.js';
 import { SortSettings } from './components/SortSettings.js';
 import { AutoCloseSettings } from './components/AutoCloseSettings.js';
+import { UrlNormalizationSettings } from './components/UrlNormalizationSettings.js';
 import { IconClickSettings } from './components/IconClickSettings.js';
 import { RestoreSettings } from './components/RestoreSettings.js';
 import { LinkCheckSettings } from './components/LinkCheckSettings.js';
@@ -209,6 +210,22 @@ export function App() {
             onSecondsChange={(value) => updateSetting('autoCloseSeconds', value)}
             onRulesChange={(value) => updateSetting('autoCloseRules', value)}
             onRuleOrderChange={(value) => updateSetting('autoCloseRuleOrder', value)}
+          />
+        </SettingsSection>
+        
+        {/* URL正規化設定 */}
+        <SettingsSection
+          icon="🔗"
+          title={t('settings.urlNormalization.title')}
+          description={t('settings.urlNormalization.description')}
+          dataTestId="url-normalization-section"
+        >
+          <UrlNormalizationSettings
+            enabled={settings.urlNormalizationEnabled}
+            rules={settings.urlNormalizationRules}
+            savedEnabled={savedSettings.urlNormalizationEnabled}
+            onEnabledChange={(value) => updateSetting('urlNormalizationEnabled', value)}
+            onRulesChange={(value) => updateSetting('urlNormalizationRules', value)}
           />
         </SettingsSection>
 

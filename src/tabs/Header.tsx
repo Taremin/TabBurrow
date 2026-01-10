@@ -40,6 +40,8 @@ interface HeaderProps {
   // カスタムグループ表示設定
   showGroupedTabsInDomainGroups: boolean;
   onToggleShowGroupedTabsInDomainGroups: () => void;
+  // 正規化ルール作成
+  onCreateNormalizationRule: () => void;
   // ソート順関連
   groupSort: GroupSortType;
   itemSort: ItemSortType;
@@ -79,6 +81,7 @@ export const Header = memo(function Header({
   onRequestBulkMoveToNewGroup,
   showGroupedTabsInDomainGroups,
   onToggleShowGroupedTabsInDomainGroups,
+  onCreateNormalizationRule,
   groupSort,
   itemSort,
   onGroupSortChange,
@@ -259,6 +262,15 @@ export const Header = memo(function Header({
                   {t('tabManager.selection.openAsTabGroup')}
                 </button>
               )}
+              <button 
+                className="btn btn-secondary btn-small"
+                onClick={onCreateNormalizationRule}
+                disabled={selectedCount === 0}
+                title={t('tabManager.selection.createNormalizationRule')}
+                data-testid="create-normalization-rule-button"
+              >
+                <Activity size={16} />
+              </button>
               <button 
                 className="btn btn-secondary btn-small"
                 onClick={onToggleSelectionMode}

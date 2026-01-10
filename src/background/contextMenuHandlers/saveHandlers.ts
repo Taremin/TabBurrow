@@ -1,8 +1,9 @@
 import browser from '../../browserApi.js';
 import type { Tabs } from 'webextension-polyfill';
 import { saveTabs, saveTabsForCustomGroup, type SavedTab } from '../../storage.js';
-import { extractDomain } from '../../utils/url.js';
-import { getTabScreenshot, saveAndCloseTabs } from '../tabSaver.js';
+import { extractDomain, applyUrlNormalization } from '../../utils/url.js';
+import { getTabScreenshot, saveAndCloseTabs, createSavedTab } from '../tabSaver.js';
+import { getSettings } from '../../settings.js';
 import { isSaveableUrl } from './utils.js';
 
 /**
@@ -49,20 +50,11 @@ export async function handleStashThisPage(tab: Tabs.Tab): Promise<void> {
       activeTabWindowId: tab.active ? tab.windowId : undefined,
     });
     
-    const domain = extractDomain(tab.url);
-    const savedTab: SavedTab = {
-      id: crypto.randomUUID(),
-      url: tab.url,
-      title: tab.title || 'Untitled',
-      domain,
-      group: domain,       // ドメイングループとして保存
-      groupType: 'domain',
-      customGroups: [],
-      favIconUrl: tab.favIconUrl || '',
-      screenshot,
-      lastAccessed: tab.lastAccessed || now,
-      savedAt: now,
-    };
+    const settings = await getSettings();
+    const canonicalUrl = settings.urlNormalizationEnabled
+      ? applyUrlNormalization(tab.url, settings.urlNormalizationRules || [])
+      : tab.url;
+    const savedTab = createSavedTab(tab, screenshot, now, canonicalUrl);
     
     await saveTabs([savedTab]);
     console.log(`タブを収納しました: ${tab.url}`);
@@ -89,20 +81,15 @@ export async function handleSaveToCustomGroup(tab: Tabs.Tab, groupName: string):
       activeTabWindowId: tab.active ? tab.windowId : undefined,
     });
     
-    const domain = extractDomain(tab.url);
-    const savedTab: SavedTab = {
-      id: crypto.randomUUID(),
-      url: tab.url,
-      title: tab.title || 'Untitled',
-      domain,
-      group: groupName,      // カスタムグループ名
-      groupType: 'custom',   // カスタムグループタイプ
-      customGroups: [groupName],
-      favIconUrl: tab.favIconUrl || '',
-      screenshot,
-      lastAccessed: tab.lastAccessed || now,
-      savedAt: now,
-    };
+    const settings = await getSettings();
+    const canonicalUrl = settings.urlNormalizationEnabled
+      ? applyUrlNormalization(tab.url, settings.urlNormalizationRules || [])
+      : tab.url;
+    const savedTab = createSavedTab(tab, screenshot, now, canonicalUrl, {
+      group: groupName,
+      groupType: 'custom',
+      customGroups: [groupName]
+    });
     
     await saveTabsForCustomGroup([savedTab]);
     console.log(`タブを「${groupName}」グループに保存しました: ${tab.url}`);

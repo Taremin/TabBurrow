@@ -96,11 +96,24 @@ export const DEFAULT_LINK_CHECK_RULES: LinkCheckRule[] = [
   { id: 'default-network-error', enabled: true, name: 'ネットワークエラー', condition: 'network-error', action: 'dead' },
 ];
 
+/**
+ * URL正規化ルール
+ */
+export interface UrlNormalizationRule {
+  id: string;          // ユニークID
+  enabled: boolean;    // 有効/無効
+  name: string;        // ルール名
+  pattern: string;      // 正規表現パターン
+  replacement: string;  // 置換後の形式 ($1, $2 等を使用可能)
+}
+
 // 設定の型定義
 export interface Settings {
   autoCloseEnabled: boolean;     // 自動収納有効/無効
   autoCloseSeconds: number;      // 自動収納までの秒数
   autoCloseRules: AutoCloseRule[];  // 自動収納ルール
+  urlNormalizationEnabled: boolean; // URL正規化有効/無効
+  urlNormalizationRules: UrlNormalizationRule[]; // URL正規化ルール
   autoCloseRuleOrder: RuleOrderType;  // ルール評価順序
   locale: LocaleSetting;         // 言語設定（'ja' | 'en' | 'auto'）
   theme: ThemeSetting;           // テーマ設定（'system' | 'dark' | 'light'）
@@ -147,6 +160,8 @@ const DEFAULT_SETTINGS: Settings = {
   autoCloseEnabled: false,
   autoCloseSeconds: 1800, // 30分
   autoCloseRules: [],
+  urlNormalizationEnabled: true,
+  urlNormalizationRules: [],
   autoCloseRuleOrder: 'asc',
   locale: 'auto',
   theme: 'system',

@@ -26,9 +26,10 @@ import {
 // テスト用のモックタブを作成
 function createMockTab(overrides: Partial<SavedTab> = {}): SavedTab {
   const id = crypto.randomUUID();
+  const url = overrides.url || `https://example.com/${id}`;
   return {
     id,
-    url: `https://example.com/${id}`,
+    url,
     title: 'Test Page',
     domain: 'example.com',
     group: 'example.com',
@@ -37,6 +38,7 @@ function createMockTab(overrides: Partial<SavedTab> = {}): SavedTab {
     screenshot: new Blob(['test'], { type: 'image/jpeg' }),
     lastAccessed: Date.now(),
     savedAt: Date.now(),
+    canonicalUrl: url, // canonicalUrlを追加
     ...overrides,
   };
 }

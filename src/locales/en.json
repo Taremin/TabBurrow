@@ -3,6 +3,7 @@
         "settings": "Settings",
         "save": "Save",
         "cancel": "Cancel",
+        "close": "Close",
         "delete": "Delete",
         "tabs": "tabs",
         "tabCount": "{count} tabs",
@@ -87,6 +88,33 @@
                 "selectGroup": "Select Group",
                 "save": "Save",
                 "cancel": "Cancel"
+            }
+        },
+        "urlNormalization": {
+            "title": "URL Normalization",
+            "enableLabel": "Enable URL Normalization",
+            "description": "Treat similar URLs (e.g., chapters of a novel) as a single normalized URL to avoid duplication and consolidate entries.",
+            "rulesTitle": "Normalization Rules",
+            "rulesDescription": "Use regular expression replacement to transform multiple URLs into a single common format.",
+            "addRule": "Add Rule",
+            "editRule": "Edit Rule",
+            "noRules": "No rules",
+            "simulatorTitle": "Simulator",
+            "simulatorPlaceholder": "Enter URL to test",
+            "simulatorResult": "Normalized Result:",
+            "dialog": {
+                "name": "Rule Name",
+                "pattern": "Search Pattern (Regex)",
+                "replacement": "Replacement Format (e.g., $1, $2)",
+                "applyToExisting": "Apply to existing tabs immediately and merge",
+                "applyConfirm": "Do you want to apply this rule to all existing tabs? Tabs with the same normalized URL will be merged, keeping the most recent one. This action cannot be undone.",
+                "applySuccess": "Merged {count} tabs"
+            },
+            "resultDialog": {
+                "title": "Normalization Result",
+                "detailsTitle": "Merged Tabs",
+                "mergedFrom": "Merged {count} tabs",
+                "andMore": "and {count} more..."
             }
         },
         "viewMode": {
@@ -394,6 +422,7 @@
             "bulkMoveToGroup": "Move to Group",
             "bulkRemoveFromGroup": "Remove from Group",
             "openAsTabGroup": "Open as Tab Group",
+            "createNormalizationRule": "Create Normalization Rule",
             "confirmDeleteTitle": "Delete Selected Tabs",
             "confirmDeleteMessage": "Delete {count} tabs? This action cannot be undone."
         },
