@@ -95,7 +95,8 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
     onChange(newColor);
   }, [onChange]);
 
-  const togglePicker = useCallback(() => {
+  const togglePicker = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation(); // グループヘッダーのクリックイベントを止める
     if (!disabled) {
       setIsOpen(prev => !prev);
       if (isOpen) {

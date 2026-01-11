@@ -69,6 +69,38 @@ test.describe('タブ管理画面 - カスタムグループ色変更', () => {
     await expect(presetColors).toHaveCount(10); // 9色 + 色なし
   });
 
+  test('カラーピッカークリック時にグループが折りたたまれない', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // カスタムグループのヘッダーを探す
+    const groupHeader = page.locator('[data-testid="group-header"]').filter({
+      hasText: 'テストグループ'
+    });
+    
+    // グループ内のタブカードが表示されていることを確認（グループが展開されている）
+    const tabCard = page.locator('[data-testid="tab-card"]').first();
+    await expect(tabCard).toBeVisible();
+    
+    // カラーピッカートリガーをクリック
+    const colorPickerTrigger = groupHeader.locator('.color-picker-trigger');
+    await colorPickerTrigger.click();
+    
+    // ポップオーバーが表示される
+    await expect(page.locator('.color-picker-popover')).toBeVisible();
+    
+    // グループ内のタブカードがまだ表示されていることを確認（折りたたまれていない）
+    await expect(tabCard).toBeVisible();
+    
+    // ポップオーバーを閉じる（外部クリック）
+    await page.locator('body').click({ position: { x: 10, y: 10 } });
+    await expect(page.locator('.color-picker-popover')).not.toBeVisible();
+    
+    // それでもタブカードは表示されている（折りたたまれていない）
+    await expect(tabCard).toBeVisible();
+  });
+
   test('色を選択するとグループにカラーバーが表示される', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
@@ -119,6 +151,13 @@ test.describe('タブ管理画面 - カスタムグループ色変更', () => {
     // ポップオーバーが閉じるまで待機
     await expect(page.locator('.color-picker-popover')).not.toBeVisible();
     
+    // カラーバーが表示されることを確認（色が適用されたら）
+    const colorBar = groupHeader.locator('.group-color-bar');
+    await expect(colorBar).toBeVisible();
+    
+    // 少し待機して保存が完了するのを待つ
+    await page.waitForTimeout(500);
+    
     // ページをリロード
     await page.reload();
     await waitForPageLoad(page);
@@ -127,8 +166,8 @@ test.describe('タブ管理画面 - カスタムグループ色変更', () => {
     const reloadedGroupHeader = page.locator('[data-testid="group-header"]').filter({
       hasText: 'テストグループ'
     });
-    const colorBar = reloadedGroupHeader.locator('.group-color-bar');
-    await expect(colorBar).toBeVisible();
+    const reloadedColorBar = reloadedGroupHeader.locator('.group-color-bar');
+    await expect(reloadedColorBar).toBeVisible();
   });
 
   test('ドメイングループにはカラーピッカーが表示されない（ピン留めされていない場合）', async ({ context, extensionId }) => {
