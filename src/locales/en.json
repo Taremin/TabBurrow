@@ -439,6 +439,7 @@
         "trash": {
             "title": "Trash",
             "empty": "Trash is empty",
+            "noMatches": "No matching tabs found",
             "restore": "Restore",
             "restoreAll": "Restore All",
             "restoreSelected": "Restore Selected",

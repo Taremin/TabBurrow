@@ -505,22 +505,33 @@ export function App() {
     selectAll(filteredTabs.map(tab => tab.id));
   }, [filteredTabs, selectAll]);
 
-  const handleBulkDelete = useCallback(() => {
+  const handleBulkDelete = useCallback(async () => {
     const count = selectedTabIds.size;
     if (count === 0) return;
     
-    showConfirmDialog({
-      title: t('tabManager.selection.confirmDeleteTitle'),
-      message: t('tabManager.selection.confirmDeleteMessage', { count }),
-      onConfirm: async () => {
-        await bulkDeleteTabs([...selectedTabIds]);
-        refreshTrashCount();
-        setSelectedTabIds(new Set());
-        setIsSelectionMode(false);
-        hideConfirmDialog();
-      },
-    });
-  }, [selectedTabIds, bulkDeleteTabs, setSelectedTabIds, t, showConfirmDialog, hideConfirmDialog, setIsSelectionMode]);
+    const settings = await getSettings();
+    
+    // 即時削除（保存期間0日）の場合のみ警告
+    if (settings.trashRetentionDays === 0) {
+      showConfirmDialog({
+        title: t('tabManager.selection.confirmDeleteTitle'),
+        message: t('tabManager.selection.confirmDeleteMessage', { count }),
+        onConfirm: async () => {
+          await bulkDeleteTabs([...selectedTabIds]);
+          refreshTrashCount();
+          setSelectedTabIds(new Set());
+          setIsSelectionMode(false);
+          hideConfirmDialog();
+        },
+      });
+    } else {
+      // ゴミ箱に移動するだけなので確認不要
+      await bulkDeleteTabs([...selectedTabIds]);
+      refreshTrashCount();
+      setSelectedTabIds(new Set());
+      setIsSelectionMode(false);
+    }
+  }, [selectedTabIds, bulkDeleteTabs, setSelectedTabIds, t, showConfirmDialog, hideConfirmDialog, setIsSelectionMode, refreshTrashCount]);
 
   const handleBulkMoveToGroupWrapper = useCallback(async (groupName: string) => {
     if (selectedTabIds.size === 0) return;

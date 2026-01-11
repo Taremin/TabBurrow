@@ -122,8 +122,8 @@ test.describe('ゴミ箱機能', () => {
     const restoreButton = page.locator('.trash-item').first().locator('button').first();
     await restoreButton.click();
     
-    // ダイアログを閉じる
-    await page.locator('.dialog-close-button').click();
+    // ダイアログを閉じる（オーバーレイをクリック）
+    await page.locator('.dialog-overlay').click({ position: { x: 10, y: 10 } });
     
     // タブが復元されていることを確認
     await expect(page.locator('[data-testid="tab-card"]')).toHaveCount(1);

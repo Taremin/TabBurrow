@@ -163,13 +163,6 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
                 <span className="trash-count">({trashedTabs.length})</span>
               )}
             </h2>
-            <button
-              className="dialog-close-button"
-              onClick={onClose}
-              aria-label={t('common.close')}
-            >
-              ×
-            </button>
           </div>
 
           {/* 検索バー */}
@@ -236,7 +229,11 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
             ) : filteredTabs.length === 0 ? (
               <div className="trash-empty">
                 <Trash2 size={48} opacity={0.3} />
-                <p>{t('tabManager.trash.empty')}</p>
+                <p>
+                {searchQuery.trim()
+                  ? t('tabManager.trash.noMatches')
+                  : t('tabManager.trash.empty')}
+              </p>
               </div>
             ) : (
               filteredTabs.map(tab => (

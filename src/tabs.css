@@ -2456,10 +2456,14 @@ body {
 
 /* ゴミ箱ダイアログ */
 .trash-dialog {
-  width: min(900px, 90vw);
-  max-height: 80vh;
+  width: min(1200px, 95vw);
+  max-width: min(1200px, 95vw);
+  /* 共通スタイル（400px）を上書き */
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
+  padding: 24px;
+  /* 余白を調整 */
 }
 
 .trash-search {
@@ -2523,8 +2527,8 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 0 16px 16px;
-  min-height: 200px;
-  max-height: 400px;
+  min-height: 300px;
+  /* max-height削除: flex: 1 でダイアログサイズに追従 */
 }
 
 .trash-empty {

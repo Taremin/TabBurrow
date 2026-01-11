@@ -439,6 +439,7 @@
         "trash": {
             "title": "ゴミ箱",
             "empty": "ゴミ箱は空です",
+            "noMatches": "一致するタブがありません",
             "restore": "復元",
             "restoreAll": "すべて復元",
             "restoreSelected": "選択を復元",
