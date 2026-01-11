@@ -18,6 +18,7 @@ import { setupTabEventListeners, captureActiveTabsInAllWindows } from './tabEven
 import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress, type LinkCheckResult } from './linkChecker';
 import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup';
 import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage';
+import { initTrashCleanup, handleTrashCleanupAlarm } from './trash';
 
 /**
  * 拡張アイコンがクリックされたときの処理
@@ -112,6 +113,9 @@ async function initializeAll(): Promise<void> {
     
     // スクリーンショット定期更新を初期化
     await initScreenshotUpdate();
+    
+    // ゴミ箱クリーンアップを初期化
+    await initTrashCleanup();
 
     // 初期化時に現在のアクティブタブを取得
     if (settings.screenshotEnabled) {
@@ -288,6 +292,8 @@ browser.alarms.onAlarm.addListener((alarm) => {
   handleAutoCloseAlarm(alarm);
   // バックアップアラーム
   handleBackupAlarm(alarm);
+  // ゴミ箱クリーンアップアラーム
+  handleTrashCleanupAlarm(alarm.name);
   // スクリーンショット更新アラーム
   if (alarm.name === 'screenshot-update') {
     getSettings().then(settings => {

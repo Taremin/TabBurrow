@@ -126,7 +126,7 @@ export async function createTestTabData(page: Page, tabData: {
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 6;
+  const DB_VERSION = 7;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -172,6 +172,13 @@ export async function createTestTabData(page: Page, tabData: {
           if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
             const backupStore = db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
             backupStore.createIndex('createdAt', 'createdAt', { unique: false });
+          }
+          
+          // trashストアを作成（DB_VERSION 7で追加）
+          if (!db.objectStoreNames.contains('trash')) {
+            const trashStore = db.createObjectStore('trash', { keyPath: 'id' });
+            trashStore.createIndex('trashedAt', 'trashedAt', { unique: false });
+            trashStore.createIndex('domain', 'domain', { unique: false });
           }
         };
         
@@ -263,7 +270,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 } = {}): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 6;
+  const DB_VERSION = 7;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -306,6 +313,13 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
           if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
             const backupStore = db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
             backupStore.createIndex('createdAt', 'createdAt', { unique: false });
+          }
+          
+          // trashストアを作成（DB_VERSION 7で追加）
+          if (!db.objectStoreNames.contains('trash')) {
+            const trashStore = db.createObjectStore('trash', { keyPath: 'id' });
+            trashStore.createIndex('trashedAt', 'trashedAt', { unique: false });
+            trashStore.createIndex('domain', 'domain', { unique: false });
           }
         };
         
@@ -361,47 +375,53 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
  * dbSchema.tsと同じ定数を使用
  */
 export async function clearTestData(page: Page): Promise<void> {
-  // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 6;
+  const DB_VERSION = 7;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
-  const BACKUPS_STORE_NAME = 'backups';
-  
-  await page.evaluate(async (dbConfig) => {
-    const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
+  const TRASH_STORE_NAME = 'trash';
+
+  await page.evaluate(async (config) => {
+    const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, TRASH_STORE_NAME } = config;
     
-    // IndexedDBの全データをクリア
+    // DBを開く（ストアがない場合に作成するため）
     const openDB = (): Promise<IDBDatabase> => {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
         request.onupgradeneeded = (event) => {
           const db = (event.target as IDBOpenDBRequest).result;
           if (!db.objectStoreNames.contains(TABS_STORE_NAME)) {
-            db.createObjectStore(TABS_STORE_NAME, { keyPath: 'id' });
+            const store = db.createObjectStore(TABS_STORE_NAME, { keyPath: 'id' });
+            store.createIndex('domain', 'domain', { unique: false });
           }
           if (!db.objectStoreNames.contains(CUSTOM_GROUPS_STORE_NAME)) {
             db.createObjectStore(CUSTOM_GROUPS_STORE_NAME, { keyPath: 'name' });
           }
-          if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
-            db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
+          if (!db.objectStoreNames.contains(TRASH_STORE_NAME)) {
+            const trashStore = db.createObjectStore(TRASH_STORE_NAME, { keyPath: 'id' });
+            trashStore.createIndex('trashedAt', 'trashedAt', { unique: false });
+            trashStore.createIndex('domain', 'domain', { unique: false });
           }
         };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
       });
     };
 
     const db = await openDB();
+    const transaction = db.transaction([TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, TRASH_STORE_NAME], 'readwrite');
+    transaction.objectStore(TABS_STORE_NAME).clear();
+    transaction.objectStore(CUSTOM_GROUPS_STORE_NAME).clear();
+    transaction.objectStore(TRASH_STORE_NAME).clear();
     
     return new Promise<void>((resolve, reject) => {
-      const transaction = db.transaction([TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME], 'readwrite');
-      transaction.objectStore(TABS_STORE_NAME).clear();
-      transaction.objectStore(CUSTOM_GROUPS_STORE_NAME).clear();
-      transaction.oncomplete = () => resolve();
+      transaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
       transaction.onerror = () => reject(transaction.error);
     });
-  }, { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME });
+  }, { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, TRASH_STORE_NAME });
 }
 
 /**
@@ -412,7 +432,7 @@ export async function createCustomGroupData(page: Page, groups: {
   sortOrder?: number;
 }[]): Promise<void> {
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 6;
+  const DB_VERSION = 7;
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   
   await page.evaluate(async ({ groups, dbConfig }) => {

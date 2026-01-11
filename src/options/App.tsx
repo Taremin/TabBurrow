@@ -18,6 +18,7 @@ import { RestoreSettings } from './components/RestoreSettings';
 import { LinkCheckSettings } from './components/LinkCheckSettings';
 import { BackupSettings } from './components/BackupSettings';
 import { ScreenshotSettings } from './components/ScreenshotSettings';
+import { TrashSettings } from './components/TrashSettings';
 import { DataManagement } from './components/DataManagement';
 import { CustomGroupSettings } from './components/CustomGroupSettings';
 import { DomainGroupSettings } from './components/DomainGroupSettings';
@@ -306,6 +307,19 @@ export function App() {
             savedIntervalMinutes={savedSettings.screenshotUpdateIntervalMinutes}
             onEnabledChange={(value) => updateSetting('screenshotEnabled', value)}
             onIntervalMinutesChange={(value) => updateSetting('screenshotUpdateIntervalMinutes', value)}
+          />
+        </SettingsSection>
+
+        {/* ゴミ箱設定 */}
+        <SettingsSection
+          icon="🗑️"
+          title={t('settings.trash.title')}
+          description={t('settings.trash.retentionDaysDescription')}
+          dataTestId="trash-section"
+        >
+          <TrashSettings
+            trashRetentionDays={settings.trashRetentionDays}
+            onTrashRetentionDaysChange={(value) => updateSetting('trashRetentionDays', value)}
           />
         </SettingsSection>
 

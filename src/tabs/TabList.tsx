@@ -3,12 +3,18 @@
  * react-virtuosoのGroupedVirtuosoを使用
  */
 
-import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
-import { GroupedVirtuoso, Virtuoso, GroupedVirtuosoHandle } from 'react-virtuoso';
+import { useMemo, useCallback, useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { GroupedVirtuoso, Virtuoso, GroupedVirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import type { SavedTab, GroupSortType, ItemSortType, TabGroup, CustomGroupMeta, ViewMode, DisplayDensity, GroupFilter } from './types';
 import type { PinnedDomainGroup } from '../settings';
 import { TabCard } from './TabCard';
 import { GroupHeader } from './GroupHeader';
+
+/** TabListのハンドル型（親コンポーネントから呼び出せるメソッド） */
+export interface TabListHandle {
+  /** 現在のスクロール状態を保存 */
+  saveScrollState: () => void;
+}
 
 interface TabListProps {
   tabs: SavedTab[];
@@ -17,7 +23,7 @@ interface TabListProps {
   displayDensity: DisplayDensity;
   groupSort: GroupSortType;
   itemSort: ItemSortType;
-  onDeleteTab: (id: string) => void;
+  onDeleteTab: (id: string) => void | Promise<void>;
   onDeleteGroup: (groupName: string, groupType: 'domain' | 'custom') => void;
   onOpenGroup: (groupName: string, groupType: 'domain' | 'custom') => void;
   onOpenGroupAsTabGroup?: (groupName: string, groupType: 'domain' | 'custom') => void;
@@ -182,7 +188,7 @@ function filterTabsByRegex(tabs: SavedTab[], pattern: string): SavedTab[] {
  * - カスタムグループを上部に表示
  * - ドメイングループを下部に表示
  */
-export function TabList({
+export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList({
   tabs,
   customGroups,
   viewMode,
@@ -214,10 +220,24 @@ export function TabList({
   showGroupedTabsInDomainGroups = false,
   pinnedDomainGroups = [],
   onTogglePin,
-}: TabListProps) {
+}, ref) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
   const [pendingScrollGroup, setPendingScrollGroup] = useState<string | null>(null);
+  
+  // スクロール状態を保存（key変更によるリマウント時に復元するため）
+  const scrollStateRef = useRef<StateSnapshot | null>(null);
+  
+  // 親コンポーネントにメソッドを公開
+  useImperativeHandle(ref, () => ({
+    saveScrollState: () => {
+      if (virtuosoRef.current) {
+        virtuosoRef.current.getState((state) => {
+          scrollStateRef.current = state;
+        });
+      }
+    },
+  }), []);
 
   // グループ化とソート（フィルタ適用）
   const { groups, groupCounts, flatTabs } = useMemo(() => {
@@ -471,8 +491,9 @@ export function TabList({
           itemContent={itemContent}
           style={{ height: '100%', flex: 1 }}
           overscan={200}
+          {...(scrollStateRef.current ? { restoreStateFrom: scrollStateRef.current } : {})}
         />
       )}
     </div>
   );
-}
+});

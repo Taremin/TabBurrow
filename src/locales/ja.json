@@ -174,6 +174,12 @@
             "intervalLabel": "自動更新間隔（分）",
             "intervalHint": "アクティブなタブのスクリーンショットを定期的に更新します（1〜60分）。"
         },
+        "trash": {
+            "title": "ゴミ箱",
+            "retentionDays": "保持期間（日）",
+            "retentionDaysDescription": "削除したタブを指定日数保持します。0日にすると即時削除されます",
+            "emptyNow": "今すぐゴミ箱を空にする"
+        },
         "dataManagement": {
             "title": "データ管理",
             "tabData": "タブデータ",
@@ -429,6 +435,20 @@
         "groupFilter": {
             "placeholder": "正規表現で絞り込み...",
             "invalidPattern": "無効な正規表現"
+        },
+        "trash": {
+            "title": "ゴミ箱",
+            "empty": "ゴミ箱は空です",
+            "restore": "復元",
+            "restoreAll": "すべて復元",
+            "restoreSelected": "選択を復元",
+            "deletePermanently": "完全に削除",
+            "emptyTrash": "ゴミ箱を空にする",
+            "emptyTrashConfirm": "ゴミ箱を空にしますか？この操作は取り消せません。",
+            "deletedAt": "{days}日前に削除",
+            "deletedToday": "今日削除",
+            "itemCount": "{count}件のタブ",
+            "searchPlaceholder": "ゴミ箱内を検索..."
         }
     },
     "contextMenu": {

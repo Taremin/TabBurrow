@@ -2,7 +2,7 @@
  * TabBurrow - メインアプリケーションコンポーネント
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import browser from '../browserApi';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import { platform } from '../platform';
@@ -10,12 +10,13 @@ import type { Tabs } from 'webextension-polyfill';
 import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings';
 import type { GroupFilter } from './types';
 import { Header } from './Header';
-import { TabList } from './TabList';
+import { TabList, type TabListHandle } from './TabList';
 import { ConfirmDialog } from '../common/ConfirmDialog';
 import { LinkCheckDialog } from './LinkCheckDialog';
 import { PromptDialog } from '../common/PromptDialog';
 import { CreateNormalizationRuleDialog } from './CreateNormalizationRuleDialog';
 import { NormalizationResultDialog } from '../common/NormalizationResultDialog';
+import { TrashDialog, useTrashCount } from './TrashDialog';
 import type { NormalizationApplyResult } from '../storage';
 import { useTranslation } from '../common/i18nContext';
 
@@ -51,6 +52,9 @@ const waitForTabStatus = (tabId: number, waitFor: 'loading' | 'complete'): Promi
 
 export function App() {
   const { t } = useTranslation();
+  
+  // TabListのハンドル参照（スクロール状態保存用）
+  const tabListRef = useRef<TabListHandle>(null);
 
   // Custom Hooks
   const {
@@ -129,6 +133,10 @@ export function App() {
   const [isLinkCheckOpen, setIsLinkCheckOpen] = useState(false);
   const [isNormalizationRuleDialogOpen, setIsNormalizationRuleDialogOpen] = useState(false);
   const [normalizationResult, setNormalizationResult] = useState<NormalizationApplyResult | null>(null);
+  const [isTrashDialogOpen, setIsTrashDialogOpen] = useState(false);
+
+  // ゴミ箱カウント
+  const { count: trashCount, refresh: refreshTrashCount } = useTrashCount();
 
   // Tab Count
   const tabCount = useMemo(() => filteredTabs.length, [filteredTabs]);
@@ -257,6 +265,7 @@ export function App() {
         message: t('tabManager.customGroup.deleteConfirmMessage', { name: groupName }),
         onConfirm: async () => {
           await deleteCustomGroupByName(groupName);
+          refreshTrashCount();
           hideConfirmDialog();
         },
       });
@@ -266,6 +275,7 @@ export function App() {
         message: t('tabManager.confirmDialog.deleteGroupMessage', { domain: groupName, count: groupTabs.length }),
         onConfirm: async () => {
           await deleteDomainGroup(groupName);
+          refreshTrashCount();
           hideConfirmDialog();
         },
       });
@@ -485,6 +495,7 @@ export function App() {
       message: t('tabManager.selection.confirmDeleteMessage', { count }),
       onConfirm: async () => {
         await bulkDeleteTabs([...selectedTabIds]);
+        refreshTrashCount();
         setSelectedTabIds(new Set());
         setIsSelectionMode(false);
         hideConfirmDialog();
@@ -544,6 +555,7 @@ export function App() {
       message: t('tabManager.confirmDialog.deleteAllMessage', { count: allTabs.length }),
       onConfirm: async () => {
         await deleteAll();
+        refreshTrashCount();
         hideConfirmDialog();
       },
     });
@@ -595,6 +607,8 @@ export function App() {
         onCreateNormalizationRule={handleRequestCreateNormalizationRule}
         showGroupedTabsInDomainGroups={showGroupedTabsInDomainGroups}
         onToggleShowGroupedTabsInDomainGroups={handleToggleShowGroupedTabsInDomainGroups}
+        trashCount={trashCount}
+        onOpenTrash={() => setIsTrashDialogOpen(true)}
       />
 
       <main className="main">
@@ -609,14 +623,24 @@ export function App() {
         {/* タブ一覧 */}
         {filteredTabs.length > 0 && (
           <TabList
+            ref={tabListRef}
             tabs={filteredTabs}
             customGroups={customGroups}
             viewMode={viewMode ?? 'grouped'}
             displayDensity={displayDensity ?? 'normal'}
             groupSort={groupSort}
             itemSort={itemSort}
-            onDeleteTab={handleDeleteTab}
-            onDeleteGroup={handleDeleteGroup}
+            onDeleteTab={async (id) => {
+              // 削除前にスクロール状態を保存
+              tabListRef.current?.saveScrollState();
+              await handleDeleteTab(id);
+              refreshTrashCount();
+            }}
+            onDeleteGroup={(groupName, groupType) => {
+              // 削除前にスクロール状態を保存
+              tabListRef.current?.saveScrollState();
+              handleDeleteGroup(groupName, groupType);
+            }}
             onOpenGroup={handleOpenGroup}
             onOpenGroupAsTabGroup={platform.supportsTabGroups ? handleOpenGroupAsTabGroup : undefined}
             onOpenTab={handleOpenTab}
@@ -718,6 +742,15 @@ export function App() {
         isOpen={normalizationResult !== null}
         result={normalizationResult}
         onClose={() => setNormalizationResult(null)}
+      />
+
+      <TrashDialog
+        isOpen={isTrashDialogOpen}
+        onClose={() => setIsTrashDialogOpen(false)}
+        onTrashChanged={() => {
+          loadTabs();
+          refreshTrashCount();
+        }}
       />
     </div>
   );

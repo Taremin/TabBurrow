@@ -16,7 +16,7 @@ import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check, X } 
 interface TabCardProps {
   tab: SavedTab;
   customGroups: CustomGroupMeta[];
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => void | Promise<void>;
   onOpen: (url: string) => void;
   onMiddleClick?: (url: string) => void; // ホイールクリック（中クリック）
   onMoveToGroup: (tabId: string, groupName: string) => void;
@@ -135,7 +135,7 @@ export const TabCard = memo(function TabCard({
   const handleConfirmDelete = useCallback(async () => {
     setIsRemoving(true);
     await new Promise(resolve => setTimeout(resolve, 200));
-    onDelete(tab.id);
+    await onDelete(tab.id);
     setShowDeleteMenu(false);
   }, [onDelete, tab.id]);
 

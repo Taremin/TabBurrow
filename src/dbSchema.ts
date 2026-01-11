@@ -11,7 +11,7 @@
 export const DB_NAME = 'TabBurrowDB';
 
 /** データベースバージョン */
-export const DB_VERSION = 6;
+export const DB_VERSION = 7;
 
 /** タブストア名 */
 export const TABS_STORE_NAME = 'tabs';
@@ -21,6 +21,9 @@ export const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
 
 /** バックアップストア名 */
 export const BACKUPS_STORE_NAME = 'backups';
+
+/** ゴミ箱ストア名 */
+export const TRASH_STORE_NAME = 'trash';
 
 // ======================
 // 型定義
@@ -91,6 +94,16 @@ export interface BackupRecord {
   tabs: BackupTab[];
 }
 
+/**
+ * ゴミ箱内のタブ（削除されたタブ）
+ */
+export interface TrashedTab extends SavedTab {
+  trashedAt: number;        // ゴミ箱に入れた日時
+  originalGroup: string;    // 元のグループ名（復元時に使用）
+  originalGroupType: GroupType;
+  originalCustomGroups?: string[];
+}
+
 // ======================
 // インデックス定義
 // ======================
@@ -127,6 +140,14 @@ export const CUSTOM_GROUPS_INDEXES = [
  */
 export const BACKUPS_INDEXES = [
   { name: 'createdAt', keyPath: 'createdAt', unique: false },
+] as const;
+
+/**
+ * ゴミ箱ストアのインデックス定義
+ */
+export const TRASH_INDEXES = [
+  { name: 'trashedAt', keyPath: 'trashedAt', unique: false },
+  { name: 'domain', keyPath: 'domain', unique: false },
 ] as const;
 
 /**

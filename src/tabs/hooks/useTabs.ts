@@ -9,17 +9,17 @@ import type { SavedTab, CustomGroupMeta } from '../types';
 import {
   getAllTabs,
   getAllCustomGroups,
-  deleteTab,
-  deleteTabsByGroup,
-  deleteMultipleTabs,
+  moveTabToTrash,
+  moveTabsToTrash,
+  moveGroupToTrash,
   assignTabToCustomGroup,
   assignMultipleTabsToGroup,
   removeTabFromCustomGroup,
   removeMultipleTabsFromGroup,
   getStorageUsage,
-  deleteAllTabs,
   updateTab,
 } from '../../storage';
+import { getSettings } from '../../settings';
 import { formatBytes } from '../utils';
 import { useTranslation } from '../../common/i18nContext';
 
@@ -69,27 +69,33 @@ export function useTabs() {
     }
   }, [updateStats]);
 
-  // タブ削除
+  // タブ削除（ゴミ箱に移動）
   const handleDeleteTab = useCallback(async (id: string) => {
-    await deleteTab(id);
+    const settings = await getSettings();
+    await moveTabToTrash(id, settings.trashRetentionDays);
     await loadTabs();
   }, [loadTabs]);
 
-  // ドメイングループ削除（タブも削除）
+  // ドメイングループ削除（タブをゴミ箱に移動）
   const handleDeleteDomainGroup = useCallback(async (groupName: string) => {
-    await deleteTabsByGroup(groupName);
+    const settings = await getSettings();
+    await moveGroupToTrash(groupName, settings.trashRetentionDays);
     await loadTabs();
   }, [loadTabs]);
 
-  // 全削除
+  // 全削除（ゴミ箱に移動）
   const handleDeleteAll = useCallback(async () => {
-    await deleteAllTabs();
+    const settings = await getSettings();
+    const tabs = await getAllTabs();
+    const ids = tabs.map(tab => tab.id);
+    await moveTabsToTrash(ids, settings.trashRetentionDays);
     await loadTabs();
   }, [loadTabs]);
 
-  // 複数削除
+  // 複数削除（ゴミ箱に移動）
   const handleBulkDelete = useCallback(async (ids: string[]) => {
-    await deleteMultipleTabs(ids);
+    const settings = await getSettings();
+    await moveTabsToTrash(ids, settings.trashRetentionDays);
     await loadTabs();
   }, [loadTabs]);
 

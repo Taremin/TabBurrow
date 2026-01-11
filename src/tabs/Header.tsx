@@ -46,6 +46,9 @@ interface HeaderProps {
   itemSort: ItemSortType;
   onGroupSortChange: (mode: GroupSortType) => void;
   onItemSortChange: (mode: ItemSortType) => void;
+  // ゴミ箱関連
+  trashCount: number;
+  onOpenTrash: () => void;
 }
 
 export const Header = memo(function Header({
@@ -84,6 +87,8 @@ export const Header = memo(function Header({
   itemSort,
   onGroupSortChange,
   onItemSortChange,
+  trashCount,
+  onOpenTrash,
 }: HeaderProps) {
   const { t } = useTranslation();
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -460,6 +465,16 @@ export const Header = memo(function Header({
               <a href="options.html" className="btn btn-icon btn-secondary" title={t('tabManager.header.settingsButton')}>
                 <Settings size={18} />
               </a>
+              <button 
+                className={`btn btn-icon btn-secondary ${trashCount > 0 ? 'has-badge' : ''}`}
+                onClick={onOpenTrash}
+                title={t('tabManager.trash.title')}
+                aria-label={t('tabManager.trash.title')}
+                data-testid="trash-button"
+              >
+                <Trash2 size={18} />
+                {trashCount > 0 && <span className="trash-badge">{trashCount}</span>}
+              </button>
               <button 
                 className="btn btn-icon btn-primary"
                 onClick={onOpenAll}
