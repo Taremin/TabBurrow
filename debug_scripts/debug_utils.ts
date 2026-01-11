@@ -27,7 +27,7 @@ interface SeedOptions {
 export async function seedTabsData(page: Page, tabs: Partial<SavedTab>[], options: SeedOptions = {}) {
   const {
     dbName = 'TabBurrowDB',
-    dbVersion = 5,
+    dbVersion = 7,
     storeName = 'tabs'
   } = options;
 
