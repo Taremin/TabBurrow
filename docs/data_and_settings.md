@@ -2,7 +2,7 @@
 
 ## IndexedDB (`storage.ts`, `dbSchema.ts`)
 
-`TabBurrowDB` (Version 4) を使用。
+`TabBurrowDB` (Version 7) を使用。
 
 ### `tabs` ストア
 保存されたタブのメインデータ。
@@ -24,6 +24,8 @@
 *   **name**: グループ名 (PK)
 *   **createdAt**: 作成日時
 *   **updatedAt**: 更新日時
+*   **sortOrder**: 表示順序（昇順で表示、Version 5で追加）
+*   **color**: グループ色（HEX形式、例: "#3b82f6"、オプショナル）
 
 ### `backups` ストア (Version 3で追加)
 自動バックアップデータ。

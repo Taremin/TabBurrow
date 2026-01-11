@@ -53,6 +53,10 @@ interface TabListProps {
   // ピン留めドメイングループ
   pinnedDomainGroups?: PinnedDomainGroup[];
   onTogglePin?: (name: string) => void;
+  // カスタムグループの色変更
+  onCustomGroupColorChange?: (groupName: string, color: string | undefined) => void;
+  // ピン留めドメイングループの色変更
+  onPinnedDomainGroupColorChange?: (domain: string, color: string | undefined) => void;
 }
 
 /**
@@ -220,6 +224,8 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
   showGroupedTabsInDomainGroups = false,
   pinnedDomainGroups = [],
   onTogglePin,
+  onCustomGroupColorChange,
+  onPinnedDomainGroupColorChange,
 }, ref) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
@@ -371,9 +377,16 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         isPinned={group.groupType === 'domain' && pinnedDomainGroups.some(p => p.domain === group.name)}
         onTogglePin={group.groupType === 'domain' ? onTogglePin : undefined}
         color={groupColor}
+        onColorChange={
+          group.groupType === 'custom' 
+            ? (color) => onCustomGroupColorChange?.(group.name, color)
+            : (group.groupType === 'domain' && pinnedDomainGroups.some(p => p.domain === group.name))
+              ? (color) => onPinnedDomainGroupColorChange?.(group.name, color)
+              : undefined
+        }
       />
     );
-  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin]);
+  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {

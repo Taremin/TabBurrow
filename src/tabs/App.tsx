@@ -71,6 +71,7 @@ export function App() {
     handleBulkMoveToGroup: bulkMoveTabsToGroup,
     handleBulkRemoveFromGroup: bulkRemoveTabsFromGroup,
     handleUpdateTab: updateTabData,
+    handleUpdateCustomGroupColor,
   } = useTabs();
 
   const {
@@ -230,6 +231,24 @@ export function App() {
       await saveSettings({ ...settings, pinnedDomainGroups: newPinnedGroups });
     } catch (error) {
       console.error('ピン留め設定の保存に失敗:', error);
+    }
+  }, [pinnedDomainGroups]);
+
+  // ピン留めドメイングループの色変更
+  const handlePinnedDomainGroupColorChange = useCallback(async (domain: string, color: string | undefined) => {
+    const newPinnedGroups = pinnedDomainGroups.map(p =>
+      p.domain === domain ? { ...p, color } : p
+    );
+    
+    // オプティミスティック更新
+    setPinnedDomainGroups(newPinnedGroups);
+    
+    try {
+      const settings = await getSettings();
+      await saveSettings({ ...settings, pinnedDomainGroups: newPinnedGroups });
+      notifySettingsChanged();
+    } catch (error) {
+      console.error('ピン留めグループの色設定の保存に失敗:', error);
     }
   }, [pinnedDomainGroups]);
 
@@ -664,6 +683,8 @@ export function App() {
             showGroupedTabsInDomainGroups={showGroupedTabsInDomainGroups}
             pinnedDomainGroups={pinnedDomainGroups}
             onTogglePin={handleTogglePin}
+            onCustomGroupColorChange={handleUpdateCustomGroupColor}
+            onPinnedDomainGroupColorChange={handlePinnedDomainGroupColorChange}
           />
         )}
 

@@ -18,6 +18,7 @@ import {
   removeMultipleTabsFromGroup,
   getStorageUsage,
   updateTab,
+  updateCustomGroupColor,
 } from '../../storage';
 import { getSettings } from '../../settings';
 import { formatBytes } from '../utils';
@@ -129,6 +130,15 @@ export function useTabs() {
     await loadTabs();
   }, [loadTabs]);
 
+  // カスタムグループの色更新
+  const handleUpdateCustomGroupColor = useCallback(async (groupName: string, color: string | undefined) => {
+    await updateCustomGroupColor(groupName, color);
+    // オプティミスティック更新（UIのレスポンス向上のため即座に更新）
+    setCustomGroups(prev => prev.map(g =>
+      g.name === groupName ? { ...g, color } : g
+    ));
+  }, []);
+
   // 初期読み込みとイベントリスナー
   useEffect(() => {
     loadTabs();
@@ -163,5 +173,6 @@ export function useTabs() {
     handleBulkMoveToGroup,
     handleBulkRemoveFromGroup,
     handleUpdateTab,
+    handleUpdateCustomGroupColor,
   };
 }

@@ -6,6 +6,7 @@
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from '../common/i18nContext';
 import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin } from 'lucide-react';
+import { ColorPicker } from '../common/ColorPicker';
 
 interface GroupHeaderProps {
   name: string;
@@ -36,6 +37,7 @@ interface GroupHeaderProps {
   onTogglePin?: (name: string) => void;
   // グループ色
   color?: string;
+  onColorChange?: (color: string | undefined) => void;
 }
 
 /**
@@ -64,6 +66,7 @@ export const GroupHeader = memo(function GroupHeader({
   isPinned = false,
   onTogglePin,
   color,
+  onColorChange,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -222,6 +225,24 @@ export const GroupHeader = memo(function GroupHeader({
         <span className="group-count">({tabCount})</span>
       </div>
       <div className="group-actions">
+        {/* ピン留めボタン（ドメイングループのみ、左端に配置） */}
+        {isDomainGroup && onTogglePin && (
+          <button 
+            className={`group-pin ${isPinned ? 'pinned' : ''}`}
+            title={isPinned ? t('tabManager.group.unpinButton') : t('tabManager.group.pinButton')}
+            onClick={handleTogglePin}
+            data-testid="group-pin-button"
+          >
+            <Pin size={16} />
+          </button>
+        )}
+        {/* カスタムグループまたはピン留めドメイングループの色変更 */}
+        {(isCustomGroup || (isDomainGroup && isPinned)) && onColorChange && (
+          <ColorPicker
+            color={color}
+            onChange={onColorChange}
+          />
+        )}
         {/* グループ内フィルタ */}
         {onFilterChange && (
           <>
@@ -261,16 +282,6 @@ export const GroupHeader = memo(function GroupHeader({
             data-testid="group-rename-button"
           >
             <Pencil size={16} />
-          </button>
-        )}
-        {isDomainGroup && onTogglePin && (
-          <button 
-            className={`group-pin ${isPinned ? 'pinned' : ''}`}
-            title={isPinned ? t('tabManager.group.unpinButton') : t('tabManager.group.pinButton')}
-            onClick={handleTogglePin}
-            data-testid="group-pin-button"
-          >
-            <Pin size={16} />
           </button>
         )}
         <button 
