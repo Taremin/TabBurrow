@@ -141,15 +141,14 @@
 }
 
 .color-picker-trigger {
-    padding: 0;
-    /* btn-icon からサイズを継承 */
+    background: transparent !important;
+    color: var(--text-muted);
 }
 
 .color-preview {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    /* 四角から丸に変更してパレット感と区別？ またはそのまま 3px */
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
 

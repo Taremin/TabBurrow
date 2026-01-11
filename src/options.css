@@ -1084,6 +1084,13 @@
     color: var(--danger-color);
 }
 
+/* 設定画面内のカラーピッカートリガーのホバー色を周囲に合わせる */
+.custom-groups-settings .color-picker-trigger:hover:not(:disabled),
+.pinned-domain-groups-settings .color-picker-trigger:hover:not(:disabled) {
+    background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+}
+
 .add-group-button {
     align-self: flex-start;
 }

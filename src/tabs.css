@@ -450,6 +450,19 @@
   gap: 8px;
 }
 
+/* グループヘッダー内のカラーピッカートリガーを隣のボタンに合わせる */
+.group-header .color-picker-trigger {
+  padding: 6px !important;
+  min-width: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.group-header .color-picker-trigger:hover:not(:disabled) {
+  background: var(--accent-light) !important;
+  color: var(--accent-color) !important;
+}
+
 /* ピン留めボタン */
 .group-pin {
   background: none;
