@@ -4,11 +4,13 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import browser from '../browserApi';
+import type { Tabs } from 'webextension-polyfill';
 import '../tabGroupsPolyfill.js'; // Vivaldi用polyfillを適用
 import { platform } from '../platform';
-import type { Tabs } from 'webextension-polyfill';
+import { useTabs } from './hooks/useTabs';
+import { useDialogs } from './hooks/useDialogs';
+import type { SavedTab, GroupFilter } from './types';
 import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings';
-import type { GroupFilter } from './types';
 import { Header } from './Header';
 import { TabList, type TabListHandle } from './TabList';
 import { ConfirmDialog } from '../common/ConfirmDialog';
@@ -17,15 +19,14 @@ import { PromptDialog } from '../common/PromptDialog';
 import { CreateNormalizationRuleDialog } from './CreateNormalizationRuleDialog';
 import { NormalizationResultDialog } from '../common/NormalizationResultDialog';
 import { TrashDialog, useTrashCount } from './TrashDialog';
+import { EditTabDialog } from './EditTabDialog';
 import type { NormalizationApplyResult } from '../storage';
 import { useTranslation } from '../common/i18nContext';
 
 // Custom Hooks
-import { useTabs } from './hooks/useTabs';
 import { useGroups } from './hooks/useGroups';
 import { useSearch } from './hooks/useSearch';
 import { useSelection } from './hooks/useSelection';
-import { useDialogs } from './hooks/useDialogs';
 
 
 
@@ -100,6 +101,8 @@ export function App() {
     selectAll,
     deselectAll: handleDeselectAll,
     setIsSelectionMode,
+    addSelection: handleSelectGroup,
+    removeSelection: handleDeselectGroup,
   } = useSelection();
 
   const {
@@ -112,9 +115,9 @@ export function App() {
     createGroupDialog,
     showCreateGroupDialog,
     hideCreateGroupDialog,
-    tabRenameDialog,
-    showTabRenameDialog,
-    hideTabRenameDialog,
+    editTabDialog,
+    showEditTabDialog,
+    hideEditTabDialog,
   } = useDialogs();
 
   // Settings State
@@ -234,7 +237,6 @@ export function App() {
     }
   }, [pinnedDomainGroups]);
 
-  // ピン留めドメイングループの色変更
   const handlePinnedDomainGroupColorChange = useCallback(async (domain: string, color: string | undefined) => {
     const newPinnedGroups = pinnedDomainGroups.map(p =>
       p.domain === domain ? { ...p, color } : p
@@ -251,6 +253,38 @@ export function App() {
       console.error('ピン留めグループの色設定の保存に失敗:', error);
     }
   }, [pinnedDomainGroups]);
+
+  // グループ別のアイテムソート順更新
+  const handleUpdateGroupItemSort = useCallback(async (groupName: string, groupType: 'domain' | 'custom', newItemSort: ItemSortType | undefined) => {
+    const { updateCustomGroupItemSort, updatePinnedDomainGroupSort } = await import('../storage');
+    try {
+      if (groupType === 'custom') {
+        await updateCustomGroupItemSort(groupName, newItemSort);
+      } else {
+        await updatePinnedDomainGroupSort(groupName, newItemSort);
+      }
+      // 設定を再読み込みして内部状態(pinnedDomainGroups)を更新
+      await loadSettings();
+      await loadTabs();
+    } catch (error) {
+      console.error('グループのソート順更新に失敗:', error);
+    }
+  }, [loadSettings, loadTabs]);
+
+  // タブ編集
+  const handleRequestTabEdit = useCallback((tabId: string) => {
+    const tab = allTabs.find(t => t.id === tabId);
+    showEditTabDialog(tabId, tab?.displayName || '', tab?.sortKey || '');
+  }, [allTabs, showEditTabDialog]);
+
+  const handleConfirmTabEdit = useCallback(async (displayName: string, sortKey: string) => {
+    const updates: Partial<SavedTab> = {
+      displayName: displayName.trim() || undefined,
+      sortKey: sortKey.trim() || undefined
+    };
+    await updateTabData(editTabDialog.tabId, updates);
+    hideEditTabDialog();
+  }, [editTabDialog.tabId, updateTabData, hideEditTabDialog]);
 
   // Actions Wrapper
   const handleOpenTab = useCallback((url: string) => {
@@ -486,19 +520,7 @@ export function App() {
     }
   }, [t, loadTabs, setIsSelectionMode, setSelectedTabIds]);
 
-  // Tab Rename Logic
-  const handleRequestTabRename = useCallback((tabId: string) => {
-    const tab = allTabs.find(t => t.id === tabId);
-    showTabRenameDialog(tabId, tab?.displayName || tab?.title || '');
-  }, [allTabs, showTabRenameDialog]);
-
-  const handleConfirmTabRename = useCallback(async (newDisplayName: string) => {
-    const trimmed = newDisplayName.trim();
-    // 空文字の場合はundefinedにして表示名を解除
-    const displayName = trimmed || undefined;
-    await updateTabData(tabRenameDialog.tabId, { displayName });
-    hideTabRenameDialog();
-  }, [tabRenameDialog.tabId, updateTabData, hideTabRenameDialog]);
+  // 旧ハンドラの削除・更新
 
   // Bulk Actions
   const handleSelectAll = useCallback(() => {
@@ -546,22 +568,6 @@ export function App() {
     setSelectedTabIds(new Set());
     setIsSelectionMode(false);
   }, [selectedTabIds, bulkRemoveTabsFromGroup, setSelectedTabIds, setIsSelectionMode]);
-
-  const handleSelectGroup = useCallback((tabIds: string[]) => {
-      setSelectedTabIds(prev => {
-          const next = new Set(prev);
-          tabIds.forEach(id => next.add(id));
-          return next;
-      });
-  }, [setSelectedTabIds]);
-
-  const handleDeselectGroup = useCallback((tabIds: string[]) => {
-      setSelectedTabIds(prev => {
-          const next = new Set(prev);
-          tabIds.forEach(id => next.delete(id));
-          return next;
-      });
-  }, [setSelectedTabIds]);
 
   // Global Actions
   const handleOpenAll = useCallback(() => {
@@ -680,7 +686,7 @@ export function App() {
             onMoveToGroup={moveTabToGroup}
             onRemoveFromGroup={removeTabFromGroup}
             onRequestMoveToNewGroup={handleRequestMoveToNewGroup}
-            onRenameTab={handleRequestTabRename}
+            onEditTab={handleRequestTabEdit}
             isSelectionMode={isSelectionMode}
             selectedTabIds={selectedTabIds}
             onToggleSelection={handleToggleSelection}
@@ -696,6 +702,7 @@ export function App() {
             onTogglePin={handleTogglePin}
             onCustomGroupColorChange={handleUpdateCustomGroupColor}
             onPinnedDomainGroupColorChange={handlePinnedDomainGroupColorChange}
+            onUpdateGroupItemSort={handleUpdateGroupItemSort}
           />
         )}
 
@@ -752,15 +759,13 @@ export function App() {
         onCancel={hideCreateGroupDialog}
       />
 
-      {/* タブ表示名変更ダイアログ (PromptDialog) */}
-      <PromptDialog
-        isOpen={tabRenameDialog.isOpen}
-        title={t('tabManager.tabCard.renameDialogTitle')}
-        message={t('tabManager.tabCard.renameDialogMessage')}
-        defaultValue={tabRenameDialog.currentDisplayName || ''}
-        allowEmpty={true}
-        onConfirm={handleConfirmTabRename}
-        onCancel={hideTabRenameDialog}
+      <EditTabDialog
+        isOpen={editTabDialog.isOpen}
+        title={t('tabManager.tabCard.editDialogTitle')}
+        defaultDisplayName={editTabDialog.currentDisplayName}
+        defaultSortKey={editTabDialog.currentSortKey}
+        onConfirm={handleConfirmTabEdit}
+        onCancel={hideEditTabDialog}
       />
 
       <CreateNormalizationRuleDialog

@@ -35,7 +35,7 @@ interface TabListProps {
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string, groupName?: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
-  onRenameTab?: (tabId: string) => void; // タブの表示名変更
+  onEditTab?: (tabId: string) => void; // タブの編集
   // 選択モード関連
   isSelectionMode: boolean;
   selectedTabIds: Set<string>;
@@ -57,6 +57,7 @@ interface TabListProps {
   onCustomGroupColorChange?: (groupName: string, color: string | undefined) => void;
   // ピン留めドメイングループの色変更
   onPinnedDomainGroupColorChange?: (domain: string, color: string | undefined) => void;
+  onUpdateGroupItemSort?: (groupName: string, groupType: 'domain' | 'custom', itemSort: ItemSortType | undefined) => void;
 }
 
 /**
@@ -101,30 +102,42 @@ function groupTabs(tabs: SavedTab[], showGroupedTabsInDomainGroups: boolean = fa
 
 /**
  * グループ内のタブをソート
+ * 1. sortKey (文字列) があればそれによる辞書順。sortKeyがあるものが優先。
+ * 2. 同一、または両方ない場合に sortType によるソート。
  */
 function sortTabsInGroup(tabs: SavedTab[], sortType: ItemSortType): SavedTab[] {
   const sorted = [...tabs];
   
-  switch (sortType) {
-    case 'saved-desc':
-      sorted.sort((a, b) => b.savedAt - a.savedAt);
-      break;
-    case 'saved-asc':
-      sorted.sort((a, b) => a.savedAt - b.savedAt);
-      break;
-    case 'title-asc':
-      sorted.sort((a, b) => a.title.localeCompare(b.title, 'ja'));
-      break;
-    case 'title-desc':
-      sorted.sort((a, b) => b.title.localeCompare(a.title, 'ja'));
-      break;
-    case 'accessed-desc':
-      sorted.sort((a, b) => b.lastAccessed - a.lastAccessed);
-      break;
-    case 'accessed-asc':
-      sorted.sort((a, b) => a.lastAccessed - b.lastAccessed);
-      break;
-  }
+  sorted.sort((a, b) => {
+    // 第一段階: sortKey
+    const keyA = a.sortKey || '';
+    const keyB = b.sortKey || '';
+    
+    if (keyA && !keyB) return -1;
+    if (!keyA && keyB) return 1;
+    if (keyA && keyB) {
+      const cmp = keyA.localeCompare(keyB, 'ja');
+      if (cmp !== 0) return cmp;
+    }
+    
+    // 第二段階: sortType
+    switch (sortType) {
+      case 'saved-desc':
+        return b.savedAt - a.savedAt;
+      case 'saved-asc':
+        return a.savedAt - b.savedAt;
+      case 'title-asc':
+        return a.title.localeCompare(b.title, 'ja');
+      case 'title-desc':
+        return b.title.localeCompare(a.title, 'ja');
+      case 'accessed-desc':
+        return b.lastAccessed - a.lastAccessed;
+      case 'accessed-asc':
+        return a.lastAccessed - b.lastAccessed;
+      default:
+        return 0;
+    }
+  });
   
   return sorted;
 }
@@ -210,7 +223,7 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
   onMoveToGroup,
   onRemoveFromGroup,
   onRequestMoveToNewGroup,
-  onRenameTab,
+  onEditTab,
   isSelectionMode,
   selectedTabIds,
   onToggleSelection,
@@ -226,13 +239,13 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
   onTogglePin,
   onCustomGroupColorChange,
   onPinnedDomainGroupColorChange,
+  onUpdateGroupItemSort,
 }, ref) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
-  const [pendingScrollGroup, setPendingScrollGroup] = useState<string | null>(null);
-  
   // スクロール状態を保存（key変更によるリマウント時に復元するため）
   const scrollStateRef = useRef<StateSnapshot | null>(null);
+  const [pendingScrollGroup, setPendingScrollGroup] = useState<string | null>(null);
   
   // 親コンポーネントにメソッドを公開
   useImperativeHandle(ref, () => ({
@@ -295,7 +308,9 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     
     // カスタムグループを先に追加
     for (const [name, groupTabList] of sortedCustomGroups) {
-      const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
+      const customGroup = customGroups.find(g => g.name === name);
+      const effectiveItemSort = (customGroup?.itemSort as ItemSortType) || itemSort;
+      const sortedTabs = sortTabsInGroup(groupTabList, effectiveItemSort);
       // グループフィルタを適用
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
       const isCollapsed = collapsedGroups[name] || false;
@@ -309,7 +324,9 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     
     // ピン留めドメイングループを追加（カスタムグループの直後）
     for (const [name, groupTabList] of pinnedDomainGroupEntries) {
-      const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
+      const pinnedGroup = pinnedDomainGroups.find(p => p.domain === name);
+      const effectiveItemSort = pinnedGroup?.itemSort || itemSort;
+      const sortedTabs = sortTabsInGroup(groupTabList, effectiveItemSort);
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
       const isCollapsed = collapsedGroups[name] || false;
       groups.push({ name, groupType: 'domain', tabs: filteredTabs });
@@ -342,17 +359,9 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     const groupTabIds = group.tabs.map(t => t.id);
     const isCollapsed = collapsedGroups[group.name] || false;
     
-    // グループ色を取得
-    let groupColor: string | undefined;
-    if (group.groupType === 'custom') {
-      // カスタムグループの色はcustomGroupsから取得
-      const customGroup = customGroups.find(g => g.name === group.name);
-      groupColor = customGroup?.color;
-    } else {
-      // ピン留めドメイングループの色はpinnedDomainGroupsから取得
-      const pinnedGroup = pinnedDomainGroups.find(p => p.domain === group.name);
-      groupColor = pinnedGroup?.color;
-    }
+    const isCustomGroup = group.groupType === 'custom';
+    const groupMeta = isCustomGroup ? customGroups.find(g => g.name === group.name) : undefined;
+    const pinnedGroup = !isCustomGroup ? pinnedDomainGroups.find(p => p.domain === group.name) : undefined;
     
     return (
       <GroupHeader
@@ -376,17 +385,16 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         displayName={group.groupType === 'domain' ? domainGroupAliases[group.name] : undefined}
         isPinned={group.groupType === 'domain' && pinnedDomainGroups.some(p => p.domain === group.name)}
         onTogglePin={group.groupType === 'domain' ? onTogglePin : undefined}
-        color={groupColor}
-        onColorChange={
-          group.groupType === 'custom' 
-            ? (color) => onCustomGroupColorChange?.(group.name, color)
-            : (group.groupType === 'domain' && pinnedDomainGroups.some(p => p.domain === group.name))
-              ? (color) => onPinnedDomainGroupColorChange?.(group.name, color)
-              : undefined
+        color={isCustomGroup ? groupMeta?.color : pinnedGroup?.color}
+        onColorChange={isCustomGroup 
+          ? (c) => onCustomGroupColorChange?.(group.name, c) 
+          : (c) => onPinnedDomainGroupColorChange?.(group.name, c)
         }
+        itemSort={isCustomGroup ? groupMeta?.itemSort : pinnedGroup?.itemSort}
+        onItemSortChange={(sort) => onUpdateGroupItemSort?.(group.name, group.groupType, sort)}
       />
     );
-  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange]);
+  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {
@@ -443,7 +451,7 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         onMoveToGroup={onMoveToGroup}
         onRemoveFromGroup={onRemoveFromGroup}
         onRequestMoveToNewGroup={onRequestMoveToNewGroup}
-        onRenameTab={onRenameTab}
+        onEditTab={onEditTab}
         isSelectionMode={isSelectionMode}
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
@@ -451,7 +459,7 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         onNavigateToGroup={handleNavigateToGroup}
       />
     );
-  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onRenameTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, handleNavigateToGroup]);
+  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onEditTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, handleNavigateToGroup]);
 
   // フラット表示用のソート済みタブリスト
   const sortedFlatTabs = useMemo(() => {
@@ -472,14 +480,14 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         onMoveToGroup={onMoveToGroup}
         onRemoveFromGroup={onRemoveFromGroup}
         onRequestMoveToNewGroup={onRequestMoveToNewGroup}
-        onRenameTab={onRenameTab}
+        onEditTab={onEditTab}
         isSelectionMode={isSelectionMode}
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
         isCompact={isCompact}
       />
     );
-  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onRenameTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
+  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onEditTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
 
   if (tabs.length === 0) {
     return null;
@@ -504,7 +512,8 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
           itemContent={itemContent}
           style={{ height: '100%', flex: 1 }}
           overscan={200}
-          {...(scrollStateRef.current ? { restoreStateFrom: scrollStateRef.current } : {})}
+          // eslint-disable-next-line react-hooks/refs
+          restoreStateFrom={scrollStateRef.current || undefined}
         />
       )}
     </div>

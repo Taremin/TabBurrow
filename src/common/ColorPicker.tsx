@@ -148,7 +148,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
                 type="button"
                 className={`color-preset-item ${color === presetColor ? 'selected' : ''}`}
                 style={{ backgroundColor: presetColor }}
-                onClick={() => handlePresetClick(presetColor)}
+                onClick={(e) => { e.stopPropagation(); handlePresetClick(presetColor); }}
                 title={presetColor}
               />
             ))}
@@ -156,7 +156,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
             <button
               type="button"
               className={`color-preset-item no-color ${!color ? 'selected' : ''}`}
-              onClick={handleClearColor}
+              onClick={(e) => { e.stopPropagation(); handleClearColor(); }}
               title={t('common.colorPicker.noColor')}
             >
               <X size={12} />
@@ -167,7 +167,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
           <button
             type="button"
             className="color-custom-toggle"
-            onClick={() => setShowCustomPicker(prev => !prev)}
+            onClick={(e) => { e.stopPropagation(); setShowCustomPicker(prev => !prev); }}
           >
             {showCustomPicker ? t('common.colorPicker.close') : t('common.colorPicker.customColor')}
           </button>

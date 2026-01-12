@@ -4,9 +4,12 @@
  */
 
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from '../common/i18nContext';
-import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin } from 'lucide-react';
+import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin, SortAsc, Check } from 'lucide-react';
 import { ColorPicker } from '../common/ColorPicker';
+import { useClickOutside } from '../common/hooks/useClickOutside';
+import type { ItemSortType } from './types';
 
 interface GroupHeaderProps {
   name: string;
@@ -38,6 +41,9 @@ interface GroupHeaderProps {
   // グループ色
   color?: string;
   onColorChange?: (color: string | undefined) => void;
+  // グループ別のアイテムソート順変更
+  itemSort?: string;
+  onItemSortChange?: (itemSort: ItemSortType | undefined) => void;
 }
 
 /**
@@ -67,9 +73,39 @@ export const GroupHeader = memo(function GroupHeader({
   onTogglePin,
   color,
   onColorChange,
+  itemSort,
+  onItemSortChange,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const [sortMenuPosition, setSortMenuPosition] = useState({ left: 0, top: 0 });
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
+
+  // 外部クリックでメニューを閉じる
+  const closeSortMenu = useCallback(() => setShowSortMenu(false), []);
+  useClickOutside([sortMenuRef, sortButtonRef], closeSortMenu, showSortMenu);
+
+  // メニュートグル
+  const handleToggleSortMenu = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!showSortMenu && sortButtonRef.current) {
+      const rect = sortButtonRef.current.getBoundingClientRect();
+      setSortMenuPosition({
+        left: rect.right - 200, // メニュー幅を考慮して右寄せ
+        top: rect.bottom + 4,
+      });
+    }
+    setShowSortMenu(prev => !prev);
+  }, [showSortMenu]);
+
+  const handleSortSelect = useCallback((value: ItemSortType | undefined) => {
+    if (onItemSortChange) {
+      onItemSortChange(value);
+    }
+    setShowSortMenu(false);
+  }, [onItemSortChange]);
   const checkboxRef = useRef<HTMLInputElement>(null);
   
   // 正規表現が有効かどうか
@@ -283,6 +319,62 @@ export const GroupHeader = memo(function GroupHeader({
           >
             <Pencil size={16} />
           </button>
+        )}
+        {/* グループ別のソート順選択 (カスタムグループまたはピン留め済みドメイングループのみ) */}
+        {onItemSortChange && (groupType === 'custom' || isPinned) && (
+          <div className="group-sort-wrapper">
+            <button
+              ref={sortButtonRef}
+              className={`group-action-button ${itemSort && itemSort !== '' ? 'active' : ''}`}
+              title={t('tabManager.sort.itemLabel')}
+              onClick={handleToggleSortMenu}
+              data-testid="group-item-sort-button"
+            >
+              <SortAsc size={16} />
+            </button>
+            {showSortMenu && createPortal(
+              <div
+                ref={sortMenuRef}
+                className="group-menu-portal group-sort-menu"
+                style={{
+                  position: 'fixed',
+                  left: sortMenuPosition.left,
+                  top: sortMenuPosition.top,
+                  zIndex: 1000,
+                }}
+              >
+                <div className="group-menu-label">{t('tabManager.sort.itemLabel')}</div>
+                <button
+                  className={`group-menu-item ${!itemSort ? 'is-selected' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); handleSortSelect(undefined); }}
+                  data-testid="group-sort-option-default"
+                >
+                  <span className="group-menu-item-check">{!itemSort && <Check size={14} />}</span>
+                  <span className="group-menu-item-text">{t('tabManager.sort.default')}</span>
+                </button>
+                <div className="group-menu-divider" />
+                {[
+                  { value: 'saved-desc' as const, label: t('tabManager.sort.savedDesc') },
+                  { value: 'saved-asc' as const, label: t('tabManager.sort.savedAsc') },
+                  { value: 'title-asc' as const, label: t('tabManager.sort.titleAsc') },
+                  { value: 'title-desc' as const, label: t('tabManager.sort.titleDesc') },
+                  { value: 'accessed-desc' as const, label: t('tabManager.sort.accessedDesc') },
+                  { value: 'accessed-asc' as const, label: t('tabManager.sort.accessedAsc') },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    className={`group-menu-item ${itemSort === opt.value ? 'is-selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); handleSortSelect(opt.value); }}
+                    data-testid={`group-sort-option-${opt.value}`}
+                  >
+                    <span className="group-menu-item-check">{itemSort === opt.value && <Check size={14} />}</span>
+                    <span className="group-menu-item-text">{opt.label}</span>
+                  </button>
+                ))}
+              </div>,
+              document.body
+            )}
+          </div>
         )}
         <button 
           className="group-open" 

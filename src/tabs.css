@@ -498,6 +498,28 @@
   margin-left: 4px;
 }
 
+/* 汎用アクションボタン（ソート順、編集など） */
+.group-action-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.group-action-button:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.group-action-button.active {
+  color: var(--accent-color);
+}
+
 .group-open {
   background: none;
   border: none;

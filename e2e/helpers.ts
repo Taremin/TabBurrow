@@ -123,10 +123,12 @@ export async function createTestTabData(page: Page, tabData: {
   screenshot?: boolean; // スクリーンショットを含めるか
   displayName?: string; // カスタム表示名
   customGroups?: string[]; // カスタムグループ名
+  savedAt?: number; // 保存日時
+  lastAccessed?: number; // 最終アクセス日時
 }): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 7;
+  const DB_VERSION = 8;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -232,8 +234,8 @@ export async function createTestTabData(page: Page, tabData: {
       groupType: data.groupType || 'domain',
       favIconUrl: '',
       screenshot: screenshotBlob,
-      lastAccessed: Date.now(),
-      savedAt: Date.now(),
+      lastAccessed: data.lastAccessed || Date.now(),
+      savedAt: data.savedAt || Date.now(),
       canonicalUrl: data.url, // デフォルトはURLそのまま
     };
     
@@ -270,7 +272,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
 } = {}): Promise<void> {
   // dbSchema.tsと同じ定数を使用
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 7;
+  const DB_VERSION = 8;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const BACKUPS_STORE_NAME = 'backups';
@@ -376,7 +378,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
  */
 export async function clearTestData(page: Page): Promise<void> {
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 7;
+  const DB_VERSION = 8;
   const TABS_STORE_NAME = 'tabs';
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   const TRASH_STORE_NAME = 'trash';
@@ -432,7 +434,7 @@ export async function createCustomGroupData(page: Page, groups: {
   sortOrder?: number;
 }[]): Promise<void> {
   const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 7;
+  const DB_VERSION = 8;
   const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
   
   await page.evaluate(async ({ groups, dbConfig }) => {
