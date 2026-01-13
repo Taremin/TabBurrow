@@ -88,4 +88,36 @@ test.describe('Tab Sorting', () => {
     // 6. Accessed Asc (Oldest first): 2 (3s), 3 (2s), 1 (1s) -> 2: A Tab
     await testSort('accessed-asc', 'A Tab');
   });
+
+  test('Group Header Buttons Order', async ({ page, extensionId }) => {
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    await clearTestData(page);
+
+    const groupName = 'OrderTestGroup';
+    await createTestTabData(page, { url: 'https://example.com', title: 'Tab', domain: 'example.com', customGroups: [groupName] });
+    await page.reload();
+    await waitForPageLoad(page);
+
+    const groupHeader = page.locator(selectors.groupHeader).first();
+    const actions = groupHeader.locator('.group-actions');
+
+    // 順序を確認
+    const rawOrder = await actions.locator('button, .group-sort-wrapper, .color-picker-trigger').evaluateAll(elements => {
+      return elements.map(el => {
+        if (el.classList.contains('group-sort-wrapper') || el.querySelector('[data-testid="group-item-sort-button"]')) return 'sort';
+        if (el.getAttribute('data-testid') === 'group-filter-toggle') return 'filter';
+        if (el.getAttribute('data-testid') === 'group-rename-button') return 'rename';
+        if (el.classList.contains('color-picker-trigger')) return 'palette';
+        return 'other';
+      }).filter(type => type !== 'other');
+    });
+
+    // 重複を除去
+    const order = rawOrder.filter((item, index) => rawOrder.indexOf(item) === index);
+
+    // 期待される順序: sort, palette, filter, rename
+    const relevantOrder = order.filter(t => ['sort', 'palette', 'filter', 'rename'].includes(t));
+    expect(relevantOrder).toEqual(['sort', 'palette', 'filter', 'rename']);
+  });
 });

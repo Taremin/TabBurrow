@@ -612,18 +612,9 @@ test.describe('一括選択機能', () => {
     // 一括削除ボタンをクリック
     const bulkDeleteButton = page.getByRole('button', { name: /一括削除|Delete Selected/ });
     await bulkDeleteButton.click();
-    await page.waitForTimeout(100);
-    
-    // 確認ダイアログが表示される
-    const confirmDialog = page.locator('.dialog');
-    await expect(confirmDialog).toBeVisible();
-    
-    // 確認ボタンをクリック
-    const confirmButton = confirmDialog.locator('button.btn-danger');
-    await confirmButton.click();
     await page.waitForTimeout(300);
     
-    // 1つだけ残る
+    // 1つだけ残る（ゴミ箱に移動されるため確認ダイアログは表示されない）
     await expect(tabCards).toHaveCount(1);
   });
 
@@ -1484,11 +1475,11 @@ test.describe('タブ表示名変更機能', () => {
     
     // ダイアログに新しい表示名を入力
     const dialog = page.locator('.dialog');
-    const input = dialog.locator('input[type="text"]');
+    const input = dialog.locator(tabsPageSelectors.editTabDisplayNameInput);
     await input.fill('My Custom Display Name');
     
     // OKボタンをクリック
-    const okButton = dialog.locator('button.btn-primary');
+    const okButton = dialog.locator(tabsPageSelectors.editTabConfirmButton);
     await okButton.click();
     await page.waitForTimeout(300);
     
@@ -1530,12 +1521,12 @@ test.describe('タブ表示名変更機能', () => {
     await expect(dialog).toBeVisible();
     
     // 入力欄を空にする
-    const input = dialog.locator('input[type="text"]');
+    const input = dialog.locator(tabsPageSelectors.editTabDisplayNameInput);
     await input.clear();
     await page.waitForTimeout(100);
     
     // OKボタンが有効であることを確認（空入力でも押せる）
-    const okButton = dialog.locator('button.btn-primary');
+    const okButton = dialog.locator(tabsPageSelectors.editTabConfirmButton);
     await expect(okButton).toBeEnabled();
     
     // OKボタンをクリック
@@ -1578,7 +1569,7 @@ test.describe('タブ表示名変更機能', () => {
     await expect(dialog).toBeVisible();
     
     // 入力欄の初期値が元のタイトルになっている
-    const input = dialog.locator('input[type="text"]');
+    const input = dialog.locator(tabsPageSelectors.editTabDisplayNameInput);
     await expect(input).toHaveValue('My Original Page Title');
     
     // キャンセル

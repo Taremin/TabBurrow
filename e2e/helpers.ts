@@ -36,7 +36,7 @@ export const tabsPageSelectors = {
   groupRenameButton: '[data-testid="group-rename-button"]',
   pinButton: '[data-testid="group-pin-button"]',
   groupActionButton: '[data-testid="group-action-button"]',
-  tabRenameButton: '[data-testid="tab-rename-button"]',
+  tabRenameButton: '[data-testid="tab-edit-button"]',
   tabGroupButton: '[data-testid="tab-group-button"]',
   tabDeleteButton: '[data-testid="tab-delete-button"]',
   
@@ -44,6 +44,11 @@ export const tabsPageSelectors = {
   confirmDialog: '.confirm-dialog',
   confirmButton: '.confirm-btn',
   cancelButton: '.cancel-btn',
+  
+  // 編集ダイアログ
+  editTabDisplayNameInput: '[data-testid="edit-tab-display-name"]',
+  editTabSortKeyInput: '[data-testid="edit-tab-sort-key"]',
+  editTabConfirmButton: '[data-testid="confirm-edit-tab"]',
   
   // その他
   screenshotPopup: '[data-testid="screenshot-popup"]',

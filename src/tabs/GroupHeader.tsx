@@ -272,54 +272,6 @@ export const GroupHeader = memo(function GroupHeader({
             <Pin size={16} />
           </button>
         )}
-        {/* カスタムグループまたはピン留めドメイングループの色変更 */}
-        {(isCustomGroup || (isDomainGroup && isPinned)) && onColorChange && (
-          <ColorPicker
-            color={color}
-            onChange={onColorChange}
-          />
-        )}
-        {/* グループ内フィルタ */}
-        {onFilterChange && (
-          <>
-            {showFilter && (
-              <div className="group-filter">
-                <input
-                  type="text"
-                  className={`group-filter-input ${!isValidPattern ? 'error' : ''}`}
-                  placeholder={t('tabManager.groupFilter.placeholder')}
-                  value={filterPattern}
-                  onChange={handleFilterChange}
-                  onClick={e => e.stopPropagation()}
-                  data-testid="group-filter-input"
-                />
-                {!isValidPattern && (
-                  <span className="group-filter-error" title={t('tabManager.groupFilter.invalidPattern')}>
-                    <AlertTriangle size={16} />
-                  </span>
-                )}
-              </div>
-            )}
-            <button
-              className={`group-filter-toggle ${showFilter || hasActiveFilter ? 'active' : ''}`}
-              onClick={toggleFilter}
-              title={t('tabManager.groupFilter.placeholder')}
-              data-testid="group-filter-toggle"
-            >
-              <Search size={16} />
-            </button>
-          </>
-        )}
-        {onRequestRename && (
-          <button 
-            className="group-edit" 
-            title={isCustomGroup ? t('tabManager.customGroup.edit') : t('settings.domainGroups.editAlias')}
-            onClick={handleRename}
-            data-testid="group-rename-button"
-          >
-            <Pencil size={16} />
-          </button>
-        )}
         {/* グループ別のソート順選択 (カスタムグループまたはピン留め済みドメイングループのみ) */}
         {onItemSortChange && (groupType === 'custom' || isPinned) && (
           <div className="group-sort-wrapper">
@@ -375,6 +327,53 @@ export const GroupHeader = memo(function GroupHeader({
               document.body
             )}
           </div>
+        )}
+        {/* カスタムグループまたはピン留めドメイングループの色変更 */}
+        {(isCustomGroup || (isDomainGroup && isPinned)) && onColorChange && (
+          <ColorPicker
+            color={color}
+            onChange={onColorChange}
+          />
+        )}
+        {onFilterChange && (
+          <>
+            {showFilter && (
+              <div className="group-filter">
+                <input
+                  type="text"
+                  className={`group-filter-input ${!isValidPattern ? 'error' : ''}`}
+                  placeholder={t('tabManager.groupFilter.placeholder')}
+                  value={filterPattern}
+                  onChange={handleFilterChange}
+                  onClick={e => e.stopPropagation()}
+                  data-testid="group-filter-input"
+                />
+                {!isValidPattern && (
+                  <span className="group-filter-error" title={t('tabManager.groupFilter.invalidPattern')}>
+                    <AlertTriangle size={16} />
+                  </span>
+                )}
+              </div>
+            )}
+            <button
+              className={`group-filter-toggle ${showFilter || hasActiveFilter ? 'active' : ''}`}
+              onClick={toggleFilter}
+              title={t('tabManager.groupFilter.placeholder')}
+              data-testid="group-filter-toggle"
+            >
+              <Search size={16} />
+            </button>
+          </>
+        )}
+        {onRequestRename && (
+          <button 
+            className="group-edit" 
+            title={isCustomGroup ? t('tabManager.customGroup.edit') : t('settings.domainGroups.editAlias')}
+            onClick={handleRename}
+            data-testid="group-rename-button"
+          >
+            <Pencil size={16} />
+          </button>
         )}
         <button 
           className="group-open" 

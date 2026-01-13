@@ -115,6 +115,7 @@ export function ColorPicker({ color, onChange, disabled = false }: ColorPickerPr
         onClick={togglePicker}
         title={t('common.colorPicker.selectColor')}
         disabled={disabled}
+        data-testid="color-picker-trigger"
       >
         {color ? (
           <span

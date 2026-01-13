@@ -274,7 +274,7 @@ export function App() {
   // タブ編集
   const handleRequestTabEdit = useCallback((tabId: string) => {
     const tab = allTabs.find(t => t.id === tabId);
-    showEditTabDialog(tabId, tab?.displayName || '', tab?.sortKey || '');
+    showEditTabDialog(tabId, tab?.displayName || tab?.title || '', tab?.sortKey || '');
   }, [allTabs, showEditTabDialog]);
 
   const handleConfirmTabEdit = useCallback(async (displayName: string, sortKey: string) => {
