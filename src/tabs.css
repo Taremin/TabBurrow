@@ -2468,13 +2468,13 @@ body {
 }
 
 /* ゴミ箱バッジ */
-.trash-badge {
+.btn-icon .trash-badge {
   position: absolute;
   top: -4px;
   right: -4px;
   background: var(--danger-color);
   color: white;
-  font-size: 0.625rem;
+  font-size: 0.7rem;
   font-weight: 700;
   min-width: 16px;
   height: 16px;
