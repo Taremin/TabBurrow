@@ -45,7 +45,7 @@ describe('tabSaver', () => {
       expect(result.domain).toBe('example.com');
       expect(result.group).toBe('example.com');
       expect(result.groupType).toBe('domain');
-      expect(result.favIconUrl).toBe('https://example.com/favicon.ico');
+      expect(result.faviconUrl).toBe('https://example.com/favicon.ico');
       expect(result.screenshot).toBe(mockScreenshot);
       expect(result.lastAccessed).toBe(1000000000000);
       expect(result.savedAt).toBe(savedAt);
@@ -75,7 +75,7 @@ describe('tabSaver', () => {
       
       const result = createSavedTab(mockTab, mockScreenshot, Date.now(), mockTab.url!);
       
-      expect(result.favIconUrl).toBe('');
+      expect(result.faviconUrl).toBe('');
     });
 
     it('lastAccessedがない場合はsavedAtを使用する', () => {
