@@ -166,10 +166,13 @@ export function App() {
           <SortSettings
             groupSort={settings.groupSort}
             itemSort={settings.itemSort}
+            customSortKeyOrder={settings.customSortKeyOrder}
             savedGroupSort={savedSettings.groupSort}
             savedItemSort={savedSettings.itemSort}
+            savedCustomSortKeyOrder={savedSettings.customSortKeyOrder}
             onGroupSortChange={(value) => updateSetting('groupSort', value)}
             onItemSortChange={(value) => updateSetting('itemSort', value)}
+            onCustomSortKeyOrderChange={(value) => updateSetting('customSortKeyOrder', value)}
           />
         </SettingsSection>
 

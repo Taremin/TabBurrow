@@ -40,7 +40,7 @@ export const tabsPageSelectors = {
   // ボタン
   groupRenameButton: '[data-testid="group-rename-button"]',
   pinButton: '[data-testid="group-pin-button"]',
-  groupActionButton: '[data-testid="group-action-button"]',
+  groupActionButton: '[data-testid="group-item-sort-button"]',
   tabRenameButton: '[data-testid="tab-edit-button"]',
   tabGroupButton: '[data-testid="tab-group-button"]',
   tabDeleteButton: '[data-testid="tab-delete-button"]',
@@ -135,6 +135,7 @@ export async function createTestTabData(page: Page, tabData: {
   customGroups?: string[]; // カスタムグループ名
   savedAt?: number; // 保存日時
   lastAccessed?: number; // 最終アクセス日時
+  sortKey?: string; // 手動ソート用キー
 }): Promise<void> {
   // IndexedDBに直接テストデータを挿入
   await page.evaluate(async ({ data, dbConfig }) => {
@@ -240,6 +241,7 @@ export async function createTestTabData(page: Page, tabData: {
       lastAccessed: data.lastAccessed || Date.now(),
       savedAt: data.savedAt || Date.now(),
       canonicalUrl: data.url, // デフォルトはURLそのまま
+      sortKey: data.sortKey, // sortKeyを追加
     };
     
     // displayNameが指定されている場合のみ追加

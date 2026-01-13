@@ -265,6 +265,7 @@ export const TabCard = memo(function TabCard({
         onMouseMove={isCompact ? handleMouseMove : undefined}
         onMouseLeave={isCompact ? handleMouseLeave : undefined}
         data-group-type={currentGroupType}
+        data-group-name={currentGroupName}
         data-tab-id={tab.id}
         data-testid="tab-card"
       >
@@ -351,7 +352,7 @@ export const TabCard = memo(function TabCard({
           {isCompact ? (
             <div className="tab-meta tab-meta-compact">
               {tab.sortKey && (
-                <span className="sortkey-badge" title={t('tabManager.tabCard.sortKey', { key: tab.sortKey })}>
+                <span className="sortkey-badge" title={t('tabManager.tabCard.customSortKey', { key: tab.sortKey })}>
                   <ArrowUpDown size={12} />{tab.sortKey}
                 </span>
               )}
@@ -361,7 +362,7 @@ export const TabCard = memo(function TabCard({
           ) : (
             <div className="tab-meta">
               {tab.sortKey && (
-                <span className="sortkey-badge" title={t('tabManager.tabCard.sortKey', { key: tab.sortKey })}>
+                <span className="sortkey-badge" title={t('tabManager.tabCard.customSortKey', { key: tab.sortKey })}>
                   <ArrowUpDown size={12} />{tab.sortKey}
                 </span>
               )}

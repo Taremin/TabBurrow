@@ -141,7 +141,10 @@
             "titleAsc": "Title (A-Z)",
             "titleDesc": "Title (Z-A)",
             "accessedDesc": "Last Accessed (Newest)",
-            "accessedAsc": "Last Accessed (Oldest)"
+            "accessedAsc": "Last Accessed (Oldest)",
+            "customSortKeyOrder": "Custom Sort Key Order",
+            "customSortKeyAsc": "Ascending (A→Z)",
+            "customSortKeyDesc": "Descending (Z→A)"
         },
         "restore": {
             "title": "Tab Restore",
@@ -338,7 +341,8 @@
             "titleAsc": "Title (A-Z)",
             "titleDesc": "Title (Z-A)",
             "accessedDesc": "Last Accessed (Newest)",
-            "accessedAsc": "Last Accessed (Oldest)"
+            "accessedAsc": "Last Accessed (Oldest)",
+            "customSortKeyOrder": "Custom Sort Key Order"
         },
         "empty": {
             "title": "No saved tabs",
@@ -350,21 +354,21 @@
         "tabCard": {
             "lastAccessed": "Last Accessed: {datetime}",
             "saved": "Saved: {datetime}",
-            "sortKey": "Sort Key: {key}",
+            "customSortKey": "Custom Sort Key: {key}",
             "customGroups": "Custom Groups",
             "edit": "Edit",
             "editDialogTitle": "Edit Tab",
             "displayNameLabel": "Display Name",
             "displayNamePlaceholder": "Enter display name...",
             "displayNameMessage": "Enter a new display name (leave empty to use original title)",
-            "sortKeyLabel": "Sort Key",
-            "sortKeyPlaceholder": "Enter sort key...",
-            "sortKeyHelp": "Setting a sort key will prioritize this tab when sorting, overriding the saved date.",
+            "customSortKeyLabel": "Custom Sort Key",
+            "customSortKeyPlaceholder": "Enter custom sort key...",
+            "customSortKeyHelp": "Setting a custom sort key will prioritize this tab when sorting, overriding the configured sort order in settings.",
             "deleteButton": "Actions",
             "deleteMenuLabel": "Action Menu",
             "removeFromGroup": "Remove from Group",
             "deleteTab": "Delete Tab",
-            "setSortKey": "Set Sort Key"
+            "setCustomSortKey": "Set Custom Sort Key"
         },
         "group": {
             "openButton": "Open Group",

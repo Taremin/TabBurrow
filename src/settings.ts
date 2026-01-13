@@ -16,6 +16,9 @@ export type RestoreMode = 'normal' | 'lazy' | 'immediate';
 export type GroupSortType = 'count-desc' | 'count-asc' | 'domain-asc' | 'domain-desc' | 'updated-desc' | 'updated-asc';
 export type ItemSortType = 'saved-desc' | 'saved-asc' | 'title-asc' | 'title-desc' | 'accessed-desc' | 'accessed-asc';
 
+// カスタムソートキーのソート順
+export type CustomSortKeyOrder = 'asc' | 'desc';
+
 // ルールの対象タイプ
 // domain: ドメイン名のみ, url: パス含むURL, fullUrl: クエリパラメータ含む完全URL, title: ページタイトル
 export type RuleTargetType = 'domain' | 'url' | 'fullUrl' | 'title';
@@ -48,6 +51,8 @@ export type DisplayDensity = 'normal' | 'compact';
 export interface PinnedDomainGroup {
   domain: string;   // ドメイン名
   color?: string;   // グループ色（HEX形式）
+  itemSort?: ItemSortType; // グループ別のソート順
+  customSortKeyOrder?: CustomSortKeyOrder; // カスタムソートキーの並び順
 }
 
 // 自動収納ルール
@@ -120,6 +125,7 @@ export interface Settings {
 
   groupSort: GroupSortType;      // グループソート順
   itemSort: ItemSortType;        // アイテムソート順
+  customSortKeyOrder: CustomSortKeyOrder; // カスタムソートキーの並び順
   restoreMode: RestoreMode;      // タブ復元モード
   restoreIntervalMs: number;     // タブ復元時のインターバル（ミリ秒）
 
@@ -171,6 +177,7 @@ const DEFAULT_SETTINGS: Settings = {
 
   groupSort: 'count-desc', // タブ数（多い順）
   itemSort: 'saved-desc',  // 保存日時（新しい順）
+  customSortKeyOrder: 'asc', // カスタムソートキーは昇順がデフォルト
   restoreMode: 'lazy',     // デフォルトは遅延サスペンド
   restoreIntervalMs: 100,  // 100ms間隔
 
@@ -230,8 +237,10 @@ export async function getSettings(): Promise<Settings> {
 /**
  * 設定を保存
  */
-export async function saveSettings(settings: Settings): Promise<void> {
-  await browser.storage.local.set({ [STORAGE_KEY]: settings });
+export async function saveSettings(updates: Partial<Settings>): Promise<void> {
+  const settings = await getSettings();
+  const updatedSettings = { ...settings, ...updates };
+  await browser.storage.local.set({ [STORAGE_KEY]: updatedSettings });
 }
 
 /**

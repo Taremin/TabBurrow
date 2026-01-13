@@ -140,7 +140,10 @@
             "titleAsc": "タイトル（A-Z）",
             "titleDesc": "タイトル（Z-A）",
             "accessedDesc": "最終アクセス（新しい順）",
-            "accessedAsc": "最終アクセス（古い順）"
+            "accessedAsc": "最終アクセス（古い順）",
+            "customSortKeyOrder": "カスタムソートキー順",
+            "customSortKeyAsc": "昇順（A→Z）",
+            "customSortKeyDesc": "降順（Z→A）"
         },
         "restore": {
             "title": "タブ復元",
@@ -337,7 +340,8 @@
             "titleAsc": "タイトル（A-Z）",
             "titleDesc": "タイトル（Z-A）",
             "accessedDesc": "最終アクセス（新しい順）",
-            "accessedAsc": "最終アクセス（古い順）"
+            "accessedAsc": "最終アクセス（古い順）",
+            "customSortKeyOrder": "カスタムソートキー順"
         },
         "empty": {
             "title": "保存されたタブはありません",
@@ -349,21 +353,21 @@
         "tabCard": {
             "lastAccessed": "最終アクセス: {datetime}",
             "saved": "保存: {datetime}",
-            "sortKey": "ソートキー: {key}",
+            "customSortKey": "カスタムソートキー: {key}",
             "customGroups": "カスタムグループ",
             "edit": "編集",
             "editDialogTitle": "タブを編集",
             "displayNameLabel": "表示名",
             "displayNamePlaceholder": "表示名を入力...",
             "displayNameMessage": "新しい表示名を入力してください（空にすると元のタイトルが使用されます）",
-            "sortKeyLabel": "ソートキー",
-            "sortKeyPlaceholder": "ソートキーを入力...",
-            "sortKeyHelp": "ソートキーを入力すると、保存日時に優先してこの値で並べ替えられます。",
+            "customSortKeyLabel": "カスタムソートキー",
+            "customSortKeyPlaceholder": "カスタムソートキーを入力...",
+            "customSortKeyHelp": "カスタムソートキーを設定すると、設定画面のソート順より優先してこの値で並べ替えられます。",
             "deleteButton": "アクション",
             "deleteMenuLabel": "アクションメニュー",
             "removeFromGroup": "グループから外す",
             "deleteTab": "タブを削除",
-            "setSortKey": "ソートキーを設定"
+            "setCustomSortKey": "カスタムソートキーを設定"
         },
         "group": {
             "openButton": "グループを開く",

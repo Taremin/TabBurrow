@@ -17,7 +17,7 @@ import {
   type TrashedTab,
 } from './dbSchema';
 import browser from './browserApi';
-import type { UrlNormalizationRule } from './settings';
+import type { UrlNormalizationRule, CustomSortKeyOrder } from './settings';
 
 // 型を再エクスポート（後方互換性のため）
 export type { SavedTab, CustomGroupMeta, GroupType, TrashedTab };
@@ -209,6 +209,37 @@ async function openDB(): Promise<IDBDatabase> {
           trashStore.createIndex('trashedAt', 'trashedAt', { unique: false });
           trashStore.createIndex('domain', 'domain', { unique: false });
         }
+      }
+      // バージョン8: グループ個別ソートとタブ個別ソートキー対応
+      if (oldVersion < 8) {
+        const tabStore = transaction.objectStore(STORE_NAME);
+        const groupStore = transaction.objectStore(CUSTOM_GROUPS_STORE);
+
+        // タブに sortKey を追加（既存は undefined）
+        const tabCursor = tabStore.openCursor();
+        tabCursor.onsuccess = (e) => {
+          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+          if (cursor) {
+            const tab = cursor.value;
+            // ついでに小文字 faviconUrl への統一（もしあれば）
+            if (tab.favIconUrl !== undefined) {
+              tab.faviconUrl = tab.favIconUrl;
+              delete tab.favIconUrl;
+            }
+            cursor.update(tab);
+            cursor.continue();
+          }
+        };
+
+        // カスタムグループに itemSort を追加（既存は undefined）
+        const groupCursor = groupStore.openCursor();
+        groupCursor.onsuccess = (e) => {
+          const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+          if (cursor) {
+            // 特に初期値はセットせず undefined のままにする（グローバル設定に従う）
+            cursor.continue();
+          }
+        };
       }
     };
   });
@@ -1160,12 +1191,14 @@ export async function moveTabToTrash(id: string, retentionDays: number = 7): Pro
       }
       
       // ゴミ箱用のデータを作成
+      const now = Date.now();
       const trashedTab: TrashedTab = {
         ...tab,
-        trashedAt: Date.now(),
+        trashedAt: now,
         originalGroup: tab.group,
         originalGroupType: tab.groupType,
-        originalCustomGroups: tab.customGroups,
+        originalCustomGroups: tab.customGroups || [],
+        faviconUrl: tab.faviconUrl,
       };
       
       // ゴミ箱に追加
@@ -1214,7 +1247,8 @@ export async function moveTabsToTrash(ids: string[], retentionDays: number = 7):
           trashedAt: Date.now(),
           originalGroup: tab.group,
           originalGroupType: tab.groupType,
-          originalCustomGroups: tab.customGroups,
+          originalCustomGroups: tab.customGroups || [], // 空配列デフォルト
+          faviconUrl: tab.faviconUrl,
         };
         
         trashStore.put(trashedTab);
@@ -1256,16 +1290,18 @@ export async function moveGroupToTrash(groupName: string, retentionDays: number 
           if (retentionDays === 0) {
             cursor.delete();
           } else {
-            // ゴミ箱にコピー
-            const trashedTab: TrashedTab = {
-              ...tab,
-              trashedAt: Date.now(),
-              originalGroup: tab.group,
-              originalGroupType: tab.groupType,
-              originalCustomGroups: tab.customGroups,
-            };
-            trashStore.put(trashedTab);
-            cursor.delete();
+            // ゴミ箱用のデータを作成
+          const trashedTab: TrashedTab = {
+            ...tab,
+            trashedAt: Date.now(), // now ではなく Date.now()
+            originalGroup: tab.group,
+            originalGroupType: tab.groupType,
+            originalCustomGroups: tab.customGroups || [],
+            faviconUrl: tab.faviconUrl,
+          };
+          
+          trashStore.put(trashedTab);
+          cursor.delete();
           }
         }
         cursor.continue();
@@ -1309,7 +1345,7 @@ export async function restoreTabFromTrash(id: string): Promise<void> {
         group: trashedTab.originalGroup,
         groupType: trashedTab.originalGroupType,
         customGroups: trashedTab.originalCustomGroups,
-        favIconUrl: trashedTab.favIconUrl,
+        faviconUrl: trashedTab.faviconUrl,
         screenshot: trashedTab.screenshot,
         lastAccessed: trashedTab.lastAccessed,
         savedAt: trashedTab.savedAt,
@@ -1488,4 +1524,123 @@ export async function deleteExpiredTrash(retentionDays: number): Promise<number>
     };
     transaction.onerror = () => reject(transaction.error);
   });
+}
+
+/**
+ * タブのソートキーを更新
+ */
+export async function updateTabSortKey(id: string, sortKey: string | undefined): Promise<void> {
+  // 空文字の場合は undefined として扱う（プロパティ削除）
+  const finalSortKey = (sortKey && sortKey.trim() !== '') ? sortKey.trim() : undefined;
+  
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const getRequest = store.get(id);
+
+    getRequest.onsuccess = () => {
+      const tab = getRequest.result as SavedTab | undefined;
+      if (tab) {
+        if (finalSortKey === undefined) {
+          delete tab.sortKey;
+        } else {
+          tab.sortKey = finalSortKey;
+        }
+        store.put(tab);
+      }
+    };
+
+    transaction.oncomplete = () => {
+      browser.runtime.sendMessage({ type: 'tabs-changed' }).catch(() => {});
+      resolve();
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+/**
+ * カスタムグループの個別アイテムソート順を更新
+ */
+export async function updateCustomGroupItemSort(groupName: string, itemSort: string | undefined): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readwrite');
+    const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
+    const getRequest = store.get(groupName);
+
+    getRequest.onsuccess = () => {
+      const group = getRequest.result as CustomGroupMeta | undefined;
+      if (group) {
+        group.itemSort = itemSort;
+        group.updatedAt = Date.now();
+        store.put(group);
+      }
+    };
+
+    transaction.oncomplete = () => {
+      browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
+      resolve();
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+/**
+ * ピン留めドメイングループの個別アイテムソート順を更新（browser.storage.local）
+ */
+export async function updatePinnedDomainGroupSort(domain: string, itemSort: any): Promise<void> {
+  const { getSettings, saveSettings } = await import('./settings');
+  const settings = await getSettings();
+  const pinnedGroups = (settings.pinnedDomainGroups || []).map(g => {
+    if (g.domain === domain) {
+      return { ...g, itemSort };
+    }
+    return g;
+  });
+  await saveSettings({ pinnedDomainGroups: pinnedGroups });
+  browser.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
+}
+
+/**
+ * カスタムグループの個別カスタムソートキー順を更新
+ */
+export async function updateCustomGroupCustomSortKeyOrder(groupName: string, order: CustomSortKeyOrder | undefined): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readwrite');
+    const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
+    const getRequest = store.get(groupName);
+
+    getRequest.onsuccess = () => {
+      const group = getRequest.result as CustomGroupMeta | undefined;
+      if (group) {
+        group.customSortKeyOrder = order;
+        group.updatedAt = Date.now();
+        store.put(group);
+      }
+    };
+
+    transaction.oncomplete = () => {
+      browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
+      resolve();
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+/**
+ * ピン留めドメイングループの個別カスタムソートキー順を更新（browser.storage.local）
+ */
+export async function updatePinnedDomainGroupCustomSortKeyOrder(domain: string, order: CustomSortKeyOrder | undefined): Promise<void> {
+  const { getSettings, saveSettings } = await import('./settings');
+  const settings = await getSettings();
+  const pinnedGroups = (settings.pinnedDomainGroups || []).map(g => {
+    if (g.domain === domain) {
+      return { ...g, customSortKeyOrder: order };
+    }
+    return g;
+  });
+  await saveSettings({ pinnedDomainGroups: pinnedGroups });
+  browser.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
 }

@@ -10,7 +10,7 @@ import { platform } from '../platform';
 import { useTabs } from './hooks/useTabs';
 import { useDialogs } from './hooks/useDialogs';
 import type { SavedTab, GroupFilter } from './types';
-import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings';
+import { getSettings, saveSettings, notifySettingsChanged, type GroupSortType, type ItemSortType, type CustomSortKeyOrder, type RestoreMode, type ViewMode, type DisplayDensity, type PinnedDomainGroup } from '../settings';
 import { Header } from './Header';
 import { TabList, type TabListHandle } from './TabList';
 import { ConfirmDialog } from '../common/ConfirmDialog';
@@ -123,6 +123,7 @@ export function App() {
   // Settings State
   const [groupSort, setGroupSort] = useState<GroupSortType>('count-desc');
   const [itemSort, setItemSort] = useState<ItemSortType>('saved-desc');
+  const [customSortKeyOrder, setCustomSortKeyOrder] = useState<CustomSortKeyOrder>('asc');
   const [restoreMode, setRestoreMode] = useState<RestoreMode>('lazy');
   const [restoreIntervalMs, setRestoreIntervalMs] = useState(100);
   const [viewMode, setViewMode] = useState<ViewMode | undefined>(undefined);
@@ -151,6 +152,7 @@ export function App() {
       const settings = await getSettings();
       setGroupSort(settings.groupSort);
       setItemSort(settings.itemSort);
+      setCustomSortKeyOrder(settings.customSortKeyOrder);
       setRestoreMode(settings.restoreMode);
       setRestoreIntervalMs(settings.restoreIntervalMs);
       setViewMode(prev => prev === undefined ? settings.defaultViewMode : prev);
@@ -268,6 +270,23 @@ export function App() {
       await loadTabs();
     } catch (error) {
       console.error('グループのソート順更新に失敗:', error);
+    }
+  }, [loadSettings, loadTabs]);
+
+  // グループ別のカスタムソートキー順更新
+  const handleUpdateGroupCustomSortKeyOrder = useCallback(async (groupName: string, groupType: 'domain' | 'custom', order: CustomSortKeyOrder | undefined) => {
+    const { updateCustomGroupCustomSortKeyOrder, updatePinnedDomainGroupCustomSortKeyOrder } = await import('../storage');
+    try {
+      if (groupType === 'custom') {
+        await updateCustomGroupCustomSortKeyOrder(groupName, order);
+      } else {
+        await updatePinnedDomainGroupCustomSortKeyOrder(groupName, order);
+      }
+      // 設定を再読み込みして内部状態(pinnedDomainGroups)を更新
+      await loadSettings();
+      await loadTabs();
+    } catch (error) {
+      console.error('グループのカスタムソートキー順更新に失敗:', error);
     }
   }, [loadSettings, loadTabs]);
 
@@ -703,6 +722,8 @@ export function App() {
             onCustomGroupColorChange={handleUpdateCustomGroupColor}
             onPinnedDomainGroupColorChange={handlePinnedDomainGroupColorChange}
             onUpdateGroupItemSort={handleUpdateGroupItemSort}
+            customSortKeyOrder={customSortKeyOrder}
+            onUpdateGroupCustomSortKeyOrder={handleUpdateGroupCustomSortKeyOrder}
           />
         )}
 

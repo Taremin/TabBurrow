@@ -3,7 +3,7 @@
  */
 
 // ソート関連の型はsettings.tsからre-export
-export type { GroupSortType, ItemSortType } from '../settings';
+export type { GroupSortType, ItemSortType, CustomSortKeyOrder } from '../settings';
 
 // ストレージの型をre-export
 export type { GroupType, SavedTab, CustomGroupMeta } from '../storage';

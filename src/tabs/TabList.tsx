@@ -58,6 +58,9 @@ interface TabListProps {
   // ピン留めドメイングループの色変更
   onPinnedDomainGroupColorChange?: (domain: string, color: string | undefined) => void;
   onUpdateGroupItemSort?: (groupName: string, groupType: 'domain' | 'custom', itemSort: ItemSortType | undefined) => void;
+  // カスタムソートキーの並び順
+  customSortKeyOrder: 'asc' | 'desc';
+  onUpdateGroupCustomSortKeyOrder?: (groupName: string, groupType: 'domain' | 'custom', order: 'asc' | 'desc' | undefined) => void;
 }
 
 /**
@@ -105,11 +108,11 @@ function groupTabs(tabs: SavedTab[], showGroupedTabsInDomainGroups: boolean = fa
  * 1. sortKey (文字列) があればそれによる辞書順。sortKeyがあるものが優先。
  * 2. 同一、または両方ない場合に sortType によるソート。
  */
-function sortTabsInGroup(tabs: SavedTab[], sortType: ItemSortType): SavedTab[] {
+function sortTabsInGroup(tabs: SavedTab[], sortType: ItemSortType, customSortKeyOrder: 'asc' | 'desc' = 'asc'): SavedTab[] {
   const sorted = [...tabs];
   
   sorted.sort((a, b) => {
-    // 第一段階: sortKey
+    // 第一段階: sortKey (カスタムソートキー)
     const keyA = a.sortKey || '';
     const keyB = b.sortKey || '';
     
@@ -117,7 +120,7 @@ function sortTabsInGroup(tabs: SavedTab[], sortType: ItemSortType): SavedTab[] {
     if (!keyA && keyB) return 1;
     if (keyA && keyB) {
       const cmp = keyA.localeCompare(keyB, 'ja');
-      if (cmp !== 0) return cmp;
+      if (cmp !== 0) return customSortKeyOrder === 'asc' ? cmp : -cmp;
     }
     
     // 第二段階: sortType
@@ -240,6 +243,8 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
   onCustomGroupColorChange,
   onPinnedDomainGroupColorChange,
   onUpdateGroupItemSort,
+  customSortKeyOrder,
+  onUpdateGroupCustomSortKeyOrder,
 }, ref) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
@@ -310,7 +315,8 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     for (const [name, groupTabList] of sortedCustomGroups) {
       const customGroup = customGroups.find(g => g.name === name);
       const effectiveItemSort = (customGroup?.itemSort as ItemSortType) || itemSort;
-      const sortedTabs = sortTabsInGroup(groupTabList, effectiveItemSort);
+      const effectiveCustomSortKeyOrder = (customGroup?.customSortKeyOrder as 'asc' | 'desc') || customSortKeyOrder;
+      const sortedTabs = sortTabsInGroup(groupTabList, effectiveItemSort, effectiveCustomSortKeyOrder);
       // グループフィルタを適用
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
       const isCollapsed = collapsedGroups[name] || false;
@@ -326,7 +332,8 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     for (const [name, groupTabList] of pinnedDomainGroupEntries) {
       const pinnedGroup = pinnedDomainGroups.find(p => p.domain === name);
       const effectiveItemSort = pinnedGroup?.itemSort || itemSort;
-      const sortedTabs = sortTabsInGroup(groupTabList, effectiveItemSort);
+      const effectiveCustomSortKeyOrder = pinnedGroup?.customSortKeyOrder || customSortKeyOrder;
+      const sortedTabs = sortTabsInGroup(groupTabList, effectiveItemSort, effectiveCustomSortKeyOrder);
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
       const isCollapsed = collapsedGroups[name] || false;
       groups.push({ name, groupType: 'domain', tabs: filteredTabs });
@@ -338,7 +345,7 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     
     // 非ピン留めドメイングループを追加
     for (const [name, groupTabList] of unpinnedDomainGroupEntries) {
-      const sortedTabs = sortTabsInGroup(groupTabList, itemSort);
+      const sortedTabs = sortTabsInGroup(groupTabList, itemSort, customSortKeyOrder);
       // グループフィルタを適用
       const filteredTabs = filterTabsByRegex(sortedTabs, groupFilters[name] || '');
       const isCollapsed = collapsedGroups[name] || false;
@@ -351,7 +358,7 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     }
     
     return { groups, groupCounts, flatTabs };
-  }, [tabs, customGroups, groupSort, itemSort, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups, pinnedDomainGroups]);
+  }, [tabs, customGroups, groupSort, itemSort, customSortKeyOrder, groupFilters, collapsedGroups, showGroupedTabsInDomainGroups, pinnedDomainGroups]);
 
   // グループヘッダーのレンダリング
   const groupContent = useCallback((index: number) => {
@@ -392,9 +399,11 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         }
         itemSort={isCustomGroup ? groupMeta?.itemSort : pinnedGroup?.itemSort}
         onItemSortChange={(sort) => onUpdateGroupItemSort?.(group.name, group.groupType, sort)}
+        customSortKeyOrder={isCustomGroup ? (groupMeta?.customSortKeyOrder as any) : pinnedGroup?.customSortKeyOrder}
+        onCustomSortKeyOrderChange={(order) => onUpdateGroupCustomSortKeyOrder?.(group.name, group.groupType, order)}
       />
     );
-  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort]);
+  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort, onUpdateGroupCustomSortKeyOrder]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {
@@ -463,8 +472,8 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
 
   // フラット表示用のソート済みタブリスト
   const sortedFlatTabs = useMemo(() => {
-    return sortTabsInGroup([...tabs], itemSort);
-  }, [tabs, itemSort]);
+    return sortTabsInGroup([...tabs], itemSort, customSortKeyOrder);
+  }, [tabs, itemSort, customSortKeyOrder]);
 
   // フラット表示用のアイテムレンダリング
   const flatItemContent = useCallback((index: number) => {

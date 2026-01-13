@@ -11,7 +11,7 @@
 export const DB_NAME = 'TabBurrowDB';
 
 /** データベースバージョン */
-export const DB_VERSION = 7;
+export const DB_VERSION = 8;
 
 /** タブストア名 */
 export const TABS_STORE_NAME = 'tabs';
@@ -45,10 +45,11 @@ export interface SavedTab {
   group: string;        // グループ名（ドメインまたはカスタムグループ名）
   groupType: GroupType; // グループタイプ
   customGroups?: string[]; // カスタムグループ名の配列
-  favIconUrl: string;   // ファビコンURL
+  faviconUrl: string;   // ファビコンURL (小文字のfaviconUrlに修正されている可能性があるが既存に合わせる)
   screenshot: Blob;     // 512x512スクリーンショット (JPEG)
   lastAccessed: number; // 最終アクセス日時（タブから取得）
   savedAt: number;      // 保存日時（タイムスタンプ）
+  sortKey?: string;     // 手動ソート用のキー
 }
 
 /**
@@ -60,6 +61,8 @@ export interface CustomGroupMeta {
   updatedAt: number;  // 更新日時
   sortOrder: number;  // 表示順序（昇順で表示）
   color?: string;     // グループ色（HEX形式、例: "#3b82f6"）
+  itemSort?: string;  // グループ個別のアイテムソート順 (ItemSortType)
+  customSortKeyOrder?: string; // カスタムソートキーの並び順 ('asc' | 'desc')
 }
 
 /**
@@ -76,7 +79,7 @@ export interface BackupTab {
   group: string;
   groupType: GroupType;
   customGroups?: string[];
-  favIconUrl: string;
+  faviconUrl: string;
   screenshot: Blob;     // Blobのまま保存
   lastAccessed: number;
   savedAt: number;
@@ -162,7 +165,7 @@ export function createTabData(overrides: {
   domain?: string;
   group?: string;
   groupType?: GroupType;
-  favIconUrl?: string;
+  faviconUrl?: string;
   screenshot?: Blob;
   lastAccessed?: number;
   savedAt?: number;
@@ -180,7 +183,7 @@ export function createTabData(overrides: {
     domain: domain,
     group: overrides.group || domain,
     groupType: overrides.groupType || 'domain',
-    favIconUrl: overrides.favIconUrl || '',
+    faviconUrl: overrides.faviconUrl || '',
     screenshot: overrides.screenshot || new Blob([]),
     lastAccessed: overrides.lastAccessed || Date.now(),
     savedAt: overrides.savedAt || Date.now(),

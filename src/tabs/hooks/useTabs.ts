@@ -18,6 +18,7 @@ import {
   removeMultipleTabsFromGroup,
   getStorageUsage,
   updateTab,
+  updateTabSortKey,
   updateCustomGroupColor,
 } from '../../storage';
 import { getSettings } from '../../settings';
@@ -130,6 +131,12 @@ export function useTabs() {
     await loadTabs();
   }, [loadTabs]);
 
+  // タブのソートキー更新
+  const handleUpdateTabSortKey = useCallback(async (id: string, sortKey: string | undefined) => {
+    await updateTabSortKey(id, sortKey);
+    await loadTabs();
+  }, [loadTabs]);
+
   // カスタムグループの色更新
   const handleUpdateCustomGroupColor = useCallback(async (groupName: string, color: string | undefined) => {
     await updateCustomGroupColor(groupName, color);
@@ -173,6 +180,7 @@ export function useTabs() {
     handleBulkMoveToGroup,
     handleBulkRemoveFromGroup,
     handleUpdateTab,
+    handleUpdateTabSortKey,
     handleUpdateCustomGroupColor,
   };
 }

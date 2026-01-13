@@ -9,7 +9,7 @@ import { useTranslation } from '../common/i18nContext';
 import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin, SortAsc, Check } from 'lucide-react';
 import { ColorPicker } from '../common/ColorPicker';
 import { useClickOutside } from '../common/hooks/useClickOutside';
-import type { ItemSortType } from './types';
+import type { ItemSortType, CustomSortKeyOrder } from './types';
 
 interface GroupHeaderProps {
   name: string;
@@ -44,6 +44,9 @@ interface GroupHeaderProps {
   // グループ別のアイテムソート順変更
   itemSort?: string;
   onItemSortChange?: (itemSort: ItemSortType | undefined) => void;
+  // グループ別のカスタムソートキー順変更
+  customSortKeyOrder?: CustomSortKeyOrder;
+  onCustomSortKeyOrderChange?: (order: CustomSortKeyOrder | undefined) => void;
 }
 
 /**
@@ -75,6 +78,8 @@ export const GroupHeader = memo(function GroupHeader({
   onColorChange,
   itemSort,
   onItemSortChange,
+  customSortKeyOrder,
+  onCustomSortKeyOrderChange,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -104,8 +109,13 @@ export const GroupHeader = memo(function GroupHeader({
     if (onItemSortChange) {
       onItemSortChange(value);
     }
-    setShowSortMenu(false);
   }, [onItemSortChange]);
+
+  const handleCustomSortKeyOrderSelect = useCallback((value: CustomSortKeyOrder | undefined) => {
+    if (onCustomSortKeyOrderChange) {
+      onCustomSortKeyOrderChange(value);
+    }
+  }, [onCustomSortKeyOrderChange]);
   const checkboxRef = useRef<HTMLInputElement>(null);
   
   // 正規表現が有効かどうか
@@ -298,7 +308,7 @@ export const GroupHeader = memo(function GroupHeader({
                 <div className="group-menu-label">{t('tabManager.sort.itemLabel')}</div>
                 <button
                   className={`group-menu-item ${!itemSort ? 'is-selected' : ''}`}
-                  onClick={(e) => { e.stopPropagation(); handleSortSelect(undefined); }}
+                  onClick={(e) => { e.stopPropagation(); handleSortSelect(undefined); setShowSortMenu(false); }}
                   data-testid="group-sort-option-default"
                 >
                   <span className="group-menu-item-check">{!itemSort && <Check size={14} />}</span>
@@ -316,10 +326,35 @@ export const GroupHeader = memo(function GroupHeader({
                   <button
                     key={opt.value}
                     className={`group-menu-item ${itemSort === opt.value ? 'is-selected' : ''}`}
-                    onClick={(e) => { e.stopPropagation(); handleSortSelect(opt.value); }}
+                    onClick={(e) => { e.stopPropagation(); handleSortSelect(opt.value); setShowSortMenu(false); }}
                     data-testid={`group-sort-option-${opt.value}`}
                   >
                     <span className="group-menu-item-check">{itemSort === opt.value && <Check size={14} />}</span>
+                    <span className="group-menu-item-text">{opt.label}</span>
+                  </button>
+                ))}
+
+                <div className="group-menu-divider" />
+                <div className="group-menu-label">{t('tabManager.sort.customSortKeyOrder')}</div>
+                <button
+                  className={`group-menu-item ${!customSortKeyOrder ? 'is-selected' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); handleCustomSortKeyOrderSelect(undefined); setShowSortMenu(false); }}
+                  data-testid="group-custom-sort-key-order-default"
+                >
+                  <span className="group-menu-item-check">{!customSortKeyOrder && <Check size={14} />}</span>
+                  <span className="group-menu-item-text">{t('tabManager.sort.default')}</span>
+                </button>
+                {[
+                  { value: 'asc' as const, label: t('settings.sort.customSortKeyAsc') },
+                  { value: 'desc' as const, label: t('settings.sort.customSortKeyDesc') },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    className={`group-menu-item ${customSortKeyOrder === opt.value ? 'is-selected' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); handleCustomSortKeyOrderSelect(opt.value); setShowSortMenu(false); }}
+                    data-testid={`group-custom-sort-key-order-${opt.value}`}
+                  >
+                    <span className="group-menu-item-check">{customSortKeyOrder === opt.value && <Check size={14} />}</span>
                     <span className="group-menu-item-text">{opt.label}</span>
                   </button>
                 ))}
