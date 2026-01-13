@@ -92,6 +92,22 @@ e2e/
 └── fixtures.ts         # テスト用フィクスチャ
 ```
 
+### IndexedDB の操作
+E2Eテストやデバッグスクリプトで直接 IndexedDB を操作（データの注入やクリアなど）する場合は、以下の点に注意してください。
+
+- **定数の一元化**: DB名、バージョン、ストア名などの定数は、ハードコードせずに必ず `src/dbSchema.ts` からインポートして使用してください。
+- **ブラウザ側への引き渡し**: `page.evaluate` 内で DB 操作を行う場合、外部モジュールを直接インポートできないため、実行コンテキスト（Node側）でインポートした定数を引数として渡す必要があります。
+
+例:
+```typescript
+import { DB_NAME, DB_VERSION } from '../src/dbSchema';
+
+await page.evaluate(async ({ dbName, dbVersion }) => {
+  const request = indexedDB.open(dbName, dbVersion);
+  // ...
+}, { dbName: DB_NAME, dbVersion: DB_VERSION });
+```
+
 ### 注意事項
 - E2Eテスト実行前に `npm run build:chrome` でビルドが必要
 - 日本語でテスト名を指定する場合、コマンドラインでエラーになることがあるため、ファイル名と行番号で指定する

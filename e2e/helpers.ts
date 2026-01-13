@@ -1,7 +1,12 @@
-/**
- * E2Eテスト用ヘルパー関数
- */
 import type { Page } from '@playwright/test';
+import { 
+  DB_NAME, 
+  DB_VERSION, 
+  TABS_STORE_NAME, 
+  CUSTOM_GROUPS_STORE_NAME, 
+  BACKUPS_STORE_NAME,
+  TRASH_STORE_NAME,
+} from '../src/dbSchema';
 
 /**
  * タブ管理画面のセレクター
@@ -131,16 +136,9 @@ export async function createTestTabData(page: Page, tabData: {
   savedAt?: number; // 保存日時
   lastAccessed?: number; // 最終アクセス日時
 }): Promise<void> {
-  // dbSchema.tsと同じ定数を使用
-  const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 8;
-  const TABS_STORE_NAME = 'tabs';
-  const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
-  const BACKUPS_STORE_NAME = 'backups';
-  
   // IndexedDBに直接テストデータを挿入
   await page.evaluate(async ({ data, dbConfig }) => {
-    const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
+    const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME, TRASH_STORE_NAME } = dbConfig;
     
     // DBを開く
     const openDB = (): Promise<IDBDatabase> => {
@@ -182,8 +180,8 @@ export async function createTestTabData(page: Page, tabData: {
           }
           
           // trashストアを作成（DB_VERSION 7で追加）
-          if (!db.objectStoreNames.contains('trash')) {
-            const trashStore = db.createObjectStore('trash', { keyPath: 'id' });
+          if (!db.objectStoreNames.contains(TRASH_STORE_NAME)) {
+            const trashStore = db.createObjectStore(TRASH_STORE_NAME, { keyPath: 'id' });
             trashStore.createIndex('trashedAt', 'trashedAt', { unique: false });
             trashStore.createIndex('domain', 'domain', { unique: false });
           }
@@ -263,7 +261,7 @@ export async function createTestTabData(page: Page, tabData: {
     });
   }, { 
     data: tabData, 
-    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME } 
+    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME, TRASH_STORE_NAME } 
   });
 }
 
@@ -275,17 +273,10 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
   domainPrefix?: string;
   domainCount?: number;
 } = {}): Promise<void> {
-  // dbSchema.tsと同じ定数を使用
-  const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 8;
-  const TABS_STORE_NAME = 'tabs';
-  const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
-  const BACKUPS_STORE_NAME = 'backups';
-  
   const { domainPrefix = 'test', domainCount = 50 } = options;
   
   await page.evaluate(async ({ count, domainPrefix, domainCount, dbConfig }) => {
-    const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
+    const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME, TRASH_STORE_NAME } = dbConfig;
     
     // DBを開く
     const openDB = (): Promise<IDBDatabase> => {
@@ -323,8 +314,8 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
           }
           
           // trashストアを作成（DB_VERSION 7で追加）
-          if (!db.objectStoreNames.contains('trash')) {
-            const trashStore = db.createObjectStore('trash', { keyPath: 'id' });
+          if (!db.objectStoreNames.contains(TRASH_STORE_NAME)) {
+            const trashStore = db.createObjectStore(TRASH_STORE_NAME, { keyPath: 'id' });
             trashStore.createIndex('trashedAt', 'trashedAt', { unique: false });
             trashStore.createIndex('domain', 'domain', { unique: false });
           }
@@ -373,7 +364,7 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
     count, 
     domainPrefix, 
     domainCount,
-    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME } 
+    dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME, TRASH_STORE_NAME } 
   });
 }
 
@@ -382,12 +373,6 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
  * dbSchema.tsと同じ定数を使用
  */
 export async function clearTestData(page: Page): Promise<void> {
-  const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 8;
-  const TABS_STORE_NAME = 'tabs';
-  const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
-  const TRASH_STORE_NAME = 'trash';
-
   await page.evaluate(async (config) => {
     const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, TRASH_STORE_NAME } = config;
     
@@ -421,7 +406,7 @@ export async function clearTestData(page: Page): Promise<void> {
     transaction.objectStore(CUSTOM_GROUPS_STORE_NAME).clear();
     transaction.objectStore(TRASH_STORE_NAME).clear();
     
-    return new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => {
         db.close();
         resolve();
@@ -438,10 +423,6 @@ export async function createCustomGroupData(page: Page, groups: {
   name: string;
   sortOrder?: number;
 }[]): Promise<void> {
-  const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 8;
-  const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
-  
   await page.evaluate(async ({ groups, dbConfig }) => {
     const { DB_NAME, DB_VERSION, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
     
@@ -549,7 +530,6 @@ export async function findTranslationKeysInPage(page: Page): Promise<string[]> {
  * IndexedDBをクリアする
  */
 export async function clearIndexedDB(page: Page): Promise<void> {
-  const DB_NAME = 'TabBurrowDB';
   await page.evaluate(async (name) => {
     return new Promise<void>((resolve, reject) => {
       const request = indexedDB.deleteDatabase(name);

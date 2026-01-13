@@ -1,6 +1,7 @@
 
 import { test, expect, getExtensionUrl } from './fixtures';
 import { waitForPageLoad, clearTestData, createCustomGroupData, tabsPageSelectors } from './helpers';
+import { DB_NAME, DB_VERSION, TABS_STORE_NAME } from '../src/dbSchema';
 
 test.describe('ナビゲーション不具合の再現', () => {
   test.beforeEach(async ({ context, extensionId }) => {
@@ -24,13 +25,14 @@ test.describe('ナビゲーション不具合の再現', () => {
       { name: 'Group B', sortOrder: 1 },
     ]);
 
-    await page.evaluate(async () => {
+    await page.evaluate(async ({ dbConfig }) => {
+      const { DB_NAME, DB_VERSION, TABS_STORE_NAME } = dbConfig;
       const db = await new Promise<IDBDatabase>((resolve) => {
-        const req = indexedDB.open('TabBurrowDB', 6);
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
         req.onsuccess = () => resolve(req.result);
       });
-      const trans = db.transaction(['tabs'], 'readwrite');
-      const store = trans.objectStore('tabs');
+      const trans = db.transaction([TABS_STORE_NAME], 'readwrite');
+      const store = trans.objectStore(TABS_STORE_NAME);
       const now = Date.now();
       
       // Group A (2 tabs)
@@ -56,7 +58,7 @@ test.describe('ナビゲーション不具合の再現', () => {
         });
       }
       return new Promise((resolve) => trans.oncomplete = resolve);
-    });
+    }, { dbConfig: { DB_NAME, DB_VERSION, TABS_STORE_NAME } });
 
     // リロード
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));

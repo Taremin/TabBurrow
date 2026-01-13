@@ -12,6 +12,13 @@
 import { test } from '../e2e/fixtures';
 import { waitForPageLoad, clearTestData } from '../e2e/helpers';
 import { getExtensionUrl } from '../e2e/fixtures';
+import { 
+  DB_NAME, 
+  DB_VERSION, 
+  TABS_STORE_NAME, 
+  CUSTOM_GROUPS_STORE_NAME, 
+  BACKUPS_STORE_NAME 
+} from '../src/dbSchema';
 import type { Page } from '@playwright/test';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -68,12 +75,6 @@ const DUMMY_TABS = [
  * IndexedDBにダミーデータを挿入（e2e/helpers.tsのcreateTestTabDataをベースに）
  */
 async function insertDummyTabs(page: Page, tabs: typeof DUMMY_TABS): Promise<void> {
-  const DB_NAME = 'TabBurrowDB';
-  const DB_VERSION = 3;
-  const TABS_STORE_NAME = 'tabs';
-  const CUSTOM_GROUPS_STORE_NAME = 'customGroups';
-  const BACKUPS_STORE_NAME = 'backups';
-  
   await page.evaluate(async ({ tabs, dbConfig }) => {
     const { DB_NAME, DB_VERSION, TABS_STORE_NAME, CUSTOM_GROUPS_STORE_NAME, BACKUPS_STORE_NAME } = dbConfig;
     

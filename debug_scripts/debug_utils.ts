@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { DB_NAME, DB_VERSION, TABS_STORE_NAME } from '../src/dbSchema';
 
 // src/dbSchema.ts からの型定義のサブセット (テストデータ投入用)
 interface SavedTab {
@@ -26,9 +27,9 @@ interface SeedOptions {
  */
 export async function seedTabsData(page: Page, tabs: Partial<SavedTab>[], options: SeedOptions = {}) {
   const {
-    dbName = 'TabBurrowDB',
-    dbVersion = 7,
-    storeName = 'tabs'
+    dbName = DB_NAME,
+    dbVersion = DB_VERSION,
+    storeName = TABS_STORE_NAME
   } = options;
 
   await page.evaluate(async ({ tabs, dbName, dbVersion, storeName }) => {
