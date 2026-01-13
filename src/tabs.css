@@ -676,6 +676,23 @@
   flex-shrink: 0;
 }
 
+/* ソートキーバッジ */
+.sortkey-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.6875rem;
+  background: var(--accent-light);
+  color: var(--accent-color);
+  border-radius: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .tab-meta {
   display: flex;
   gap: 12px;

@@ -3,7 +3,7 @@
  * 個別タブの表示・操作を担当
  */
 
-import { useState, useCallback, useEffect, useRef, memo } from 'react';
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import type { SavedTab, CustomGroupMeta } from './types';
 import { formatDateTime } from './utils';
@@ -11,7 +11,7 @@ import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext';
 import { useClickOutside } from '../common/hooks/useClickOutside';
 import { ScreenshotPopup } from './ScreenshotPopup';
-import { Globe, Camera, Folder, Trash2, Calendar, Save, Tag, Pencil, Check, X } from 'lucide-react';
+import { Globe, Camera, Pencil, Folder, Trash2, Calendar, Save, Tag, Check, X, ArrowUpDown } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
@@ -22,7 +22,7 @@ interface TabCardProps {
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string, groupName?: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
-  onRenameTab?: (tabId: string) => void; // タブの表示名変更
+  onEditTab?: (id: string) => void; // タブの編集（表示名・ソートキー）
   // コンテキスト情報
   currentGroupName?: string;
   currentGroupType?: 'domain' | 'custom';
@@ -52,7 +52,7 @@ export const TabCard = memo(function TabCard({
   onMoveToGroup,
   onRemoveFromGroup,
   onRequestMoveToNewGroup,
-  onRenameTab,
+  onEditTab,
   currentGroupName,
   currentGroupType,
   isCompact = false,
@@ -139,20 +139,19 @@ export const TabCard = memo(function TabCard({
     setShowDeleteMenu(false);
   }, [onDelete, tab.id]);
 
-  // 削除
-  const handleDelete = useCallback((e: React.MouseEvent) => {
+  // 削除ボタンクリック時の振る舞い
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    // カスタムグループ内の場合はメニューを表示
     if (currentGroupType === 'custom' && deleteButtonRef.current) {
+      // カスタムグループ内の場合はメニューを表示
       const rect = deleteButtonRef.current.getBoundingClientRect();
       setDeleteMenuPosition({
-        left: rect.right - 180, // メニュー幅を考慮して右寄せ
+        left: rect.right - 180,
         top: rect.bottom + 4,
       });
       setShowDeleteMenu(prev => !prev);
     } else {
-      // ドメイングループ内やフラット表示時は即座に削除（従来通り）
+      // それ以外は直接削除
       handleConfirmDelete();
     }
   }, [currentGroupType, handleConfirmDelete]);
@@ -301,9 +300,9 @@ export const TabCard = memo(function TabCard({
         )}
         <div className={`tab-info ${isCompact ? 'tab-info-compact' : ''}`}>
           <div className="tab-title" title={!isCompact && tab.displayName ? tab.title : undefined}>
-            {tab.favIconUrl && (
+            {tab.faviconUrl && (
               <img 
-                src={tab.favIconUrl} 
+                src={tab.faviconUrl} 
                 alt="" 
                 className="tab-favicon"
                 onError={(e) => (e.currentTarget.style.display = 'none')}
@@ -351,25 +350,35 @@ export const TabCard = memo(function TabCard({
           </div>
           {isCompact ? (
             <div className="tab-meta tab-meta-compact">
+              {tab.sortKey && (
+                <span className="sortkey-badge" title={t('tabManager.tabCard.sortKey', { key: tab.sortKey })}>
+                  <ArrowUpDown size={12} />{tab.sortKey}
+                </span>
+              )}
               <span><Calendar size={12} /> {formatDateTime(tab.lastAccessed)}</span>
               <span><Save size={12} /> {formatDateTime(tab.savedAt)}</span>
             </div>
           ) : (
             <div className="tab-meta">
+              {tab.sortKey && (
+                <span className="sortkey-badge" title={t('tabManager.tabCard.sortKey', { key: tab.sortKey })}>
+                  <ArrowUpDown size={12} />{tab.sortKey}
+                </span>
+              )}
               <span>{t('tabManager.tabCard.lastAccessed', { datetime: formatDateTime(tab.lastAccessed) })}</span>
               <span>{t('tabManager.tabCard.saved', { datetime: formatDateTime(tab.savedAt) })}</span>
             </div>
           )}
         </div>
         <div className="tab-actions">
-          {onRenameTab && (
+          {onEditTab && (
             <button 
               className="tab-rename" 
-              title={t('tabManager.tabCard.rename')}
-              data-testid="tab-rename-button"
+              title={t('tabManager.tabCard.edit')}
+              data-testid="tab-edit-button"
               onClick={(e) => {
                 e.stopPropagation();
-                onRenameTab(tab.id);
+                onEditTab(tab.id);
               }}
             >
               <Pencil size={16} />
@@ -387,9 +396,9 @@ export const TabCard = memo(function TabCard({
           <button 
             ref={deleteButtonRef}
             className="tab-delete" 
-            title={t('tabManager.tabCard.deleteButton')}
+            title={currentGroupType === 'custom' ? t('tabManager.tabCard.deleteMenuLabel') : t('tabManager.tabCard.deleteTab')}
             data-testid="tab-delete-button"
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
           >
             <Trash2 size={16} />
           </button>
@@ -464,18 +473,20 @@ export const TabCard = memo(function TabCard({
           }}
         >
           <div className="group-menu-label">{t('tabManager.tabCard.deleteMenuLabel')}</div>
-          <button
-            className="group-menu-item"
-            data-testid="remove-from-group"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemoveFromGroup(tab.id, currentGroupName);
-              setShowDeleteMenu(false);
-            }}
-          >
-            <span className="group-menu-item-check"><X size={14} /></span>
-            <span className="group-menu-item-text">{t('tabManager.tabCard.removeFromGroup')}</span>
-          </button>
+          {currentGroupType === 'custom' && (
+            <button
+              className="group-menu-item"
+              data-testid="remove-from-group"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveFromGroup(tab.id, currentGroupName);
+                setShowDeleteMenu(false);
+              }}
+            >
+              <span className="group-menu-item-check"><X size={14} /></span>
+              <span className="group-menu-item-text">{t('tabManager.tabCard.removeFromGroup')}</span>
+            </button>
+          )}
           <button
             className="group-menu-item group-menu-item-danger"
             data-testid="delete-tab"

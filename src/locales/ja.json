@@ -325,6 +325,7 @@
         "sort": {
             "groupLabel": "グループ順:",
             "itemLabel": "タブ順:",
+            "default": "既定の並び順",
             "countDesc": "タブ数（多い順）",
             "countAsc": "タブ数（少ない順）",
             "domainAsc": "ドメイン名（A-Z）",
@@ -348,14 +349,21 @@
         "tabCard": {
             "lastAccessed": "最終アクセス: {datetime}",
             "saved": "保存: {datetime}",
+            "sortKey": "ソートキー: {key}",
             "customGroups": "カスタムグループ",
-            "rename": "表示名を変更",
-            "renameDialogTitle": "タブの表示名を変更",
-            "renameDialogMessage": "新しい表示名を入力してください（空にすると元のタイトルが使用されます）",
-            "deleteButton": "削除",
-            "deleteMenuLabel": "削除操作",
+            "edit": "編集",
+            "editDialogTitle": "タブを編集",
+            "displayNameLabel": "表示名",
+            "displayNamePlaceholder": "表示名を入力...",
+            "displayNameMessage": "新しい表示名を入力してください（空にすると元のタイトルが使用されます）",
+            "sortKeyLabel": "ソートキー",
+            "sortKeyPlaceholder": "ソートキーを入力...",
+            "sortKeyHelp": "ソートキーを入力すると、保存日時に優先してこの値で並べ替えられます。",
+            "deleteButton": "アクション",
+            "deleteMenuLabel": "アクションメニュー",
             "removeFromGroup": "グループから外す",
-            "deleteTab": "タブを削除"
+            "deleteTab": "タブを削除",
+            "setSortKey": "ソートキーを設定"
         },
         "group": {
             "openButton": "グループを開く",
