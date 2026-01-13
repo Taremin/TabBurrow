@@ -162,6 +162,9 @@ export interface Settings {
 
   // ゴミ箱設定
   trashRetentionDays: number;                // ゴミ箱の保持期間（日）、0で無効（即時削除）
+
+  // タブ操作設定
+  returnFocusToTabManager: boolean;          // 管理画面から開いたタブを閉じた後に管理画面に戻るか
 }
 
 // デフォルト設定
@@ -210,6 +213,7 @@ const DEFAULT_SETTINGS: Settings = {
   screenshotEnabled: true,           // デフォルトはオン
   screenshotUpdateIntervalMinutes: 5, // デフォルト5分
   trashRetentionDays: 7,             // デフォルト7日
+  returnFocusToTabManager: false,     // デフォルトはオフ
 };
 
 const STORAGE_KEY = 'settings';

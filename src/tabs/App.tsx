@@ -133,6 +133,7 @@ export function App() {
   const [showGroupedTabsInDomainGroups, setShowGroupedTabsInDomainGroups] = useState(false);
   const [pinnedDomainGroups, setPinnedDomainGroups] = useState<PinnedDomainGroup[]>([]);
   const [maximizeWidth, setMaximizeWidth] = useState(false);
+  const [returnFocusToTabManager, setReturnFocusToTabManager] = useState(false);
 
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
@@ -162,6 +163,7 @@ export function App() {
       setShowGroupedTabsInDomainGroups(settings.showGroupedTabsInDomainGroups);
       setPinnedDomainGroups(settings.pinnedDomainGroups || []);
       setMaximizeWidth(settings.maximizeWidth || false);
+      setReturnFocusToTabManager(settings.returnFocusToTabManager || false);
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -307,13 +309,27 @@ export function App() {
   }, [editTabDialog.tabId, updateTabData, hideEditTabDialog]);
 
   // Actions Wrapper
-  const handleOpenTab = useCallback((url: string) => {
-    browser.tabs.create({ url });
-  }, []);
+  const handleOpenTab = useCallback(async (url: string) => {
+    const options: any = { url };
+    if (returnFocusToTabManager) {
+      const currentTab = await browser.tabs.getCurrent();
+      if (currentTab?.id) {
+        options.openerTabId = currentTab.id;
+      }
+    }
+    browser.tabs.create(options);
+  }, [returnFocusToTabManager]);
 
-  const handleMiddleClickTab = useCallback((url: string) => {
-    browser.tabs.create({ url, active: false });
-  }, []);
+  const handleMiddleClickTab = useCallback(async (url: string) => {
+    const options: browser.Tabs.CreateCreatePropertiesType = { url, active: false };
+    if (returnFocusToTabManager) {
+      const currentTab = await browser.tabs.getCurrent();
+      if (currentTab?.id) {
+        options.openerTabId = currentTab.id;
+      }
+    }
+    browser.tabs.create(options);
+  }, [returnFocusToTabManager]);
 
   const getGroupTabs = useCallback((groupName: string, groupType: 'domain' | 'custom') => {
     return filteredTabs.filter(t => {

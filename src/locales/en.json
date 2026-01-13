@@ -155,7 +155,9 @@
             "immediate": "Fast Suspend (suspend after minimal loading)",
             "intervalLabel": "Interval",
             "intervalMs": "ms",
-            "intervalHint": "Delay between opening multiple tabs (0-1000 ms). Default is 100 ms."
+            "intervalHint": "Specify the interval when restoring multiple tabs. Setting to 0 opens them simultaneously, but may put load on the browser.",
+            "returnFocusLabel": "Return to manager after closing",
+            "returnFocusHint": "When you close a tab opened from the manager, focus will automatically return to the manager screen."
         },
         "iconClick": {
             "title": "Icon Click",

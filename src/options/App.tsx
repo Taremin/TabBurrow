@@ -245,8 +245,11 @@ export function App() {
             intervalMs={settings.restoreIntervalMs}
             savedMode={savedSettings.restoreMode}
             savedIntervalMs={savedSettings.restoreIntervalMs}
+            returnFocus={settings.returnFocusToTabManager}
+            savedReturnFocus={savedSettings.returnFocusToTabManager}
             onModeChange={(value) => updateSetting('restoreMode', value)}
             onIntervalChange={(value) => updateSetting('restoreIntervalMs', value)}
+            onReturnFocusChange={(value) => updateSetting('returnFocusToTabManager', value)}
           />
         </SettingsSection>
 

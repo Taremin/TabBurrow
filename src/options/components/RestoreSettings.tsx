@@ -12,6 +12,9 @@ interface RestoreSettingsProps {
   savedIntervalMs: number;
   onModeChange: (value: RestoreMode) => void;
   onIntervalChange: (value: number) => void;
+  returnFocus: boolean;
+  savedReturnFocus: boolean;
+  onReturnFocusChange: (value: boolean) => void;
 }
 
 export function RestoreSettings({
@@ -21,6 +24,9 @@ export function RestoreSettings({
   savedIntervalMs,
   onModeChange,
   onIntervalChange,
+  returnFocus,
+  savedReturnFocus,
+  onReturnFocusChange,
 }: RestoreSettingsProps) {
   const { t } = useTranslation();
 
@@ -70,6 +76,21 @@ export function RestoreSettings({
           <span className="input-suffix">{t('settings.restore.intervalMs')}</span>
         </div>
         <div className="form-hint">{t('settings.restore.intervalHint')}</div>
+      </div>
+
+      <div className="form-group">
+        <label className="form-checkbox-label">
+          <input
+            type="checkbox"
+            className={`form-checkbox ${returnFocus !== savedReturnFocus ? 'modified' : ''}`}
+            checked={returnFocus}
+            onChange={(e) => onReturnFocusChange(e.target.checked)}
+            data-testid="return-focus-checkbox"
+          />
+          <span className="checkbox-custom"></span>
+          <span>{t('settings.restore.returnFocusLabel')}</span>
+        </label>
+        <div className="form-hint">{t('settings.restore.returnFocusHint')}</div>
       </div>
     </>
   );
