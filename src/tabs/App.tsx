@@ -27,6 +27,7 @@ import { useTranslation } from '../common/i18nContext';
 import { useGroups } from './hooks/useGroups';
 import { useSearch } from './hooks/useSearch';
 import { useSelection } from './hooks/useSelection';
+import { sortTabsInGroup } from './utils';
 
 
 
@@ -378,17 +379,35 @@ export function App() {
 
   const handleOpenGroup = useCallback(async (groupName: string, groupType: 'domain' | 'custom') => {
     const groupTabs = getGroupTabs(groupName, groupType);
-    const urls = groupTabs.map(tab => tab.url);
+    
+    // グループ個別のソート設定を取得
+    const customGroup = groupType === 'custom' ? customGroups.find(g => g.name === groupName) : undefined;
+    const pinnedGroup = groupType === 'domain' ? pinnedDomainGroups.find(p => p.domain === groupName) : undefined;
+    const effectiveItemSort = (customGroup?.itemSort || pinnedGroup?.itemSort || itemSort) as ItemSortType;
+    const effectiveCustomSortKeyOrder = (customGroup?.customSortKeyOrder || pinnedGroup?.customSortKeyOrder || customSortKeyOrder) as 'asc' | 'desc';
+    
+    // 表示順と同じ順序でソートしてから開く
+    const sortedTabs = sortTabsInGroup(groupTabs, effectiveItemSort, effectiveCustomSortKeyOrder);
+    const urls = sortedTabs.map(tab => tab.url);
     await openTabsWithRestoreMode(urls);
-  }, [getGroupTabs, openTabsWithRestoreMode]);
+  }, [getGroupTabs, openTabsWithRestoreMode, customGroups, pinnedDomainGroups, itemSort, customSortKeyOrder]);
 
   const handleOpenGroupAsTabGroup = useCallback(async (groupName: string, groupType: 'domain' | 'custom') => {
     const groupTabs_ = getGroupTabs(groupName, groupType);
     if (groupTabs_.length === 0) return;
     
+    // グループ個別のソート設定を取得
+    const customGroup = groupType === 'custom' ? customGroups.find(g => g.name === groupName) : undefined;
+    const pinnedGroup = groupType === 'domain' ? pinnedDomainGroups.find(p => p.domain === groupName) : undefined;
+    const effectiveItemSort = (customGroup?.itemSort || pinnedGroup?.itemSort || itemSort) as ItemSortType;
+    const effectiveCustomSortKeyOrder = (customGroup?.customSortKeyOrder || pinnedGroup?.customSortKeyOrder || customSortKeyOrder) as 'asc' | 'desc';
+    
+    // 表示順と同じ順序でソート
+    const sortedTabs = sortTabsInGroup(groupTabs_, effectiveItemSort, effectiveCustomSortKeyOrder);
+    
     try {
       const tabIds: number[] = [];
-      for (const tab of groupTabs_) {
+      for (const tab of sortedTabs) {
         const newTab = await browser.tabs.create({ url: tab.url, active: false });
         if (newTab.id) tabIds.push(newTab.id);
       }
@@ -402,15 +421,17 @@ export function App() {
     } catch (error) {
       console.error('タブグループの作成に失敗:', error);
     }
-  }, [filteredTabs]);
+  }, [getGroupTabs, customGroups, pinnedDomainGroups, itemSort, customSortKeyOrder]);
 
   const handleBulkOpenAsTabGroup = useCallback(async () => {
     if (selectedTabIds.size === 0) return;
     
     try {
       const selectedTabs = filteredTabs.filter(t => selectedTabIds.has(t.id));
+      // グローバルソート設定でソート
+      const sortedTabs = sortTabsInGroup(selectedTabs, itemSort, customSortKeyOrder);
       const tabIds: number[] = [];
-      for (const tab of selectedTabs) {
+      for (const tab of sortedTabs) {
         const newTab = await browser.tabs.create({ url: tab.url, active: false });
         if (newTab.id) tabIds.push(newTab.id);
       }
@@ -419,7 +440,7 @@ export function App() {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const groupId = await (browser.tabs as any).group({ tabIds });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (browser as any).tabGroups.update(groupId, { title: `${selectedTabs.length} tabs`, collapsed: false });
+        await (browser as any).tabGroups.update(groupId, { title: `${sortedTabs.length} tabs`, collapsed: false });
       }
       
       setSelectedTabIds(new Set());
@@ -427,7 +448,7 @@ export function App() {
     } catch (error) {
       console.error('タブグループの作成に失敗:', error);
     }
-  }, [selectedTabIds, filteredTabs, setSelectedTabIds]);
+  }, [selectedTabIds, filteredTabs, setSelectedTabIds, itemSort, customSortKeyOrder]);
 
   // Rename Logic
   const handleRequestRename = useCallback((currentName: string, groupType: 'domain' | 'custom') => {
@@ -597,12 +618,14 @@ export function App() {
       confirmButtonText: t('tabManager.confirmDialog.openAllConfirm'),
       confirmButtonStyle: 'primary',
       onConfirm: async () => {
-        const urls = filteredTabs.map(tab => tab.url);
+        // グローバルソート設定でソートしてから開く
+        const sortedTabs = sortTabsInGroup(filteredTabs, itemSort, customSortKeyOrder);
+        const urls = sortedTabs.map(tab => tab.url);
         await openTabsWithRestoreMode(urls);
         hideConfirmDialog();
       },
     });
-  }, [filteredTabs, openTabsWithRestoreMode, t, showConfirmDialog, hideConfirmDialog]);
+  }, [filteredTabs, openTabsWithRestoreMode, t, showConfirmDialog, hideConfirmDialog, itemSort, customSortKeyOrder]);
 
   const handleDeleteAllConfirm = useCallback(() => {
     showConfirmDialog({
