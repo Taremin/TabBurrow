@@ -20,12 +20,6 @@ test.describe('Tab Sorting', () => {
     // 2. Set sort keys
     const tabs = page.locator(selectors.tabCard);
     
-    // Sort logic within a group uses title-asc by default? 
-    // Actually TabList.tsx uses itemSort which defaults to saved-desc.
-    // Let's set sort keys and see them swap.
-    
-    const firstTabTitle = await tabs.nth(0).locator(selectors.tabTitle).textContent();
-    
     // Hover to reveal buttons
     await tabs.nth(0).hover();
     await tabs.nth(0).locator('[data-testid="tab-edit-button"]').click();
@@ -37,10 +31,11 @@ test.describe('Tab Sorting', () => {
     await page.fill('[data-testid="edit-tab-sort-key"]', 'A');
     await page.click('[data-testid="confirm-edit-tab"]');
 
-    // 3. Verify order (wait for local database change to propagate and re-render)
-    await page.waitForTimeout(1000); 
-    const firstTabTitleAfter = await tabs.nth(0).locator(selectors.tabTitle).textContent();
-    expect(firstTabTitleAfter).not.toBe(firstTabTitle);
+    // 3. Verify order
+    // Playwright's expect.toHaveText has built-in retry and will wait until the condition is met.
+    // This resolves race conditions between DB update and React re-render.
+    await expect(tabs.nth(0).locator(selectors.tabTitle)).toHaveText('Alpha Tab');
+    await expect(tabs.nth(1).locator(selectors.tabTitle)).toHaveText('Beta Tab');
   });
 
   test('Group specific sort order in pinned group - all options', async ({ page, extensionId }) => {

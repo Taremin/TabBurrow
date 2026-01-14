@@ -52,21 +52,25 @@ test.describe('URL正規化機能', () => {
     
     // パターンが提案されていることを確認
     const patternInput = page.getByTestId('rule-pattern-input');
+    await expect(patternInput).not.toHaveValue('');
     const patternValue = await patternInput.inputValue();
     expect(patternValue).toContain('\\d+');
     
-    // 適用完了のアラートを待つ (alert はページ上のイベントとして発生する)
-    page.once('dialog', async dialog => {
-      expect(dialog.type()).toBe('alert');
-      await dialog.accept();
-    });
-
     // 保存ボタンをクリック（「既存データに適用」はデフォルトでチェックされている想定）
     const saveButton = page.locator('.dialog button.btn-primary');
     await saveButton.click();
     
+    // 適用結果ダイアログが表示されるのを待つ (NormalizationResultDialog)
+    // タイトルで特定する ('settings.urlNormalization.resultDialog.title' の翻訳が "URL正規化の結果" などの場合)
+    // 確実なのは .dialog セレクターと内容を確認すること
+    const resultDialog = page.locator('.dialog');
+    await expect(resultDialog).toBeVisible();
+    
+    // 閉じるボタン（.btn-primary）をクリックしてダイアログを閉じる
+    await resultDialog.locator('button.btn-primary').click();
+    await expect(resultDialog).not.toBeVisible();
+    
     // タブが1つに統合されたことを確認
-    await page.waitForTimeout(500);
     await expect(tabCards).toHaveCount(1);
     
     // 設定画面でルールが保存されているか確認

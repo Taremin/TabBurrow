@@ -39,12 +39,10 @@ test.describe('ドメイングループ名変更', () => {
     console.log('Group Header HTML:', await groupHeader.innerHTML());
 
     // 編集ボタンをクリック
-    // Locatorで見つからない問題があるためJSでクリック
-    await groupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
-      if (btn) btn.click();
-      else throw new Error('Edit button not found in JS');
-    });
+    // data-testid を使用して確実に対象を取得
+    const renameButton = groupHeader.locator(tabsPageSelectors.groupRenameButton);
+    await renameButton.waitFor({ state: 'visible' });
+    await renameButton.click();
 
     // ダイアログが表示されるのを待つ
     const dialogInput = page.locator('.dialog input');
@@ -84,11 +82,8 @@ test.describe('ドメイングループ名変更', () => {
     await groupHeader.waitFor({ state: 'visible', timeout: 5000 });
     await groupHeader.scrollIntoViewIfNeeded();
     await groupHeader.hover();
-    await groupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
-      if (btn) btn.click();
-      else throw new Error('Edit button not found in JS');
-    });
+    const renameButton = groupHeader.locator(tabsPageSelectors.groupRenameButton);
+    await renameButton.click();
     await page.locator('.dialog input').fill('Settings Test Alias');
     await page.locator('.dialog .btn-primary').click();
 
@@ -165,11 +160,7 @@ test.describe('ドメイングループ名変更', () => {
     await expect(groupHeader.locator('.group-original-domain')).not.toBeVisible();
 
     // 編集ボタンをクリック
-    await groupHeader.evaluate(el => {
-      const btn = el.querySelector('.group-edit') as HTMLElement;
-      if (btn) btn.click();
-      else throw new Error('Edit button not found in JS');
-    });
+    await groupHeader.locator(tabsPageSelectors.groupRenameButton).click();
 
     // 新しい名前を入力
     const dialogInput = page.locator('.dialog input');
