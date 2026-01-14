@@ -57,8 +57,8 @@ describe('GroupHeader', () => {
     const onOpenGroup = vi.fn();
     render(<GroupHeader {...defaultProps} onOpenGroup={onOpenGroup} />);
     
-    // t() がキーを返すので 'tabManager.group.openButton'
-    const openButton = screen.getByText('tabManager.group.openButton');
+    // アイコンボタンになったのでaria-labelで取得
+    const openButton = screen.getByRole('button', { name: 'tabManager.group.openButton' });
     fireEvent.click(openButton);
     
     expect(onOpenGroup).toHaveBeenCalledWith('example.com', 'domain');
@@ -68,7 +68,8 @@ describe('GroupHeader', () => {
     const onDeleteGroup = vi.fn();
     render(<GroupHeader {...defaultProps} onDeleteGroup={onDeleteGroup} />);
     
-    const deleteButton = screen.getByText('tabManager.group.deleteButton');
+    // アイコンボタンになったのでaria-labelで取得
+    const deleteButton = screen.getByRole('button', { name: 'tabManager.group.deleteButton' });
     fireEvent.click(deleteButton);
     
     expect(onDeleteGroup).toHaveBeenCalledWith('example.com', 'domain');
@@ -99,7 +100,7 @@ describe('GroupHeader', () => {
       />
     );
     
-    const editButton = document.querySelector('.group-edit');
+    const editButton = screen.getByTestId('group-rename-button');
     expect(editButton).toBeInTheDocument();
   });
 
@@ -112,8 +113,7 @@ describe('GroupHeader', () => {
       />
     );
     
-    const editButton = document.querySelector('.group-edit');
-    expect(editButton).not.toBeInTheDocument();
+    expect(screen.queryByTestId('group-rename-button')).not.toBeInTheDocument();
   });
 
   it('displayNameが設定されている場合、エイリアス名と元のドメイン名の両方が表示される', () => {
@@ -306,14 +306,15 @@ describe('GroupHeader - タブグループとして開く', () => {
       />
     );
     
-    // 翻訳キーが返される（テスト環境ではt()はキーをそのまま返す）
-    expect(screen.getByText('tabManager.group.openAsTabGroupButton')).toBeInTheDocument();
+    // アイコンボタンになったのでaria-labelで取得
+    expect(screen.getByRole('button', { name: 'tabManager.group.openAsTabGroupButton' })).toBeInTheDocument();
   });
 
   it('onOpenGroupAsTabGroupがない場合はボタンが表示されない', () => {
     render(<GroupHeader {...defaultProps} />);
     
-    expect(screen.queryByText('tabManager.group.openAsTabGroupButton')).not.toBeInTheDocument();
+    // アイコンボタンはaria-labelで取得（存在しないことを確認）
+    expect(screen.queryByRole('button', { name: 'tabManager.group.openAsTabGroupButton' })).not.toBeInTheDocument();
   });
 
   it('ボタンをクリックするとonOpenGroupAsTabGroupが呼ばれる', () => {
@@ -325,7 +326,8 @@ describe('GroupHeader - タブグループとして開く', () => {
       />
     );
     
-    const button = screen.getByText('tabManager.group.openAsTabGroupButton');
+    // アイコンボタンになったのでaria-labelで取得
+    const button = screen.getByRole('button', { name: 'tabManager.group.openAsTabGroupButton' });
     fireEvent.click(button);
     
     expect(onOpenGroupAsTabGroup).toHaveBeenCalledWith('example.com', 'domain');

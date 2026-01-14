@@ -732,7 +732,7 @@ test.describe('グループ内正規表現検索', () => {
     await expect(tabCards).toHaveCount(3);
     
     // フィルタトグルをクリック
-    const filterToggle = page.locator('.group-filter-toggle').first();
+    const filterToggle = page.locator(tabsPageSelectors.groupFilterToggle).first();
     await filterToggle.click();
     await page.waitForTimeout(100);
     
@@ -777,7 +777,7 @@ test.describe('グループ内正規表現検索', () => {
     await waitForPageLoad(page);
     
     // フィルタトグルをクリック
-    const filterToggle = page.locator('.group-filter-toggle').first();
+    const filterToggle = page.locator(tabsPageSelectors.groupFilterToggle).first();
     await filterToggle.click();
     await page.waitForTimeout(100);
     

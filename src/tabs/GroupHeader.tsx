@@ -6,7 +6,7 @@
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../common/i18nContext';
-import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin, SortAsc, Check } from 'lucide-react';
+import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin, SortAsc, Check, ExternalLink, Layers, Trash2 } from 'lucide-react';
 import { ColorPicker } from '../common/ColorPicker';
 import { useClickOutside } from '../common/hooks/useClickOutside';
 import type { ItemSortType, CustomSortKeyOrder } from './types';
@@ -274,7 +274,7 @@ export const GroupHeader = memo(function GroupHeader({
         {/* ピン留めボタン（ドメイングループのみ、左端に配置） */}
         {isDomainGroup && onTogglePin && (
           <button 
-            className={`group-pin ${isPinned ? 'pinned' : ''}`}
+            className={`group-header-btn group-pin ${isPinned ? 'pinned' : ''}`}
             title={isPinned ? t('tabManager.group.unpinButton') : t('tabManager.group.pinButton')}
             onClick={handleTogglePin}
             data-testid="group-pin-button"
@@ -287,7 +287,7 @@ export const GroupHeader = memo(function GroupHeader({
           <div className="group-sort-wrapper">
             <button
               ref={sortButtonRef}
-              className={`group-action-button ${itemSort && itemSort !== '' ? 'active' : ''}`}
+              className={`group-header-btn ${itemSort && itemSort !== '' ? 'active' : ''}`}
               title={t('tabManager.sort.itemLabel')}
               onClick={handleToggleSortMenu}
               data-testid="group-item-sort-button"
@@ -391,7 +391,7 @@ export const GroupHeader = memo(function GroupHeader({
               </div>
             )}
             <button
-              className={`group-filter-toggle ${showFilter || hasActiveFilter ? 'active' : ''}`}
+              className={`group-header-btn ${showFilter || hasActiveFilter ? 'active' : ''}`}
               onClick={toggleFilter}
               title={t('tabManager.groupFilter.placeholder')}
               data-testid="group-filter-toggle"
@@ -402,7 +402,7 @@ export const GroupHeader = memo(function GroupHeader({
         )}
         {onRequestRename && (
           <button 
-            className="group-edit" 
+            className="group-header-btn" 
             title={isCustomGroup ? t('tabManager.customGroup.edit') : t('settings.domainGroups.editAlias')}
             onClick={handleRename}
             data-testid="group-rename-button"
@@ -410,31 +410,36 @@ export const GroupHeader = memo(function GroupHeader({
             <Pencil size={16} />
           </button>
         )}
+        {/* 垂直セパレータ */}
+        <div className="group-actions-separator" />
         <button 
-          className="group-open" 
+          className="group-header-btn" 
           title={t('tabManager.group.openButton')}
+          aria-label={t('tabManager.group.openButton')}
           onClick={(e) => handleButtonClick(e, handleOpen)}
           data-testid="group-open-button"
         >
-          {t('tabManager.group.openButton')}
+          <ExternalLink size={16} />
         </button>
         {onOpenGroupAsTabGroup && (
           <button 
-            className="group-open" 
+            className="group-header-btn" 
             title={t('tabManager.group.openAsTabGroupButton')}
+            aria-label={t('tabManager.group.openAsTabGroupButton')}
             onClick={(e) => handleButtonClick(e, handleOpenAsTabGroup)}
             data-testid="group-open-tab-group-button"
           >
-            {t('tabManager.group.openAsTabGroupButton')}
+            <Layers size={16} />
           </button>
         )}
         <button 
-          className="group-delete" 
+          className="group-header-btn group-delete" 
           title={t('tabManager.group.deleteButton')}
+          aria-label={t('tabManager.group.deleteButton')}
           onClick={(e) => handleButtonClick(e, handleDelete)}
           data-testid="group-delete-button"
         >
-          {t('tabManager.group.deleteButton')}
+          <Trash2 size={16} />
         </button>
       </div>
     </div>

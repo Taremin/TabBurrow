@@ -427,18 +427,29 @@
   min-width: 0;
 }
 
-.group-delete {
+/* グループヘッダー内ボタン共通スタイル */
+.group-header-btn {
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 6px;
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
   transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
 }
 
-.group-delete:hover {
+.group-header-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+/* 削除ボタン（ホバー時に危険色） */
+.group-header-btn.group-delete:hover {
   background: var(--danger-light);
   color: var(--danger-color);
 }
@@ -448,6 +459,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* グループアクション内の垂直セパレータ */
+.group-actions-separator {
+  width: 1px;
+  height: 16px;
+  background: var(--border-color);
+  margin: 0 4px;
 }
 
 /* グループヘッダー内のカラーピッカートリガーを隣のボタンに合わせる */
@@ -463,24 +482,7 @@
   color: var(--accent-color) !important;
 }
 
-/* ピン留めボタン */
-.group-pin {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-}
-
-.group-pin:hover {
-  background: var(--accent-light);
-  color: var(--accent-color);
-}
-
+/* ピン留めボタンの状態スタイル */
 .group-pin.pinned {
   color: var(--accent-color);
 }
@@ -498,41 +500,8 @@
   margin-left: 4px;
 }
 
-/* 汎用アクションボタン（ソート順、編集など） */
-.group-action-button {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-}
-
-.group-action-button:hover {
-  background: var(--accent-light);
-  color: var(--accent-color);
-}
-
-.group-action-button.active {
-  color: var(--accent-color);
-}
-
-.group-open {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  transition: all var(--transition-fast);
-}
-
-.group-open:hover {
-  background: var(--accent-light);
+/* アクティブ状態（ソート順選択中、フィルタ有効時など） */
+.group-header-btn.active {
   color: var(--accent-color);
 }
 
