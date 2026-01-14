@@ -22,10 +22,19 @@ export interface CreateGroupDialogState {
   bulkMove?: boolean;
 }
 
-export interface TabRenameDialogState {
+export interface TabEditDialogState {
   isOpen: boolean;
   tabId: string;
   currentDisplayName?: string;
+  currentSortKey?: string;
+}
+
+export interface PromptDialogState {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  initialValue: string;
+  onConfirm: (value: string) => void;
 }
 
 export function useDialogs() {
@@ -72,18 +81,35 @@ export function useDialogs() {
     setCreateGroupDialog({ isOpen: false });
   }, []);
 
-  // 4. タブ表示名変更ダイアログ
-  const [tabRenameDialog, setTabRenameDialog] = useState<TabRenameDialogState>({
+  // 4. タブ編集ダイアログ
+  const [editTabDialog, setEditTabDialog] = useState<TabEditDialogState>({
     isOpen: false,
     tabId: '',
   });
 
-  const showTabRenameDialog = useCallback((tabId: string, currentDisplayName?: string) => {
-    setTabRenameDialog({ isOpen: true, tabId, currentDisplayName });
+  const showEditTabDialog = useCallback((tabId: string, currentDisplayName?: string, currentSortKey?: string) => {
+    setEditTabDialog({ isOpen: true, tabId, currentDisplayName, currentSortKey });
   }, []);
 
-  const hideTabRenameDialog = useCallback(() => {
-    setTabRenameDialog({ isOpen: false, tabId: '' });
+  const hideEditTabDialog = useCallback(() => {
+    setEditTabDialog({ isOpen: false, tabId: '' });
+  }, []);
+
+  // 5. 汎用プロンプトダイアログ
+  const [promptDialog, setPromptDialog] = useState<PromptDialogState>({
+    isOpen: false,
+    title: '',
+    message: '',
+    initialValue: '',
+    onConfirm: () => {},
+  });
+
+  const showPrompt = useCallback((options: Omit<PromptDialogState, 'isOpen'>) => {
+    setPromptDialog({ ...options, isOpen: true });
+  }, []);
+
+  const hidePrompt = useCallback(() => {
+    setPromptDialog(prev => ({ ...prev, isOpen: false }));
   }, []);
 
   return {
@@ -102,9 +128,13 @@ export function useDialogs() {
     hideCreateGroupDialog,
     setCreateGroupDialog,
 
-    tabRenameDialog,
-    showTabRenameDialog,
-    hideTabRenameDialog,
-    setTabRenameDialog,
+    editTabDialog,
+    showEditTabDialog,
+    hideEditTabDialog,
+    setEditTabDialog,
+
+    promptDialog,
+    showPrompt,
+    hidePrompt,
   };
 }
