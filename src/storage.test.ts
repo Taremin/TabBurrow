@@ -34,7 +34,7 @@ function createMockTab(overrides: Partial<SavedTab> = {}): SavedTab {
     domain: 'example.com',
     group: 'example.com',
     groupType: 'domain',
-    favIconUrl: 'https://example.com/favicon.ico',
+    faviconUrl: 'https://example.com/favicon.ico',
     screenshot: new Blob(['test'], { type: 'image/jpeg' }),
     lastAccessed: Date.now(),
     savedAt: Date.now(),
