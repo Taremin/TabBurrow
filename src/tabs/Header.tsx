@@ -284,19 +284,25 @@ export const Header = memo(function Header({
           ) : (
             <>
               <div className="search-container search-container-compact">
-                <span className="search-icon"><Search size={16} /></span>
-                <input
-                  type="text"
-                  className={`search-input search-input-compact ${regexError ? 'search-input-error' : ''}`}
-                  placeholder={t('tabManager.search.placeholder')}
-                  value={localQuery}
-                  onChange={handleInputChange}
-                />
-                {localQuery && (
-                  <button className="clear-search" onClick={handleClearSearch}>
-                    <X size={14} />
-                  </button>
-                )}
+                <div className="search-input-wrapper">
+                  <span className="search-icon"><Search size={16} /></span>
+                  <input
+                    type="text"
+                    className={`search-input search-input-compact ${regexError ? 'search-input-error' : ''}`}
+                    placeholder={t('tabManager.search.placeholder')}
+                    value={localQuery}
+                    onChange={handleInputChange}
+                  />
+                  {localQuery && (
+                    <button 
+                      className="clear-search" 
+                      onClick={handleClearSearch}
+                      aria-label={t('tabManager.search.clearButton')}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
                 <div className="search-options">
                   <button
                     type="button"

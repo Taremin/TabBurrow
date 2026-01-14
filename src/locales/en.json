@@ -321,6 +321,7 @@
         },
         "search": {
             "placeholder": "Search by URL or title...",
+            "clearButton": "Clear search",
             "options": {
                 "caseSensitive": "Match Case",
                 "wholeWord": "Match Whole Word",
