@@ -66,40 +66,55 @@ export const test = base.extend<{
   },
 
   // 各テストの開始前に状態を初期化
-  initializeTest: [async ({ context, extensionId }, use) => {
-    // 拡張機能のストレージをリセットするためのページ
-    const page = await context.newPage();
+  initializeTest: [async ({ workerContext, workerExtensionId }, use) => {
+    // 拡張機能のコンテキストで実行するためのページを作成
+    const page = await workerContext.newPage();
     
     try {
-      // 拡張機能のコンテキストで実行する必要があるため、options.htmlなどを開く
-      // タイムアウトを短くし、waitUntilを最小限にする
-      await page.goto(getExtensionUrl(extensionId, 'options.html'), { 
-        waitUntil: 'commit', // ヘッダー受信時点で十分
+      // 拡張機能のページにアクセス
+      await page.goto(getExtensionUrl(workerExtensionId, 'options.html'), { 
+        waitUntil: 'commit',
         timeout: 5000 
       });
       
-      await page.evaluate(async (dbName) => {
-        // IndexedDBの削除 (TabBurrowDB)
-        // Promiseが解決されない場合に備えてタイムアウトを設ける
-        const deleteDB = () => new Promise<void>((resolve) => {
-          const request = indexedDB.deleteDatabase(dbName);
-          request.onsuccess = () => resolve();
-          request.onerror = () => resolve();
-          request.onblocked = () => resolve();
-          setTimeout(resolve, 1000);
-        });
-        
-        await deleteDB();
-        
-        // chrome.storage.local のクリア
+      await page.evaluate(async () => {
+        // 1. chrome.storage.local のクリア
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           await new Promise<void>((resolve) => {
             chrome.storage.local.clear(() => resolve());
           });
         }
-      }, 'TabBurrowDB');
+
+        // 2. IndexedDB (TabBurrowDB) の各ストアをクリア
+        // deleteDatabaseはロックの影響を受けやすいため、各ストアを明示的にクリアする
+        const DB_NAME = 'TabBurrowDB';
+        const STORES = ['tabs', 'customGroups', 'trash', 'backups'];
+        
+        const db = await new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+
+        try {
+          const existingStores = Array.from(db.objectStoreNames);
+          const storesToClear = STORES.filter(s => existingStores.includes(s));
+          
+          if (storesToClear.length > 0) {
+            const transaction = db.transaction(storesToClear, 'readwrite');
+            for (const storeName of storesToClear) {
+              transaction.objectStore(storeName).clear();
+            }
+            await new Promise<void>((resolve, reject) => {
+              transaction.oncomplete = () => resolve();
+              transaction.onerror = () => reject(transaction.error);
+            });
+          }
+        } finally {
+          db.close();
+        }
+      });
     } catch (e) {
-      // 初期化失敗はログに留め、テスト実行を優先する
       console.warn('Test state initialization warning:', e);
     } finally {
       await page.close();
