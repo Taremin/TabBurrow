@@ -465,7 +465,9 @@
             "deletedAt": "Deleted {days} days ago",
             "deletedToday": "Deleted today",
             "itemCount": "{count} tabs",
-            "searchPlaceholder": "Search trash..."
+            "searchPlaceholder": "Search trash...",
+            "deleteSelectedPermanently": "Delete Selected Permanently",
+            "deleteSelectedConfirm": "Are you sure you want to permanently delete {count} selected tabs? This action cannot be undone."
         }
     },
     "contextMenu": {

@@ -210,4 +210,57 @@ test.describe('ゴミ箱機能', () => {
     const trashBadge = trashButton.locator('.trash-badge');
     await expect(trashBadge).toHaveText('3');
   });
+
+  test('ゴミ箱から複数のタブを選択して一括で完全削除できる', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
+    await waitForPageLoad(page);
+    
+    // テストデータをクリア
+    await clearTestData(page);
+    
+    // 3つのテストタブを作成
+    for (let i = 1; i <= 3; i++) {
+      await createTestTabData(page, {
+        url: `https://example.com/bulk-delete-${i}`,
+        title: `Bulk Delete Tab ${i}`,
+        domain: 'example.com',
+      });
+    }
+    
+    // ページをリロードしてデータを反映
+    await page.reload();
+    await waitForPageLoad(page);
+    
+    // 全てのタブを削除
+    const tabCards = page.locator('[data-testid="tab-card"]');
+    const count = await tabCards.count();
+    for (let i = 0; i < count; i++) {
+      const card = page.locator('[data-testid="tab-card"]').first();
+      await card.hover();
+      await card.locator('[data-testid="tab-delete-button"]').click();
+      await page.waitForTimeout(200);
+    }
+    
+    // ゴミ箱ダイアログを開く
+    await page.locator('[data-testid="trash-button"]').click();
+    
+    // ダイアログ内の全選択チェックボックスをクリック
+    const selectAllCheckbox = page.locator('.trash-select-all input[type="checkbox"]');
+    await selectAllCheckbox.check();
+    
+    // 「選択を完全削除」ボタンが表示されることを確認してクリック
+    const bulkDeleteButton = page.getByRole('button', { name: /選択を完全削除|Delete Selected Permanently/ });
+    await expect(bulkDeleteButton).toBeVisible();
+    await bulkDeleteButton.click();
+    
+    // 確認ダイアログが表示されることを確認し、確定
+    const confirmDialog = page.locator('.dialog').filter({ hasText: /完全に削除しますか|permanently delete/ });
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole('button', { name: /完全に削除|Delete Permanently/ }).click();
+    
+    // ゴミ箱が空になることを確認
+    await expect(page.locator('.trash-item')).toHaveCount(0);
+    await expect(page.locator('.trash-empty')).toBeVisible();
+  });
 });

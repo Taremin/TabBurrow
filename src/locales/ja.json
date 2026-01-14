@@ -464,7 +464,9 @@
             "deletedAt": "{days}日前に削除",
             "deletedToday": "今日削除",
             "itemCount": "{count}件のタブ",
-            "searchPlaceholder": "ゴミ箱内を検索..."
+            "searchPlaceholder": "ゴミ箱内を検索...",
+            "deleteSelectedPermanently": "選択を完全削除",
+            "deleteSelectedConfirm": "{count}件のタブを完全に削除しますか？この操作は取り消せません。"
         }
     },
     "contextMenu": {

@@ -14,6 +14,7 @@ import {
   restoreTabFromTrash,
   restoreTabsFromTrash,
   deleteFromTrash,
+  deleteMultipleFromTrash,
   emptyTrash,
   getTrashCount,
 } from '../storage';
@@ -32,6 +33,7 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showEmptyConfirm, setShowEmptyConfirm] = useState(false);
+  const [showDeleteSelectedConfirm, setShowDeleteSelectedConfirm] = useState(false);
 
   // ゴミ箱の内容を読み込み
   const loadTrash = useCallback(async () => {
@@ -144,6 +146,16 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
     onTrashChanged?.();
   };
 
+  // 選択アイテムを完全削除
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    await deleteMultipleFromTrash(Array.from(selectedIds));
+    await loadTrash();
+    setSelectedIds(new Set());
+    setShowDeleteSelectedConfirm(false);
+    onTrashChanged?.();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -194,13 +206,22 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
               </label>
               <div className="trash-action-buttons">
                 {selectedIds.size > 0 ? (
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={handleRestoreSelected}
-                  >
-                    <RotateCcw size={14} />
-                    {t('tabManager.trash.restoreSelected')}
-                  </button>
+                  <>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={handleRestoreSelected}
+                    >
+                      <RotateCcw size={14} />
+                      {t('tabManager.trash.restoreSelected')}
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => setShowDeleteSelectedConfirm(true)}
+                    >
+                      <XCircle size={14} />
+                      {t('tabManager.trash.deleteSelectedPermanently')}
+                    </button>
+                  </>
                 ) : (
                   <button
                     className="btn btn-primary btn-sm"
@@ -214,6 +235,7 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
                 <button
                   className="btn btn-danger btn-sm"
                   onClick={() => setShowEmptyConfirm(true)}
+                  title={t('tabManager.trash.emptyTrash')}
                 >
                   <XCircle size={14} />
                   {t('tabManager.trash.emptyTrash')}
@@ -301,6 +323,17 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
         confirmButtonStyle="danger"
         onConfirm={handleEmptyTrash}
         onCancel={() => setShowEmptyConfirm(false)}
+      />
+
+      {/* 選択削除確認ダイアログ */}
+      <ConfirmDialog
+        isOpen={showDeleteSelectedConfirm}
+        title={t('tabManager.trash.deleteSelectedPermanently')}
+        message={t('tabManager.trash.deleteSelectedConfirm', { count: selectedIds.size })}
+        confirmButtonText={t('tabManager.trash.deletePermanently')}
+        confirmButtonStyle="danger"
+        onConfirm={handleDeleteSelected}
+        onCancel={() => setShowDeleteSelectedConfirm(false)}
       />
     </>
   );
