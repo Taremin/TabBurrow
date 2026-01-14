@@ -24,7 +24,7 @@ export interface TabExportData {
     displayName?: string;
     domain: string;
     customGroups?: string[];
-    favIconUrl: string;
+    faviconUrl: string;
     screenshot: string; // Base64
     lastAccessed: number;
     savedAt: number;
@@ -92,7 +92,7 @@ export async function exportTabs(): Promise<TabExportData> {
       displayName: tab.displayName,
       domain: tab.domain,
       customGroups: tab.customGroups,
-      favIconUrl: tab.favIconUrl,
+      faviconUrl: tab.faviconUrl,
       screenshot: tab.screenshot ? await blobToBase64(tab.screenshot) : '',
       lastAccessed: tab.lastAccessed,
       savedAt: tab.savedAt,
@@ -148,7 +148,7 @@ export async function importTabs(
       group: tab.domain, // インポート時はドメインをグループとして使用
       groupType: 'domain' as const,
       customGroups: tab.customGroups,
-      favIconUrl: tab.favIconUrl,
+      faviconUrl: tab.faviconUrl,
       screenshot: base64ToBlob(tab.screenshot),
       lastAccessed: tab.lastAccessed,
       savedAt: tab.savedAt,
@@ -440,7 +440,7 @@ export async function importTabsFromText(
       domain,
       group: domain,
       groupType: 'domain',
-      favIconUrl: '',
+      faviconUrl: '',
       screenshot: new Blob(),
       lastAccessed: now,
       savedAt: now,

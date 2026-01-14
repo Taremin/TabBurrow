@@ -101,8 +101,8 @@ describe('exportImport', () => {
         version: 1,
         exportedAt: '2024-01-01T00:00:00.000Z',
         tabs: [
-          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
-          { id: '2', url: 'https://test.com/page', title: 'Test Page', domain: 'test.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '2', url: 'https://test.com/page', title: 'Test Page', domain: 'test.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
         ],
       };
       const result = formatAsUrlList(data);
@@ -126,8 +126,8 @@ describe('exportImport', () => {
         version: 1,
         exportedAt: '2024-01-01T00:00:00.000Z',
         tabs: [
-          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
-          { id: '2', url: 'https://test.com/page', title: 'Test Page', domain: 'test.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '2', url: 'https://test.com/page', title: 'Test Page', domain: 'test.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
         ],
       };
       const result = formatAsMarkdown(data);
@@ -139,7 +139,7 @@ describe('exportImport', () => {
         version: 1,
         exportedAt: '2024-01-01T00:00:00.000Z',
         tabs: [
-          { id: '1', url: 'https://example.com', title: '', domain: 'example.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '1', url: 'https://example.com', title: '', domain: 'example.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
         ],
       };
       const result = formatAsMarkdown(data);
@@ -163,7 +163,7 @@ describe('exportImport', () => {
         version: 1,
         exportedAt: '2024-01-01T00:00:00.000Z',
         tabs: [
-          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
         ],
       };
       const result = formatTabsData(data, 'urlList');
@@ -175,7 +175,7 @@ describe('exportImport', () => {
         version: 1,
         exportedAt: '2024-01-01T00:00:00.000Z',
         tabs: [
-          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', favIconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
+          { id: '1', url: 'https://example.com', title: 'Example', domain: 'example.com', faviconUrl: '', screenshot: '', lastAccessed: 0, savedAt: 0 },
         ],
       };
       const result = formatTabsData(data, 'markdown');
