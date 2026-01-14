@@ -1,6 +1,6 @@
 /**
  * TabBurrow - タブ編集ダイアログ
- * 表示名とソートキーを編集するためのダイアログ
+ * 表示名とカスタムソートキーを編集するためのダイアログ
  */
 
 import { memo, useCallback, useEffect, useState, useRef } from 'react';
@@ -86,19 +86,19 @@ export const EditTabDialog = memo(function EditTabDialog({
         </div>
         <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <label style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
-            {t('tabManager.tabCard.sortKeyLabel')}
+            {t('tabManager.tabCard.customSortKeyLabel')}
           </label>
           <input
             type="text"
             className="dialog-input"
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value)}
-            placeholder={t('tabManager.tabCard.sortKeyPlaceholder')}
+            placeholder={t('tabManager.tabCard.customSortKeyPlaceholder')}
             data-testid="edit-tab-sort-key"
             style={{ width: '100%', boxSizing: 'border-box' }}
           />
           <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
-            {t('tabManager.tabCard.sortKeyHelp')}
+            {t('tabManager.tabCard.customSortKeyHelp')}
           </p>
         </div>
       </div>
