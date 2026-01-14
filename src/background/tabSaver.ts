@@ -59,7 +59,7 @@ export function createSavedTab(
     group: overrides.group || domain,
     groupType: overrides.groupType || 'domain',
     customGroups: overrides.customGroups || [],
-    favIconUrl: tab.favIconUrl || '',
+    faviconUrl: tab.favIconUrl || '',
     screenshot,
     lastAccessed: tab.lastAccessed || savedAt,
     savedAt,
