@@ -249,7 +249,7 @@ export function TrashDialog({ isOpen, onClose, onTrashChanged }: TrashDialogProp
                     />
                   </label>
                   <img
-                    src={tab.favIconUrl || '/icons/icon-32.png'}
+                    src={tab.faviconUrl || '/icons/icon-32.png'}
                     alt=""
                     className="trash-item-favicon"
                     onError={e => {
