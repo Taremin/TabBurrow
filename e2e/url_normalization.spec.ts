@@ -2,7 +2,7 @@
  * URL正規化機能のE2Eテスト
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { tabsPageSelectors, waitForPageLoad, createTestTabData, clearTestData } from './helpers';
+import { tabsPageSelectors, waitForPageLoad, createTestTabData } from './helpers';
 
 test.describe('URL正規化機能', () => {
   test('選択したタブから正規化ルールを作成し、既存タブを統合できる', async ({ context, extensionId }) => {
@@ -10,8 +10,6 @@ test.describe('URL正規化機能', () => {
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     await waitForPageLoad(page);
     
-    // 既存データをクリア
-    await clearTestData(page);
     
     // 類似するURLのタブを2つ追加
     await createTestTabData(page, {

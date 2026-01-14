@@ -3,7 +3,7 @@
  * UI操作時にバックグラウンドへ更新メッセージが送信されるかを確認
  */
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, clearTestData, createCustomGroupData, optionsPageSelectors } from './helpers';
+import { waitForPageLoad, createCustomGroupData, optionsPageSelectors } from './helpers';
 
 test.describe('コンテキストメニュー更新通知', () => {
   // メッセージングをスパイするためのスクリプト
@@ -20,14 +20,8 @@ test.describe('コンテキストメニュー更新通知', () => {
     };
   };
 
-  test.beforeEach(async ({ context, extensionId }) => {
-    // テストデータをクリア
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    await clearTestData(page);
-    await page.close();
-  });
+  // グローバルな initializeTest フィクスチャが自動でクリアするため、
+  // ここでの手動 clearTestData は不要。
 
   test('カスタムグループ作成・変更・削除時にバックグラウンドへ通知が送られる', async ({ context, extensionId }) => {
     test.setTimeout(60000); // ステップが多いためタイムアウト延長

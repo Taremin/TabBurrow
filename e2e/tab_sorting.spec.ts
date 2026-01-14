@@ -1,11 +1,10 @@
 import { test, expect, getExtensionUrl } from './fixtures';
-import { tabsPageSelectors as selectors, createTestTabData, clearTestData, waitForPageLoad } from './helpers';
+import { tabsPageSelectors as selectors, createTestTabData, waitForPageLoad } from './helpers';
 
 test.describe('Tab Sorting', () => {
   test('Sort tabs by sort key in a custom group', async ({ page, extensionId }) => {
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     await waitForPageLoad(page);
-    await clearTestData(page);
 
     // Create a custom group
     const groupName = 'SortTestGroup';
@@ -41,7 +40,6 @@ test.describe('Tab Sorting', () => {
   test('Group specific sort order in pinned group - all options', async ({ page, extensionId }) => {
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     await waitForPageLoad(page);
-    await clearTestData(page);
     
     const domain = 'example.com';
     // Create tabs with specific properties to test all sort orders
@@ -87,7 +85,6 @@ test.describe('Tab Sorting', () => {
   test('Group Header Buttons Order', async ({ page, extensionId }) => {
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     await waitForPageLoad(page);
-    await clearTestData(page);
 
     const groupName = 'OrderTestGroup';
     await createTestTabData(page, { url: 'https://example.com', title: 'Tab', domain: 'example.com', customGroups: [groupName] });
