@@ -14,6 +14,7 @@ interface SavedTab {
   screenshot?: Blob | any; // IDBにはBlobとして入るがテストデータでは調整が必要かも
   lastAccessed: number;
   savedAt: number;
+  sortKey?: string;
 }
 
 interface SeedOptions {
