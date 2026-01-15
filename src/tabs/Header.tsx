@@ -3,7 +3,7 @@ import type { DateRangeFilter, ViewMode, DisplayDensity, CustomGroupMeta, Search
 import { useTranslation } from '../common/i18nContext';
 import { useClickOutside } from '../common/hooks/useClickOutside';
 import { DateRangeFilterComponent } from './DateRangeFilter';
-import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus, CheckSquare, Square } from 'lucide-react';
+import { Search, X, ListChecks, Calendar, AlignJustify, LayoutList, List, Activity, Settings, ExternalLink, Trash2, FolderPlus, CheckSquare, Square, Wand2 } from 'lucide-react';
 
 interface HeaderProps {
   tabCount: number;
@@ -272,7 +272,7 @@ export const Header = memo(function Header({
                 title={t('tabManager.selection.createNormalizationRule')}
                 data-testid="create-normalization-rule-button"
               >
-                <Activity size={16} />
+                <Wand2 size={16} />
               </button>
               <button 
                 className="btn btn-secondary btn-small"

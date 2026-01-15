@@ -58,7 +58,7 @@ export function CreateNormalizationRuleDialog({
       replacement,
     };
     
-    return selectedUrls.slice(0, 3).map(url => ({
+    return selectedUrls.slice(0, 10).map(url => ({
       original: url,
       normalized: applyUrlNormalization(url, [tempRule])
     }));

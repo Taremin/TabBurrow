@@ -1402,6 +1402,9 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
 .preview-item {

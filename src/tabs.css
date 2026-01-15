@@ -2228,34 +2228,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.preview-item {
-  font-size: 0.8125rem;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.preview-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.preview-original {
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-
-.preview-normalized {
-  color: var(--accent-color);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-height: 240px !important;
+  overflow-y: auto !important;
+  padding-right: 12px;
 }
 
 /* ======================
@@ -2307,17 +2282,6 @@ body {
   user-select: none;
 }
 
-/* プレビューセクションの強化 */
-.preview-section {
-  margin: 20px 0;
-  padding: 16px;
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
 .preview-title-row {
   display: flex;
@@ -2358,6 +2322,7 @@ body {
   font-size: 0.75rem;
   font-family: var(--font-mono);
   word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .preview-original-text {

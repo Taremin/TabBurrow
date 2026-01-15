@@ -22,9 +22,13 @@
     padding: 32px;
     max-width: 400px;
     width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     text-align: center;
     box-shadow: var(--shadow-lg);
     animation: dialogIn 200ms ease;
+    overflow-y: auto;
 }
 
 @keyframes dialogIn {

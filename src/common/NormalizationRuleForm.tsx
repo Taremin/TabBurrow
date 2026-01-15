@@ -1,5 +1,5 @@
 import { memo, ReactNode } from 'react';
-import { Activity, ArrowDown, HelpCircle } from 'lucide-react';
+import { Wand2, ArrowDown, HelpCircle } from 'lucide-react';
 import { useTranslation } from './i18nContext';
 
 /** プレビュー結果の型 */
@@ -122,4 +122,4 @@ export const NormalizationRuleForm = memo(function NormalizationRuleForm({
 });
 
 /** ダイアログヘッダー用のアイコン */
-export const NormalizationRuleIcon = () => <Activity className="alert-icon-info" />;
+export const NormalizationRuleIcon = () => <Wand2 className="alert-icon-info" />;
