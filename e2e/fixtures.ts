@@ -28,7 +28,7 @@ export const test = base.extend<{
   // --- Worker Scope Fixtures ---
   
   // 拡張機能をロードしたコンテキストをWorkerプロセスごとに1回作成
-  workerContext: [async (_, use) => {
+  workerContext: [async ({}, use) => {
     const context = await chromium.launchPersistentContext('', {
       headless: false,
       args: [
