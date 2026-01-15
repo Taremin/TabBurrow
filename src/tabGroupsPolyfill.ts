@@ -7,10 +7,9 @@
  * 
  * 実験的実装: Vivaldiの内部APIは非公式のため将来的に動作しなくなる可能性あり
  */
-import browser from 'webextension-polyfill';
+import browser, { type Browser } from 'webextension-polyfill';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const browserAny = browser as any;
+const browserAny = browser as Browser;
 
 // Vivaldiかどうかのキャッシュ（非同期で検出）
 let isVivaldi: boolean | null = null;
@@ -27,8 +26,7 @@ async function detectVivaldi(): Promise<boolean> {
   try {
     // 現在のウィンドウを取得してvivExtDataがあるか確認
     const currentWindow = await browser.windows.getCurrent();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    isVivaldi = 'vivExtData' in (currentWindow as any);
+    isVivaldi = 'vivExtData' in currentWindow;
   } catch {
     isVivaldi = false;
   }
@@ -52,11 +50,9 @@ async function vivaldiTabsGroup(options: { tabIds: number[] }): Promise<number> 
   
   for (const tabId of tabIds) {
     const tab = await browser.tabs.get(tabId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const vivExtData = JSON.parse((tab as any).vivExtData || '{}');
+    const vivExtData = JSON.parse(tab.vivExtData || '{}');
     vivExtData.group = groupIdStr;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await browser.tabs.update(tabId, { vivExtData: JSON.stringify(vivExtData) } as any);
+    await browser.tabs.update(tabId, { vivExtData: JSON.stringify(vivExtData) });
   }
   
   return groupId;
@@ -69,8 +65,16 @@ async function vivaldiTabsGroup(options: { tabIds: number[] }): Promise<number> 
 async function vivaldiTabGroupsUpdate(
   _groupId: number, 
   _updateProperties: { title?: string; collapsed?: boolean; color?: string }
-): Promise<void> {
+): Promise<import('webextension-polyfill').TabGroups.TabGroup> {
   // Vivaldiのタブスタックには名前/色の設定機能がない
+  return {
+    id: _groupId,
+    collapsed: _updateProperties.collapsed || false,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    color: (_updateProperties.color as any) || 'grey',
+    title: _updateProperties.title,
+    windowId: 0
+  };
 }
 
 /**
@@ -81,6 +85,9 @@ async function wrappedTabsGroup(options: { tabIds: number[] }): Promise<number> 
   if (vivaldi) {
     return vivaldiTabsGroup(options);
   } else {
+    if (!browserAny._originalTabsGroup) {
+      throw new Error('Original tabs.group is not available');
+    }
     return browserAny._originalTabsGroup(options);
   }
 }
@@ -88,12 +95,16 @@ async function wrappedTabsGroup(options: { tabIds: number[] }): Promise<number> 
 async function wrappedTabGroupsUpdate(
   groupId: number, 
   updateProperties: { title?: string; collapsed?: boolean; color?: string }
-): Promise<void> {
+): Promise<import('webextension-polyfill').TabGroups.TabGroup> {
   const vivaldi = await detectVivaldi();
   if (vivaldi) {
     return vivaldiTabGroupsUpdate(groupId, updateProperties);
   } else {
-    return browserAny._originalTabGroupsUpdate(groupId, updateProperties);
+    if (!browserAny._originalTabGroupsUpdate) {
+      throw new Error('Original tabGroups.update is not available');
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return browserAny._originalTabGroupsUpdate(groupId, updateProperties as any);
   }
 }
 
@@ -104,16 +115,21 @@ export function applyTabGroupsPolyfill(): void {
   // 元のAPIを保存してラップ
   if (browserAny.tabs.group && !browserAny._originalTabsGroup) {
     browserAny._originalTabsGroup = browserAny.tabs.group;
-    browserAny.tabs.group = wrappedTabsGroup;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    browserAny.tabs.group = wrappedTabsGroup as any;
   } else if (!browserAny.tabs.group) {
-    browserAny.tabs.group = vivaldiTabsGroup;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    browserAny.tabs.group = vivaldiTabsGroup as any;
   }
   
   if (browserAny.tabGroups?.update && !browserAny._originalTabGroupsUpdate) {
-    browserAny._originalTabGroupsUpdate = browserAny.tabGroups.update;
-    browserAny.tabGroups.update = wrappedTabGroupsUpdate;
-  } else if (!browserAny.tabGroups) {
-    browserAny.tabGroups = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    browserAny._originalTabGroupsUpdate = (browserAny.tabGroups as any).update;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (browserAny.tabGroups as any).update = (wrappedTabGroupsUpdate as any);
+  } else if (!(browserAny as any).tabGroups) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (browserAny as any).tabGroups = {
       update: vivaldiTabGroupsUpdate,
     };
   }

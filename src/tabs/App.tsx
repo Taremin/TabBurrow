@@ -429,10 +429,8 @@ export function App() {
       }
       
       if (tabIds.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const groupId = await (browser.tabs as any).group({ tabIds });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (browser as any).tabGroups.update(groupId, { title: groupName, collapsed: false });
+        const groupId = await browser.tabs.group({ tabIds });
+        await browser.tabGroups.update(groupId, { title: groupName, collapsed: false });
       }
     } catch (error) {
       console.error('タブグループの作成に失敗:', error);
@@ -453,10 +451,8 @@ export function App() {
       }
       
       if (tabIds.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const groupId = await (browser.tabs as any).group({ tabIds });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (browser as any).tabGroups.update(groupId, { title: `${sortedTabs.length} tabs`, collapsed: false });
+        const groupId = await browser.tabs.group({ tabIds });
+        await browser.tabGroups.update(groupId, { title: `${sortedTabs.length} tabs`, collapsed: false });
       }
       
       setSelectedTabIds(new Set());

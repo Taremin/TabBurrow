@@ -7,8 +7,7 @@
 
 import browser from './browserApi';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const browserAny = browser as any;
+const browserAny = browser;
 
 /**
  * プラットフォーム機能の検出結果
@@ -21,7 +20,7 @@ export const platform = {
    * Firefox Android: ✗ 非対応
    */
   get supportsTabGroups(): boolean {
-    return typeof browserAny.tabs?.group === 'function';
+    return typeof browserAny.tabs.group === 'function';
   },
   
   /**

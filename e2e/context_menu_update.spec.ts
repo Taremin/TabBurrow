@@ -8,15 +8,25 @@ import { waitForPageLoad, createCustomGroupData, optionsPageSelectors } from './
 test.describe('コンテキストメニュー更新通知', () => {
   // メッセージングをスパイするためのスクリプト
   const spyScript = () => {
+    // window の型拡張
+    interface ExtendedWindow extends Window {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      __sentMessages: any[];
+    }
+    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__sentMessages = [];
+    const win = window as unknown as ExtendedWindow;
+    win.__sentMessages = [];
     
     // chrome.runtime.sendMessage をラップ
     const originalSendMessage = chrome.runtime.sendMessage.bind(chrome.runtime);
+    
+    // chrome.runtime の型拡張（必要な部分のみ）
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (chrome.runtime as any).sendMessage = function(message: any, ...args: any[]): Promise<any> {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (window as any).__sentMessages.push(message);
+    const runtime = chrome.runtime as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    runtime.sendMessage = function(message: any, ...args: any[]): Promise<any> {
+      win.__sentMessages.push(message);
       return originalSendMessage(message, ...args);
     };
   };
@@ -64,8 +74,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     await expect.poll(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return messages.some((m: any) => m.type === 'custom-groups-changed');
+      return messages.some((m: { type: string }) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
     
     // ログをクリア
@@ -105,8 +114,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     await expect.poll(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return messages.some((m: any) => m.type === 'custom-groups-changed');
+      return messages.some((m: { type: string }) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
     
     // ログをクリア
@@ -168,10 +176,8 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // メッセージ確認
     await expect.poll(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return messages.some((m: any) => m.type === 'custom-groups-changed');
+      return messages.some((m: { type: string }) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
   });
 });
