@@ -61,6 +61,7 @@ vi.mock('./tabSaver.js', () => ({
   openTabManagerPage: vi.fn().mockResolvedValue(undefined),
   getTabScreenshot: vi.fn().mockResolvedValue(new Blob([], { type: 'image/jpeg' })),
   saveAndCloseTabs: vi.fn().mockResolvedValue(undefined),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createSavedTab: vi.fn().mockImplementation((tab: any, screenshot: any, savedAt: number, canonicalUrl?: string, overrides?: any) => ({
     id: 'mock-id-' + tab.id,
     url: tab.url,
@@ -360,6 +361,7 @@ describe('contextMenu', () => {
     it('remove-and-closeメニューで管理対象タブを削除して閉じる', async () => {
       const { findTabByUrl, deleteTab } = await import('../storage.js');
       const savedTab = { id: 'saved-tab-id', url: 'https://example.com' };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(findTabByUrl).mockResolvedValueOnce(savedTab as any);
       
       const info: Menus.OnClickData = {
@@ -397,6 +399,7 @@ describe('contextMenu', () => {
     it('拡張アイコン用のremove-and-closeメニューでも動作する', async () => {
       const { findTabByUrl, deleteTab } = await import('../storage.js');
       const savedTab = { id: 'saved-tab-id', url: 'https://example.com' };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(findTabByUrl).mockResolvedValueOnce(savedTab as any);
       
       const info: Menus.OnClickData = {
@@ -495,6 +498,7 @@ describe('contextMenu', () => {
 
     it('promptでパターンが入力されたら設定にルールを追加する', async () => {
       const { getSettings, saveSettings } = await import('../settings.js');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: 'example\\.com' }] as any);
       
       const info: Menus.OnClickData = {
@@ -522,6 +526,7 @@ describe('contextMenu', () => {
 
     it('promptがキャンセルされた場合はルールを追加しない', async () => {
       const { saveSettings } = await import('../settings.js');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -539,6 +544,7 @@ describe('contextMenu', () => {
 
   describe('handleContextMenuClick - create-group-from-url', () => {
     it('create-group-from-urlメニューでパターン入力promptが表示される', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -561,6 +567,7 @@ describe('contextMenu', () => {
     });
 
     it('拡張アイコン用のcreate-group-from-urlメニューでも動作する', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -585,7 +592,9 @@ describe('contextMenu', () => {
       
       // 1回目: パターン入力 → 2回目: グループ名入力
       vi.mocked(browser.scripting.executeScript)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'example\\.com/path' }] as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'My Custom Group' }] as any);
       vi.mocked(getAllCustomGroups).mockResolvedValueOnce([]);
       
@@ -616,6 +625,7 @@ describe('contextMenu', () => {
 
     it('パターン入力がキャンセルされた場合はルールを追加しない', async () => {
       const { saveSettings } = await import('../settings.js');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -633,7 +643,9 @@ describe('contextMenu', () => {
     it('グループ名入力がキャンセルされた場合はルールを追加しない', async () => {
       const { saveSettings } = await import('../settings.js');
       vi.mocked(browser.scripting.executeScript)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -652,7 +664,9 @@ describe('contextMenu', () => {
       const { createCustomGroup, getAllCustomGroups } = await import('../storage.js');
       
       vi.mocked(browser.scripting.executeScript)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'Existing Group' }] as any);
       vi.mocked(getAllCustomGroups).mockResolvedValueOnce([{ name: 'Existing Group', createdAt: Date.now(), updatedAt: Date.now(), sortOrder: 0 }]);
       
@@ -671,6 +685,7 @@ describe('contextMenu', () => {
 
   describe('handleContextMenuClick - create-group-from-domain', () => {
     it('create-group-from-domainメニューでドメインのみがデフォルトパターンになる', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -693,6 +708,7 @@ describe('contextMenu', () => {
     });
 
     it('拡張アイコン用のcreate-group-from-domainメニューでも動作する', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(browser.scripting.executeScript).mockResolvedValueOnce([{ result: null }] as any);
       
       const info: Menus.OnClickData = {
@@ -716,7 +732,9 @@ describe('contextMenu', () => {
       const { getAllCustomGroups } = await import('../storage.js');
       
       vi.mocked(browser.scripting.executeScript)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'example\\.com' }] as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockResolvedValueOnce([{ result: 'Domain Group' }] as any);
       vi.mocked(getAllCustomGroups).mockResolvedValueOnce([]);
       

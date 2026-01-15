@@ -310,7 +310,7 @@ export function App() {
 
   // Actions Wrapper
   const handleOpenTab = useCallback(async (url: string) => {
-    const options: any = { url };
+    const options: Tabs.CreateCreatePropertiesType = { url };
     if (returnFocusToTabManager) {
       const currentTab = await browser.tabs.getCurrent();
       if (currentTab?.id) {
@@ -369,7 +369,7 @@ export function App() {
         },
       });
     }
-  }, [getGroupTabs, deleteDomainGroup, deleteCustomGroupByName, t, showConfirmDialog, hideConfirmDialog]);
+  }, [getGroupTabs, deleteDomainGroup, deleteCustomGroupByName, t, showConfirmDialog, hideConfirmDialog, refreshTrashCount]);
 
   const openTabsWithRestoreMode = useCallback(async (urls: string[]) => {
     for (let i = 0; i < urls.length; i++) {
@@ -549,7 +549,7 @@ export function App() {
     setIsNormalizationRuleDialogOpen(true);
   }, []);
 
-  const handleSaveNormalizationRule = useCallback(async (rule: any, applyToExisting: boolean) => {
+  const handleSaveNormalizationRule = useCallback(async (rule: import('../settings').UrlNormalizationRule, applyToExisting: boolean) => {
     const { applyNormalizationToExisting } = await import('../storage.js');
     try {
       const currentSettings = await getSettings();
@@ -574,7 +574,7 @@ export function App() {
       console.error('Failed to save normalization rule:', error);
       alert('Failed to save normalization rule');
     }
-  }, [t, loadTabs, setIsSelectionMode, setSelectedTabIds]);
+  }, [loadTabs, setIsSelectionMode, setSelectedTabIds]);
 
   // 旧ハンドラの削除・更新
 
@@ -653,7 +653,7 @@ export function App() {
         hideConfirmDialog();
       },
     });
-  }, [allTabs.length, deleteAll, t, showConfirmDialog, hideConfirmDialog]);
+  }, [allTabs.length, deleteAll, t, showConfirmDialog, hideConfirmDialog, refreshTrashCount]);
 
   const handleCancelDialog = useCallback(() => {
     hideConfirmDialog();

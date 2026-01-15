@@ -8,13 +8,14 @@ import { waitForPageLoad, createCustomGroupData, optionsPageSelectors } from './
 test.describe('コンテキストメニュー更新通知', () => {
   // メッセージングをスパイするためのスクリプト
   const spyScript = () => {
-    // グローバルにメッセージログ配列を作成
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__sentMessages = [];
     
     // chrome.runtime.sendMessage をラップ
     const originalSendMessage = chrome.runtime.sendMessage.bind(chrome.runtime);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (chrome.runtime as any).sendMessage = function(message: any, ...args: any[]): Promise<any> {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__sentMessages.push(message);
       return originalSendMessage(message, ...args);
     };
@@ -61,11 +62,14 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // メッセージが送信されたか確認
     await expect.poll(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return messages.some((m: any) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
     
     // ログをクリア
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await page.evaluate(() => (window as any).__sentMessages = []);
     
     // 2. カスタムグループ名変更
@@ -99,11 +103,14 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // メッセージ確認
     await expect.poll(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return messages.some((m: any) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
     
     // ログをクリア
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await page.evaluate(() => (window as any).__sentMessages = []);
     
     // 3. カスタムグループ削除
@@ -120,7 +127,9 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // メッセージ確認
     await expect.poll(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return messages.some((m: any) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
   });
@@ -143,6 +152,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     await waitForPageLoad(page);
     
     // メッセージログをクリア（リロードでクリアされているはずだが念のため）
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await page.evaluate(() => (window as any).__sentMessages = []);
     
     const group1 = page.getByTestId('custom-group-item').filter({ hasText: 'Group1' });
@@ -158,7 +168,9 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // メッセージ確認
     await expect.poll(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return messages.some((m: any) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
   });

@@ -180,7 +180,6 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
   onOpenGroupAsTabGroup,
   onOpenTab,
   onMiddleClickTab,
-  onRenameGroup,
   onRequestRename,
   onMoveToGroup,
   onRemoveFromGroup,
@@ -358,11 +357,11 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         }
         itemSort={isCustomGroup ? groupMeta?.itemSort : pinnedGroup?.itemSort}
         onItemSortChange={(sort) => onUpdateGroupItemSort?.(group.name, group.groupType, sort)}
-        customSortKeyOrder={isCustomGroup ? (groupMeta?.customSortKeyOrder as any) : pinnedGroup?.customSortKeyOrder}
+        customSortKeyOrder={isCustomGroup ? (groupMeta?.customSortKeyOrder as 'asc' | 'desc') : pinnedGroup?.customSortKeyOrder}
         onCustomSortKeyOrderChange={(order) => onUpdateGroupCustomSortKeyOrder?.(group.name, group.groupType, order)}
       />
     );
-  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRenameGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort, onUpdateGroupCustomSortKeyOrder]);
+  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort, onUpdateGroupCustomSortKeyOrder]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {

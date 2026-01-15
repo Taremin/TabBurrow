@@ -1589,7 +1589,7 @@ export async function updateCustomGroupItemSort(groupName: string, itemSort: str
 /**
  * ピン留めドメイングループの個別アイテムソート順を更新（browser.storage.local）
  */
-export async function updatePinnedDomainGroupSort(domain: string, itemSort: any): Promise<void> {
+export async function updatePinnedDomainGroupSort(domain: string, itemSort: import('./settings').ItemSortType | undefined): Promise<void> {
   const { getSettings, saveSettings } = await import('./settings');
   const settings = await getSettings();
   const pinnedGroups = (settings.pinnedDomainGroups || []).map(g => {

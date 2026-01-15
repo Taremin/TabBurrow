@@ -34,10 +34,12 @@ describe('linkChecker', () => {
         { id: '1', enabled: true, name: '404', condition: '404', action: 'dead' },
         { id: '2', enabled: true, name: '2xx', condition: '2xx', action: 'alive' },
       ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     // タブのモック
     vi.mocked(storage.getAllTabs).mockResolvedValue([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { id: 'tab1', url: 'https://example.com', title: 'Test' } as any,
     ]);
 
@@ -68,9 +70,11 @@ describe('linkChecker', () => {
       linkCheckRules: [
         { id: '1', enabled: true, name: '404', condition: '404', action: 'dead' },
       ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(storage.getAllTabs).mockResolvedValue([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { id: 'tab1', url: 'https://example.com', title: 'Test' } as any,
     ]);
 
@@ -95,9 +99,11 @@ describe('linkChecker', () => {
       linkCheckRules: [
         { id: '1', enabled: true, name: '2xx', condition: '2xx', action: 'alive' },
       ],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     vi.mocked(storage.getAllTabs).mockResolvedValue([
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       { id: 'tab1', url: 'https://example.com', title: 'Test' } as any,
     ]);
 
