@@ -40,3 +40,4 @@ test-output.json
 
 # Commit Messages
 commit/
+.agent/
