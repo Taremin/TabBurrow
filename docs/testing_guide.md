@@ -108,12 +108,18 @@ await page.evaluate(async ({ dbName, dbVersion }) => {
 }, { dbName: DB_NAME, dbVersion: DB_VERSION });
 ```
 
-### 注意事項
-- E2Eテスト実行前に `npm run build:chrome` でビルドが必要
-- 日本語でテスト名を指定する場合、コマンドラインでエラーになることがあるため、ファイル名と行番号で指定する
   ```bash
   npx playwright test e2e/extension.spec.ts:10
   ```
+
+### ブラウザの再利用と自動初期化
+E2Eテストの効率化と安定化のため、以下の仕組みを導入しています。
+
+- **ブラウザの再利用**: Workerスコープのコンテキスト（`workerContext`）を使用し、Workerプロセスごとにブラウザを一度だけ起動してテスト間で再利用します。
+- **自動初期化**: `initializeTest` フィクスチャにより、各テストの開始前に `chrome.storage.local` と IndexedDB (`TabBurrowDB`) の全ストアを自動的にクリアします。
+- **タブの自動クリーンアップ**: 各テスト終了時、そのテストで開かれたタブを自動的に閉じます（ブラウザの終了を避けるため、1枚の `about:blank` ページのみを維持します）。
+
+これらにより、テスト間の干渉を防ぎつつ、高速なテスト実行が可能です。
 
 ## i18n（国際化）テスト
 

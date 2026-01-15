@@ -58,6 +58,22 @@ export const test = base.extend<{
   // Workerスコープのコンテキストを各テストで利用
   context: async ({ workerContext }, use) => {
     await use(workerContext);
+    
+    // テスト終了後に開いたページをクリーンアップする
+    // 全てのページを閉じるとブラウザ自体が終了してしまうため、最後の1枚は残す（about:blank に遷移させる）
+    const pages = workerContext.pages();
+    for (let i = 0; i < pages.length; i++) {
+      try {
+        if (i > 0) {
+          await pages[i].close();
+        } else {
+          // 最初の1枚は about:blank に戻すことで、拡張機能のページなどが開いたままになるのを防ぐ
+          await pages[i].goto('about:blank');
+        }
+      } catch (e) {
+        // すでに閉じられている場合などのエラーは無視
+      }
+    }
   },
 
   // WorkerスコープのIDを各テストで利用
