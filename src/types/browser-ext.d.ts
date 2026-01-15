@@ -36,6 +36,8 @@ declare module 'webextension-polyfill' {
       windowId: number;
     }
 
+    type TabGroupsUpdateApi = typeof Browser.TabGroups.update
+    /*
     interface TabGroupsUpdateApi {
       (
         groupId: number,
@@ -46,6 +48,7 @@ declare module 'webextension-polyfill' {
         }
       ): Promise<TabGroup>;
     }
+    */
   }
 
   interface Browser {

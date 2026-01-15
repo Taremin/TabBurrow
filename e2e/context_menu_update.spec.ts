@@ -14,7 +14,6 @@ test.describe('コンテキストメニュー更新通知', () => {
       __sentMessages: any[];
     }
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const win = window as unknown as ExtendedWindow;
     win.__sentMessages = [];
     
@@ -176,6 +175,7 @@ test.describe('コンテキストメニュー更新通知', () => {
     
     // メッセージ確認
     await expect.poll(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const messages = await page.evaluate(() => (window as any).__sentMessages);
       return messages.some((m: { type: string }) => m.type === 'custom-groups-changed');
     }).toBeTruthy();
