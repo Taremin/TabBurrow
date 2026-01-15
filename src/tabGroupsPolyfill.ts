@@ -115,19 +115,15 @@ export function applyTabGroupsPolyfill(): void {
   // 元のAPIを保存してラップ
   if (browserAny.tabs.group && !browserAny._originalTabsGroup) {
     browserAny._originalTabsGroup = browserAny.tabs.group;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    browserAny.tabs.group = wrappedTabsGroup as any;
+    browserAny.tabs.group = wrappedTabsGroup;
   } else if (!browserAny.tabs.group) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    browserAny.tabs.group = vivaldiTabsGroup as any;
+    browserAny.tabs.group = vivaldiTabsGroup;
   }
   
   if (browserAny.tabGroups?.update && !browserAny._originalTabGroupsUpdate) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    browserAny._originalTabGroupsUpdate = (browserAny.tabGroups as any).update;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (browserAny.tabGroups as any).update = (wrappedTabGroupsUpdate as any);
-  } else if (!(browserAny as any).tabGroups) {
+    browserAny._originalTabGroupsUpdate = browserAny.tabGroups.update;
+    browserAny.tabGroups.update = wrappedTabGroupsUpdate;
+  } else if (!browserAny.tabGroups) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (browserAny as any).tabGroups = {
       update: vivaldiTabGroupsUpdate,

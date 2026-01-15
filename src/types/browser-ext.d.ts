@@ -19,12 +19,12 @@ declare module 'webextension-polyfill' {
     }
 
     /** Tab Groups API (Manifest V3 / Chrome) */
-    function group(options: {
-      tabIds: number[];
-      groupId?: number;
-    }): Promise<number>;
-    
-    function ungroup(tabIds: number | number[]): Promise<void>;
+    interface TabsGroupApi {
+      (options: {
+        tabIds: number[];
+        groupId?: number;
+      }): Promise<number>;
+    }
   }
 
   namespace TabGroups {
@@ -36,35 +36,30 @@ declare module 'webextension-polyfill' {
       windowId: number;
     }
 
-    function get(groupId: number): Promise<TabGroup>;
-    function query(queryInfo: {
-      collapsed?: boolean;
-      color?: string;
-      title?: string;
-      windowId?: number;
-    }): Promise<TabGroup[]>;
-    function update(
-      groupId: number,
-      updateProperties: {
-        collapsed?: boolean;
-        color?: string;
-        title?: string;
-      }
-    ): Promise<TabGroup>;
-    function move(
-      groupId: number,
-      moveProperties: {
-        index: number;
-        windowId?: number;
-      }
-    ): Promise<TabGroup>;
+    interface TabGroupsUpdateApi {
+      (
+        groupId: number,
+        updateProperties: {
+          collapsed?: boolean;
+          color?: string;
+          title?: string;
+        }
+      ): Promise<TabGroup>;
+    }
   }
 
   interface Browser {
-    tabGroups: typeof TabGroups;
+    /** webextension-polyfill に欠けている、または環境によって存在しない可能性があるAPI */
+    tabs: {
+      group?: Tabs.TabsGroupApi;
+    } & typeof Tabs;
+
+    tabGroups?: {
+      update?: TabGroups.TabGroupsUpdateApi;
+    } & typeof TabGroups;
     
     /** 内部的にポリフィルで使用する元の関数 */
-    _originalTabsGroup?: typeof Tabs.group;
-    _originalTabGroupsUpdate?: typeof TabGroups.update;
+    _originalTabsGroup?: Tabs.TabsGroupApi;
+    _originalTabGroupsUpdate?: TabGroups.TabGroupsUpdateApi;
   }
 }
