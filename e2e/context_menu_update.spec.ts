@@ -42,9 +42,9 @@ test.describe('コンテキストメニュー更新通知', () => {
     const createDialog = page.locator('.dialog');
     await expect(createDialog).toBeVisible();
     
-    // グループ名入力 (一文字ずつ入力して確実にイベント発火させる)
+    // グループ名入力
     const createInput = createDialog.locator('input[type="text"]');
-    await createInput.pressSequentially(groupName, { delay: 100 });
+    await createInput.fill(groupName);
     
     // 入力値が反映されていることを確認
     await expect(createInput).toHaveValue(groupName);
