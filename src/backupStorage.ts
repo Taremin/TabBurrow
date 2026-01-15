@@ -4,7 +4,6 @@
  */
 
 import {
-  DB_NAME,
   DB_VERSION,
   CUSTOM_GROUPS_STORE_NAME,
   BACKUPS_STORE_NAME,
@@ -13,53 +12,17 @@ import {
   type BackupTab,
   type BackupRecord,
 } from './dbSchema';
-import { getAllTabs, getAllCustomGroups, saveTabs, deleteAllTabs } from './storage';
+import { getAllTabs, getAllCustomGroups, saveTabs, deleteAllTabs, openDB, resetDBInstance } from './storage';
 
 // バックアップ関連の型を再エクスポート
 export type { BackupTab, BackupRecord };
 
-let dbInstance: IDBDatabase | null = null;
-
 /**
  * データベースインスタンスをリセット（テスト用）
+ * storage側をリセットする
  */
 export function resetBackupDBInstance(): void {
-  if (dbInstance) {
-    dbInstance.close();
-    dbInstance = null;
-  }
-}
-
-/**
- * IndexedDBデータベースを開く（バックアップ用）
- */
-async function openBackupDB(): Promise<IDBDatabase> {
-  if (dbInstance) {
-    return dbInstance;
-  }
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => {
-      reject(new Error(`IndexedDBを開けませんでした: ${request.error}`));
-    };
-
-    request.onsuccess = () => {
-      dbInstance = request.result;
-      resolve(dbInstance);
-    };
-
-    request.onupgradeneeded = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      
-      // バックアップストアを作成（DB_VERSION 3以降）
-      if (!db.objectStoreNames.contains(BACKUPS_STORE_NAME)) {
-        const backupStore = db.createObjectStore(BACKUPS_STORE_NAME, { keyPath: 'id' });
-        backupStore.createIndex('createdAt', 'createdAt', { unique: false });
-      }
-    };
-  });
+  resetDBInstance();
 }
 
 /**
@@ -67,7 +30,7 @@ async function openBackupDB(): Promise<IDBDatabase> {
  * - 全タブと全カスタムグループを取得してバックアップレコードを作成
  */
 export async function createBackup(): Promise<BackupRecord> {
-  const db = await openBackupDB();
+  const db = await openDB();
   
   // 現在のタブとカスタムグループを取得
   const tabs = await getAllTabs();
@@ -115,7 +78,7 @@ export async function createBackup(): Promise<BackupRecord> {
  * メタデータのみ返す（tabsは含まない）
  */
 export async function listBackups(): Promise<Omit<BackupRecord, 'tabs'>[]> {
-  const db = await openBackupDB();
+  const db = await openDB();
   
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(BACKUPS_STORE_NAME, 'readonly');
@@ -151,7 +114,7 @@ export async function listBackups(): Promise<Omit<BackupRecord, 'tabs'>[]> {
  * 指定したバックアップを取得
  */
 export async function getBackup(backupId: string): Promise<BackupRecord | null> {
-  const db = await openBackupDB();
+  const db = await openDB();
   
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(BACKUPS_STORE_NAME, 'readonly');
@@ -227,7 +190,7 @@ export async function restoreFromBackup(
  * カスタムグループを全削除して復元
  */
 async function clearAndRestoreCustomGroups(groups: CustomGroupMeta[]): Promise<void> {
-  const db = await openBackupDB();
+  const db = await openDB();
   
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(CUSTOM_GROUPS_STORE_NAME, 'readwrite');
@@ -278,7 +241,7 @@ export async function pruneOldBackups(keepCount: number): Promise<void> {
  * 指定したバックアップを削除
  */
 export async function deleteBackup(backupId: string): Promise<void> {
-  const db = await openBackupDB();
+  const db = await openDB();
   
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(BACKUPS_STORE_NAME, 'readwrite');
@@ -353,13 +316,14 @@ export async function downloadBackup(backupId: string): Promise<void> {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  URL.revokeObjectURL(url);
 }
 
 /**
  * バックアップ数を取得
  */
 export async function getBackupCount(): Promise<number> {
-  const db = await openBackupDB();
+  const db = await openDB();
   
   return new Promise((resolve, reject) => {
     const transaction = db.transaction(BACKUPS_STORE_NAME, 'readonly');
