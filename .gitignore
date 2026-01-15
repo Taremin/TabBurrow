@@ -40,4 +40,8 @@ test-output.json
 
 # Commit Messages
 commit/
-.agent/
+
+# Antigravity
+.agent/*
+!.agent/workflows/
+!.agent/rules/
