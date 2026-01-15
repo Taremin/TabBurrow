@@ -129,7 +129,6 @@
             "description": "Configure the display order in the tab manager.",
             "groupLabel": "Group Order",
             "itemLabel": "Item Sort:",
-            "default": "Default Sort",
             "countDesc": "Tab Count (Most)",
             "countAsc": "Tab Count (Least)",
             "domainAsc": "Domain (A-Z)",

@@ -28,7 +28,7 @@ export const test = base.extend<{
   // --- Worker Scope Fixtures ---
   
   // 拡張機能をロードしたコンテキストをWorkerプロセスごとに1回作成
-  workerContext: [async ({}, use) => {
+  workerContext: [async (_, use) => {
     const context = await chromium.launchPersistentContext('', {
       headless: false,
       args: [
@@ -70,7 +70,7 @@ export const test = base.extend<{
           // 最初の1枚は about:blank に戻すことで、拡張機能のページなどが開いたままになるのを防ぐ
           await pages[i].goto('about:blank');
         }
-      } catch (e) {
+      } catch {
         // すでに閉じられている場合などのエラーは無視
       }
     }
