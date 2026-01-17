@@ -972,10 +972,10 @@
 
 .screenshot-popup img {
   display: block;
-  max-width: 400px;
-  max-height: 300px;
-  width: auto;
+  width: 100%;
   height: auto;
+  max-width: 400px;
+  /* コンパクトモードの幅に合わせる */
   border-radius: var(--radius-sm);
 }
 

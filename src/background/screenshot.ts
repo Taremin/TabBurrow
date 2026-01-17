@@ -98,26 +98,20 @@ export async function resizeScreenshot(dataURL: string): Promise<Blob> {
   const img = await createImageBitmap(dataURLtoBlob(dataURL));
   
   const targetSize = 512;
-  const canvas = new OffscreenCanvas(targetSize, targetSize);
+  // アスペクト比を維持してリサイズ
+  const scale = Math.min(targetSize / img.width, targetSize / img.height);
+  const width = img.width * scale;
+  const height = img.height * scale;
+
+  const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d');
   
   if (!ctx) {
     throw new Error('Canvas context not available');
   }
-
-  // アスペクト比を維持してリサイズ
-  const scale = Math.min(targetSize / img.width, targetSize / img.height);
-  const width = img.width * scale;
-  const height = img.height * scale;
-  const x = (targetSize - width) / 2;
-  const y = (targetSize - height) / 2;
-
-  // 背景を白で塗りつぶし
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, targetSize, targetSize);
   
   // 画像を描画
-  ctx.drawImage(img, x, y, width, height);
+  ctx.drawImage(img, 0, 0, width, height);
 
   // JPEGとしてBlobに変換
   return canvas.convertToBlob({ type: 'image/jpeg', quality: 0.7 });
