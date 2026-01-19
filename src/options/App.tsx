@@ -25,7 +25,7 @@ import { DomainGroupSettings } from './components/DomainGroupSettings';
 import { PinnedDomainGroupSettings } from './components/PinnedDomainGroupSettings';
 import { Dialog } from '../common/Dialog';
 import { Layout } from '../common/Layout';
-import { AlertTriangle, Folder, Tag, Pin } from 'lucide-react';
+import { AlertTriangle, Folder, Tag, Pin, Heart } from 'lucide-react';
 
 export function App() {
   const { t } = useTranslation();
@@ -388,7 +388,10 @@ export function App() {
         <div className="fixed-footer-content">
           <div className="footer-left">
             <span className="version-info">TabBurrow v{browser.runtime.getManifest().version}</span>
-            <a href="credits.html" className="credits-link">{t('credits.headerTitle')}</a>
+            <a href="credits.html" className="credits-link">
+              <Heart size={14} className="credits-icon" />
+              <span>{t('credits.headerTitle')}</span>
+            </a>
           </div>
           <div className="footer-right">
             <span className={`save-status ${saveStatus === 'error' ? 'error' : ''}`}>

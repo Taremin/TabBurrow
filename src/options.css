@@ -394,14 +394,31 @@
 }
 
 .credits-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     color: var(--text-secondary);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     text-decoration: none;
-    transition: color var(--transition-fast);
+    transition: all var(--transition-fast);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
 }
 
 .credits-link:hover {
     color: var(--accent-color);
+    background: var(--accent-light);
+}
+
+.credits-link:hover .credits-icon {
+    color: var(--danger-color);
+    transform: scale(1.2);
+}
+
+.credits-icon {
+    transition: all var(--transition-fast);
+    stroke-width: 2.5px;
 }
 
 /* フッター分の余白確保 */
