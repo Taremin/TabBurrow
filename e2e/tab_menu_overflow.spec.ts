@@ -25,14 +25,42 @@ test.describe('Tab Menu Overflow', () => {
     const groupButton = lastTab.locator(tabsPageSelectors.tabGroupButton);
     await groupButton.click();
 
-    // メニュー（Portal）が表示されるのを待機
+    // メニュー位置とビューポート、ボタン位置を取得
     const menu = page.locator('.group-menu-portal');
     await expect(menu).toBeVisible();
 
-    // メニュー位置とビューポートを比較
-    const menuRect = await menu.boundingBox();
     const buttonRect = await groupButton.boundingBox();
     const viewport = page.viewportSize();
+
+    if (!buttonRect || !viewport) {
+      throw new Error('Could not get bounding box or viewport size');
+    }
+
+    // メニュー位置とビューポートを比較
+    // 位置調整（リポジショニング）が完了するまで少し待つ必要がある場合があるため、waitForFunctionを使用する
+    await page.waitForFunction(([{ menuSelector, viewportHeight, buttonY, buttonHeight }]) => {
+      const menu = document.querySelector(menuSelector);
+      if (!menu) return false;
+      const rect = menu.getBoundingClientRect();
+      
+      // 画面内に収まっていることは必須
+      const isWithinViewport = rect.bottom <= viewportHeight && rect.top >= 0;
+      
+      // ボタンより物理的に上に配置されているか、あるいは調整済みであること
+      // (期待される位置に移動したことを判定)
+      const isPositionAdjusted = (buttonY + buttonHeight + rect.height > viewportHeight) 
+        ? rect.top < buttonY // 下に収まらない場合は上にあるべき
+        : rect.top >= buttonY + buttonHeight; // 収まる場合は下にあるべき
+        
+      return isWithinViewport && isPositionAdjusted;
+    }, [{ 
+      menuSelector: '.group-menu-portal', 
+      viewportHeight: viewport.height,
+      buttonY: buttonRect.y,
+      buttonHeight: buttonRect.height
+    }], { timeout: 5000 });
+
+    const menuRect = await menu.boundingBox();
 
     if (menuRect && viewport && buttonRect) {
         console.log(`[Test] Button position: y=${buttonRect.y}, height=${buttonRect.height}`);
@@ -44,8 +72,6 @@ test.describe('Tab Menu Overflow', () => {
         // 上端もビューポート内にあること
         expect(menuRect.y).toBeGreaterThanOrEqual(0);
         
-        // もしボタンより下にある場合、溢れていないことを確認
-        // もしボタンより上にある場合、溢れ防止が効いてリポジショニングされたことを確認
         if (buttonRect.y + buttonRect.height + menuRect.height > viewport.height) {
             console.log(`[Test] Menu should be above the button or adjusted.`);
             expect(menuRect.y).toBeLessThan(buttonRect.y);
@@ -54,8 +80,7 @@ test.describe('Tab Menu Overflow', () => {
 
     // メニューを閉じる（bodyの中央付近をクリック）
     await page.mouse.click(500, 300);
-    // Menu might still be visible due to transition/animation? Let's wait a bit.
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(300); // 閉じられるのを少し待つ
     await expect(menu).not.toBeVisible();
   });
 

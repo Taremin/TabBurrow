@@ -20,6 +20,9 @@ import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup';
 import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage';
 import { initTrashCleanup, handleTrashCleanupAlarm } from './trash';
 
+// 初期化状態を管理
+let isInitialized = false;
+
 /**
  * 拡張アイコンがクリックされたときの処理
  */
@@ -125,6 +128,7 @@ async function initializeAll(): Promise<void> {
       captureActiveTabsInAllWindows();
     }
     
+    isInitialized = true;
     console.log('[Background] initializeAll() 完了');
   } catch (error) {
     console.error('[Background] 初期化中にエラーが発生しました:', error);
@@ -181,6 +185,9 @@ interface BackgroundMessage {
 browser.runtime.onMessage.addListener((msg: unknown) => {
   const message = msg as BackgroundMessage;
   switch (message.type) {
+    case 'get-initialization-status':
+      return Promise.resolve({ initialized: isInitialized });
+
     case 'settings-changed':
       // 設定を再読み込みして自動収納を再初期化
       initAutoClose().then(async () => {

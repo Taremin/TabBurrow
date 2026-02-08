@@ -49,24 +49,22 @@ test.describe('言語設定の同期と言語設定適用', () => {
 
   test('Service Worker の初期設定プロセスが完了することを確認', async ({ context, extensionId }) => {
     const page = await context.newPage();
-    
-    // コンソールログを収集
-    const logs: string[] = [];
-    page.on('console', msg => {
-      logs.push(msg.text());
-    });
-
-    // バックグラウンド側のコンソールも収集
-    context.on('console', msg => {
-      logs.push(`[SW] ${msg.text()}`);
-    });
-
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     
-    // 初期化完了のログが出力されているか確認
-    // 修正によって、initializeAll() 内で updateContextMenuTitles 経由のログが出る可能性がある
-    await expect.poll(() => {
-      return logs.some(l => l.includes('initializeAll() 完了'));
-    }, { timeout: 15000 }).toBeTruthy();
+    // バックグラウンドに初期化状態を問い合わせる
+    await expect.poll(async () => {
+      try {
+        const response = await page.evaluate(async () => {
+          return await chrome.runtime.sendMessage({ type: 'get-initialization-status' });
+        });
+        return response?.initialized;
+      } catch (e) {
+        console.log('SW initialization check failed:', e);
+        return false;
+      }
+    }, { 
+      timeout: 15000,
+      intervals: [500, 1000, 2000] // インターバルを徐々に広げてバックグラウンドの準備を待つ
+    }).toBeTruthy();
   });
 });
