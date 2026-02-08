@@ -10,6 +10,7 @@ import { formatDateTime } from './utils';
 import { useImageLoader } from './hooks/useImageLoader';
 import { useTranslation } from '../common/i18nContext';
 import { useClickOutside } from '../common/hooks/useClickOutside';
+import { usePopupPosition } from '../common/hooks/usePopupPosition';
 import { ScreenshotPopup } from './ScreenshotPopup';
 import { Globe, Camera, Pencil, Folder, Trash2, Calendar, Save, Tag, Check, X, ArrowUpDown } from 'lucide-react';
 
@@ -66,13 +67,26 @@ export const TabCard = memo(function TabCard({
   const [showPopup, setShowPopup] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const [showGroupMenu, setShowGroupMenu] = useState(false);
-  const [menuPosition, setMenuPosition] = useState({ left: 0, top: 0 });
   const [showDeleteMenu, setShowDeleteMenu] = useState(false);
-  const [deleteMenuPosition, setDeleteMenuPosition] = useState({ left: 0, top: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const deleteMenuRef = useRef<HTMLDivElement>(null);
+
+  // ポップアップ位置計算をフックに委譲
+  const groupMenuPos = usePopupPosition({
+    anchorRef: buttonRef,
+    popupRef: menuRef,
+    isOpen: showGroupMenu,
+    position: 'bottom-right',
+  });
+
+  const deleteMenuPos = usePopupPosition({
+    anchorRef: deleteButtonRef,
+    popupRef: deleteMenuRef,
+    isOpen: showDeleteMenu,
+    position: 'bottom-right',
+  });
 
   // 画像の遅延読み込み/解放
   const { url: screenshotUrl, ref: imageRef } = useImageLoader(tab.screenshot, {
@@ -142,13 +156,8 @@ export const TabCard = memo(function TabCard({
   // 削除ボタンクリック時の振る舞い
   const handleDeleteClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (currentGroupType === 'custom' && deleteButtonRef.current) {
+    if (currentGroupType === 'custom') {
       // カスタムグループ内の場合はメニューを表示
-      const rect = deleteButtonRef.current.getBoundingClientRect();
-      setDeleteMenuPosition({
-        left: rect.right - 180,
-        top: rect.bottom + 4,
-      });
       setShowDeleteMenu(prev => !prev);
     } else {
       // それ以外は直接削除
@@ -159,15 +168,8 @@ export const TabCard = memo(function TabCard({
   // グループメニュートグル
   const handleToggleGroupMenu = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!showGroupMenu && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setMenuPosition({
-        left: rect.right - 180, // メニュー幅を考慮して右寄せ
-        top: rect.bottom + 4,
-      });
-    }
     setShowGroupMenu(prev => !prev);
-  }, [showGroupMenu]);
+  }, []);
 
   // グループに移動
   const handleMoveToGroup = useCallback((groupName: string) => {
@@ -423,8 +425,8 @@ export const TabCard = memo(function TabCard({
           className="group-menu-portal"
           style={{
             position: 'fixed',
-            left: menuPosition.left,
-            top: menuPosition.top,
+            left: groupMenuPos.left,
+            top: groupMenuPos.top,
             zIndex: 1000,
           }}
         >
@@ -468,8 +470,8 @@ export const TabCard = memo(function TabCard({
           className="delete-menu-portal"
           style={{
             position: 'fixed',
-            left: deleteMenuPosition.left,
-            top: deleteMenuPosition.top,
+            left: deleteMenuPos.left,
+            top: deleteMenuPos.top,
             zIndex: 1000,
           }}
         >

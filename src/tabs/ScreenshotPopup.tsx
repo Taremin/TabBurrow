@@ -3,8 +3,9 @@
  * タブカードのホバー時に表示されるスクリーンショットプレビュー
  */
 
-import { useRef, useEffect, useState, memo } from 'react';
+import { useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
+import { usePopupPosition } from '../common/hooks/usePopupPosition';
 
 interface ScreenshotPopupProps {
   isVisible: boolean;
@@ -37,69 +38,22 @@ export const ScreenshotPopup = memo(function ScreenshotPopup({
   anchorRect,
 }: ScreenshotPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
-  const [popupPosition, setPopupPosition] = useState({ left: -9999, top: -9999 });
-
-  // ポップアップ位置計算（コンパクト表示時）
-  useEffect(() => {
-    if (!isCompact || !isVisible || !popupRef.current) return;
-
-    const rect = popupRef.current.getBoundingClientRect();
-    const popupWidth = rect.width;
-    const popupHeight = rect.height;
-    const cursorOffset = 16;
-
-    // 右側に収まるかチェック
-    const canFitRight = mousePos.x + cursorOffset + popupWidth <= window.innerWidth;
-
-    let left: number;
-    let top = mousePos.y + cursorOffset;
-
-    if (canFitRight) {
-      left = mousePos.x + cursorOffset;
-    } else {
-      left = mousePos.x - popupWidth - cursorOffset;
-    }
-
-    // 画面端の調整
-    if (left < 12) {
-      left = 12;
-    }
-    if (top + popupHeight > window.innerHeight) {
-      top = window.innerHeight - popupHeight - 12;
-    }
-    if (top < 12) {
-      top = 12;
-    }
-
-    setPopupPosition({ left, top });
-  }, [isCompact, isVisible, mousePos.x, mousePos.y]);
-
-  // ポップアップ位置計算（通常表示時）
-  useEffect(() => {
-    if (isCompact || !isVisible || !anchorRect) return;
-
-    const popupWidth = 400 + 16; // 予測値
-    const popupHeight = 300 + 16;
-    let left = anchorRect.right + 12;
-    let top = anchorRect.top;
-
-    // 右側に収まらない場合は左側に表示
-    if (left + popupWidth > window.innerWidth) {
-      left = anchorRect.left - popupWidth - 12;
-    }
-    // 左端に収まらない場合は画面左端に配置
-    if (left < 12) {
-      left = 12;
-    }
-    if (top + popupHeight > window.innerHeight) {
-      top = window.innerHeight - popupHeight - 12;
-    }
-    if (top < 12) {
-      top = 12;
-    }
-
-    setPopupPosition({ left, top });
-  }, [isCompact, isVisible, anchorRect]);
+  
+  // ポップアップ位置計算を共通フックに委譲
+  const popupPosition = usePopupPosition({
+    popupRef,
+    isOpen: isVisible,
+    mousePos: isCompact ? mousePos : null,
+    // anchorRectがある場合はその位置を基準にする（Refがない場合のフォールバック）
+    // 本来はRefを渡すべきだが、既存構造を活かしつつ簡易化
+    anchorRef: !isCompact && anchorRect ? { 
+      current: { 
+        getBoundingClientRect: () => anchorRect 
+      } as HTMLElement 
+    } : undefined,
+    position: isCompact ? 'bottom-left' : 'bottom-right',
+    offset: isCompact ? 16 : 12,
+  });
 
   if (!isVisible) return null;
 
