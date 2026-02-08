@@ -102,6 +102,9 @@ async function initializeAll(): Promise<void> {
     const settings = await getSettings();
     applyLocaleSetting(settings.locale);
     
+    // コンテキストメニューのタイトルを更新
+    updateContextMenuTitles();
+    
     // コンテキストメニューの状態を初期化
     await initContextMenuVisibility();
     
@@ -134,13 +137,17 @@ browser.runtime.onInstalled.addListener(async (details) => {
 
   // インストール・更新時のみ必要な処理
   try {
-    // コンテキストメニューを作成
+    // 1. まず設定と言語を初期化
+    const settings = await getSettings();
+    applyLocaleSetting(settings.locale);
+
+    // 2. コンテキストメニューを作成（現在の言語で作成される）
     createContextMenus();
     
-    // カスタムグループサブメニューを初期化
+    // 3. カスタムグループサブメニューを初期化
     await updateCustomGroupMenus();
     
-    // 初期化実行
+    // 4. その他の全機能を初期化
     await initializeAll();
   } catch (error) {
     console.error('[onInstalled] Error:', error);

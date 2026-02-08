@@ -360,29 +360,40 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
  * コンテキストメニューのタイトルを更新（言語設定変更時）
  */
 export function updateContextMenuTitles(): void {
-  // 共通・既存
-  browser.contextMenus.update('open-tab-manager', { title: t('contextMenu.openManager') });
-  browser.contextMenus.update('save-all-including-pinned', { title: t('contextMenu.saveAllIncludingPinned') });
+  const menuItems = [
+    // 共通・既存
+    { id: 'open-tab-manager', key: 'contextMenu.openManager' },
+    { id: 'save-all-including-pinned', key: 'contextMenu.saveAllIncludingPinned' },
 
-  // ページ用
-  browser.contextMenus.update(TABBURROW_MENU_ID, { title: t('contextMenu.tabBurrow') });
-  browser.contextMenus.update(TABBURROW_OPEN_MANAGER_ID, { title: t('contextMenu.openManager') });
-  browser.contextMenus.update(PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
-  browser.contextMenus.update(NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
-  browser.contextMenus.update(STASH_THIS_PAGE_MENU_ID, { title: t('contextMenu.stashThisPage') });
-  browser.contextMenus.update(REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
-  browser.contextMenus.update(EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
-  browser.contextMenus.update(CREATE_GROUP_FROM_URL_MENU_ID, { title: t('contextMenu.createGroupFromUrl') });
-  browser.contextMenus.update(CREATE_GROUP_FROM_DOMAIN_MENU_ID, { title: t('contextMenu.createGroupFromDomain') });
+    // ページ用
+    { id: TABBURROW_MENU_ID, key: 'contextMenu.tabBurrow' },
+    { id: TABBURROW_OPEN_MANAGER_ID, key: 'contextMenu.openManager' },
+    { id: PARENT_MENU_ID, key: 'contextMenu.saveToCustomGroup' },
+    { id: NEW_GROUP_MENU_ID, key: 'contextMenu.newGroup' },
+    { id: STASH_THIS_PAGE_MENU_ID, key: 'contextMenu.stashThisPage' },
+    { id: REMOVE_AND_CLOSE_MENU_ID, key: 'contextMenu.removeAndClose' },
+    { id: EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, key: 'contextMenu.excludeFromAutoClose' },
+    { id: CREATE_GROUP_FROM_URL_MENU_ID, key: 'contextMenu.createGroupFromUrl' },
+    { id: CREATE_GROUP_FROM_DOMAIN_MENU_ID, key: 'contextMenu.createGroupFromDomain' },
 
-  // 拡張アイコン用
-  browser.contextMenus.update(ACTION_PARENT_MENU_ID, { title: t('contextMenu.saveToCustomGroup') });
-  browser.contextMenus.update(ACTION_NEW_GROUP_MENU_ID, { title: t('contextMenu.newGroup') });
-  browser.contextMenus.update(ACTION_STASH_THIS_PAGE_MENU_ID, { title: t('contextMenu.stashThisPage') });
-  browser.contextMenus.update(ACTION_REMOVE_AND_CLOSE_MENU_ID, { title: t('contextMenu.removeAndClose') });
-  browser.contextMenus.update(ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, { title: t('contextMenu.excludeFromAutoClose') });
-  browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_URL_MENU_ID, { title: t('contextMenu.createGroupFromUrl') });
-  browser.contextMenus.update(ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, { title: t('contextMenu.createGroupFromDomain') });
+    // 拡張アイコン用
+    { id: ACTION_PARENT_MENU_ID, key: 'contextMenu.saveToCustomGroup' },
+    { id: ACTION_NEW_GROUP_MENU_ID, key: 'contextMenu.newGroup' },
+    { id: ACTION_STASH_THIS_PAGE_MENU_ID, key: 'contextMenu.stashThisPage' },
+    { id: ACTION_REMOVE_AND_CLOSE_MENU_ID, key: 'contextMenu.removeAndClose' },
+    { id: ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID, key: 'contextMenu.excludeFromAutoClose' },
+    { id: ACTION_CREATE_GROUP_FROM_URL_MENU_ID, key: 'contextMenu.createGroupFromUrl' },
+    { id: ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID, key: 'contextMenu.createGroupFromDomain' },
+  ];
+
+  for (const item of menuItems) {
+    try {
+      browser.contextMenus.update(item.id, { title: t(item.key) });
+    } catch (error) {
+      // メニューが存在しない場合などは無視して次へ
+      console.debug(`[contextMenu] Failed to update title for ${item.id}:`, error);
+    }
+  }
 }
 
 /**
