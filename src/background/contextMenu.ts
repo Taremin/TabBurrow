@@ -59,136 +59,140 @@ const ACTION_STASH_THIS_PAGE_MENU_ID = 'action-stash-this-page';
 /**
  * コンテキストメニューを作成
  */
-export function createContextMenus(): void {
+export async function createContextMenus(): Promise<void> {
   console.log('[contextMenu] Creating context menus...');
   
-  // ==========================================
-  // 拡張アイコンコンテキストメニュー (Context: action)
-  // ==========================================
+  try {
+    // ==========================================
+    // 拡張アイコンコンテキストメニュー (Context: action)
+    // ==========================================
 
-  browser.contextMenus.create({
-    id: 'open-tab-manager',
-    title: t('contextMenu.openManager'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: 'open-tab-manager',
+      title: t('contextMenu.openManager'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_PARENT_MENU_ID,
-    title: t('contextMenu.saveToCustomGroup'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: ACTION_PARENT_MENU_ID,
+      title: t('contextMenu.saveToCustomGroup'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_NEW_GROUP_MENU_ID,
-    parentId: ACTION_PARENT_MENU_ID,
-    title: t('contextMenu.newGroup'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: ACTION_NEW_GROUP_MENU_ID,
+      parentId: ACTION_PARENT_MENU_ID,
+      title: t('contextMenu.newGroup'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_STASH_THIS_PAGE_MENU_ID,
-    title: t('contextMenu.stashThisPage'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: ACTION_STASH_THIS_PAGE_MENU_ID,
+      title: t('contextMenu.stashThisPage'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: 'save-all-including-pinned',
-    title: t('contextMenu.saveAllIncludingPinned'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: 'save-all-including-pinned',
+      title: t('contextMenu.saveAllIncludingPinned'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_REMOVE_AND_CLOSE_MENU_ID,
-    title: t('contextMenu.removeAndClose'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: ACTION_REMOVE_AND_CLOSE_MENU_ID,
+      title: t('contextMenu.removeAndClose'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
-    title: t('contextMenu.excludeFromAutoClose'),
-    contexts: ['action'],
-    enabled: false,
-  });
+    await browser.contextMenus.create({
+      id: ACTION_EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
+      title: t('contextMenu.excludeFromAutoClose'),
+      contexts: ['action'],
+      enabled: false,
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_CREATE_GROUP_FROM_URL_MENU_ID,
-    title: t('contextMenu.createGroupFromUrl'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: ACTION_CREATE_GROUP_FROM_URL_MENU_ID,
+      title: t('contextMenu.createGroupFromUrl'),
+      contexts: ['action'],
+    });
 
-  browser.contextMenus.create({
-    id: ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID,
-    title: t('contextMenu.createGroupFromDomain'),
-    contexts: ['action'],
-  });
+    await browser.contextMenus.create({
+      id: ACTION_CREATE_GROUP_FROM_DOMAIN_MENU_ID,
+      title: t('contextMenu.createGroupFromDomain'),
+      contexts: ['action'],
+    });
 
-  // ==========================================
-  // ページコンテキストメニュー (Context: page, frame)
-  // ==========================================
+    // ==========================================
+    // ページコンテキストメニュー (Context: page, frame)
+    // ==========================================
 
-  browser.contextMenus.create({
-    id: TABBURROW_MENU_ID,
-    title: t('contextMenu.tabBurrow'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: TABBURROW_MENU_ID,
+      title: t('contextMenu.tabBurrow'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: TABBURROW_OPEN_MANAGER_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.openManager'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: TABBURROW_OPEN_MANAGER_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.openManager'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: PARENT_MENU_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.saveToCustomGroup'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: PARENT_MENU_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.saveToCustomGroup'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: NEW_GROUP_MENU_ID,
-    parentId: PARENT_MENU_ID,
-    title: t('contextMenu.newGroup'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: NEW_GROUP_MENU_ID,
+      parentId: PARENT_MENU_ID,
+      title: t('contextMenu.newGroup'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: STASH_THIS_PAGE_MENU_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.stashThisPage'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: STASH_THIS_PAGE_MENU_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.stashThisPage'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: REMOVE_AND_CLOSE_MENU_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.removeAndClose'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: REMOVE_AND_CLOSE_MENU_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.removeAndClose'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.excludeFromAutoClose'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: EXCLUDE_FROM_AUTO_CLOSE_MENU_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.excludeFromAutoClose'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: CREATE_GROUP_FROM_URL_MENU_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.createGroupFromUrl'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: CREATE_GROUP_FROM_URL_MENU_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.createGroupFromUrl'),
+      contexts: ['page', 'frame'],
+    });
 
-  browser.contextMenus.create({
-    id: CREATE_GROUP_FROM_DOMAIN_MENU_ID,
-    parentId: TABBURROW_MENU_ID,
-    title: t('contextMenu.createGroupFromDomain'),
-    contexts: ['page', 'frame'],
-  });
+    await browser.contextMenus.create({
+      id: CREATE_GROUP_FROM_DOMAIN_MENU_ID,
+      parentId: TABBURROW_MENU_ID,
+      title: t('contextMenu.createGroupFromDomain'),
+      contexts: ['page', 'frame'],
+    });
 
-  console.log('[contextMenu] Context menus creation initiated');
+    console.log('[contextMenu] Context menus creation completed');
+  } catch (error) {
+    console.error('[contextMenu] Context menus creation failed:', error);
+  }
 }
 
 /**
@@ -213,14 +217,14 @@ export async function updateCustomGroupMenus(): Promise<void> {
     const freshGroups = await getAllCustomGroups();
     for (const group of freshGroups) {
       // ページ用
-      browser.contextMenus.create({
+      await browser.contextMenus.create({
         id: CUSTOM_GROUP_MENU_PREFIX + group.name,
         parentId: PARENT_MENU_ID,
         title: group.name,
         contexts: ['page', 'frame'],
       });
       // 拡張アイコン用
-      browser.contextMenus.create({
+      await browser.contextMenus.create({
         id: ACTION_CUSTOM_GROUP_MENU_PREFIX + group.name,
         parentId: ACTION_PARENT_MENU_ID,
         title: group.name,
@@ -359,7 +363,7 @@ export async function updateContextMenuVisibility(tab: Tabs.Tab): Promise<void> 
 /**
  * コンテキストメニューのタイトルを更新（言語設定変更時）
  */
-export function updateContextMenuTitles(): void {
+export async function updateContextMenuTitles(): Promise<void> {
   const menuItems = [
     // 共通・既存
     { id: 'open-tab-manager', key: 'contextMenu.openManager' },
@@ -388,7 +392,7 @@ export function updateContextMenuTitles(): void {
 
   for (const item of menuItems) {
     try {
-      browser.contextMenus.update(item.id, { title: t(item.key) });
+      await browser.contextMenus.update(item.id, { title: t(item.key) });
     } catch (error) {
       // メニューが存在しない場合などは無視して次へ
       console.debug(`[contextMenu] Failed to update title for ${item.id}:`, error);
