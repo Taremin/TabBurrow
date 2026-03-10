@@ -43,7 +43,6 @@ export function usePopupPosition({
     let targetX = 0;
     let targetY = 0;
     let anchorWidth = 0;
-    let anchorHeight = 0;
 
     if (anchorRef?.current) {
       const rect = anchorRef.current.getBoundingClientRect();

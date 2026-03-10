@@ -78,8 +78,8 @@ test.describe('Tab Menu Overflow', () => {
         }
     }
 
-    // メニューを閉じる（bodyの中央付近をクリック）
-    await page.mouse.click(500, 300);
+    // メニューを閉じる（ドラッグ＆ドロップコンポーネントを避けるためヘッダー領域[10, 10]をクリック）
+    await page.mouse.click(10, 10);
     await page.waitForTimeout(300); // 閉じられるのを少し待つ
     await expect(menu).not.toBeVisible();
   });
