@@ -69,10 +69,8 @@ export function setCachedSettings(settings: Settings): void {
   cachedSettings = settings;
 }
 
-/**
- * tabLastActiveTimeをstorage.sessionから復元
- */
-async function restoreTabLastActiveTime(): Promise<void> {
+// テスト用にエクスポート
+export async function restoreTabLastActiveTime(): Promise<void> {
   try {
     // browser.storage.sessionが利用可能かチェック
     if (!browser.storage.session) {
@@ -84,11 +82,15 @@ async function restoreTabLastActiveTime(): Promise<void> {
     const data = result[TAB_LAST_ACTIVE_TIME_KEY] as Record<string, number> | undefined;
     
     if (data) {
-      tabLastActiveTime.clear();
+      // 復元解決前にイベント（handleTabActivated等）で既に更新された値があれば、
+      // 古い復元データで上書きしないように保護しつつマージする
       for (const [tabIdStr, timestamp] of Object.entries(data)) {
-        tabLastActiveTime.set(Number(tabIdStr), timestamp);
+        const tabId = Number(tabIdStr);
+        if (!tabLastActiveTime.has(tabId)) {
+          tabLastActiveTime.set(tabId, timestamp);
+        }
       }
-      console.log(`[autoClose] ${tabLastActiveTime.size}件のタブ状態を復元しました`);
+      console.log(`[autoClose] ${tabLastActiveTime.size}件のタブ状態を復元・マージしました`);
     }
   } catch (error) {
     console.warn('[autoClose] storage.sessionからの復元に失敗:', error);

@@ -2,14 +2,28 @@
  * autoClose.ts のユニットテスト
  * キャッシュ管理とエクスポートされた定数・関数をテスト
  */
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   AUTO_CLOSE_ALARM_NAME,
   tabLastActiveTime,
   getCachedSettings,
   setCachedSettings,
+  restoreTabLastActiveTime,
 } from './autoClose';
 import { getDefaultSettings, type Settings } from '../settings';
+import browser from '../browserApi';
+
+// browser APIのモック
+vi.mock('../browserApi.js', () => ({
+  default: {
+    storage: {
+      session: {
+        get: vi.fn(),
+        set: vi.fn().mockResolvedValue(undefined),
+      },
+    },
+  },
+}));
 
 describe('autoClose', () => {
   describe('AUTO_CLOSE_ALARM_NAME', () => {
@@ -101,6 +115,30 @@ describe('autoClose', () => {
       setCachedSettings(settings2);
       expect(getCachedSettings()?.autoCloseEnabled).toBe(true);
       expect(getCachedSettings()?.autoCloseSeconds).toBe(600);
+    });
+  });
+
+  describe('restoreTabLastActiveTime', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      tabLastActiveTime.clear();
+    });
+
+    it('復元解決前にMapに登録された最新のデータがある場合、古い復元データで上書きされないこと', async () => {
+      // 1. 復元対象のデータを session.get が返すようにモックする（古いデータ: ID 1 は 1000）
+      const mockSessionData = {
+        tabLastActiveTime: { "1": 1000 }
+      };
+      vi.mocked(browser.storage.session.get).mockResolvedValue(mockSessionData);
+
+      // 2. 復元解決前に、Mapに最新のアクティブ時刻（例: 5000）をセットしておく
+      tabLastActiveTime.set(1, 5000);
+
+      // 3. 復元処理を実行
+      await restoreTabLastActiveTime();
+
+      // 4. 検証: 最新の時刻（5000）がクリアされず維持されていること
+      expect(tabLastActiveTime.get(1)).toBe(5000);
     });
   });
 });

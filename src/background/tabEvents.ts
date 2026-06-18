@@ -41,7 +41,8 @@ export function setupTabEventListeners(): void {
  * タブがアクティブになったときの処理
  * 前のタブ（非アクティブになるタブ）のスクリーンショットをキャッシュ
  */
-async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): Promise<void> {
+// テスト用にエクスポート
+export async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoType): Promise<void> {
   const previousTabId = currentActiveTabId;
   currentActiveTabId = activeInfo.tabId;
 
@@ -188,7 +189,8 @@ export async function captureActiveTabsInAllWindows(): Promise<void> {
 /**
  * 起動時に現在のアクティブタブIDを取得して初期化する
  */
-async function initializeActiveTabId(): Promise<void> {
+// テスト用にエクスポート
+export async function initializeActiveTabId(): Promise<void> {
   try {
     const tabs = await browser.tabs.query({ active: true, lastFocusedWindow: true });
     if (tabs.length > 0 && tabs[0].id !== undefined) {
@@ -197,5 +199,12 @@ async function initializeActiveTabId(): Promise<void> {
   } catch (error) {
     console.warn('[tabEvents] アクティブタブの初期取得に失敗しました:', error);
   }
+}
+
+/**
+ * テスト用にアクティブタブIDをリセットする
+ */
+export function resetActiveTabIdForTest(): void {
+  currentActiveTabId = null;
 }
 
