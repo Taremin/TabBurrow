@@ -32,6 +32,9 @@ export function setupTabEventListeners(): void {
 
   // タブの読み込みが完了したときの処理
   browser.tabs.onUpdated.addListener(handleTabUpdated);
+
+  // 起動時に現在のアクティブタブIDを初期化
+  initializeActiveTabId();
 }
 
 /**
@@ -179,6 +182,20 @@ export async function captureActiveTabsInAllWindows(): Promise<void> {
     }
   } catch (error) {
     console.error('[Screenshot] 全ウィンドウキャプチャエラー:', error);
+  }
+}
+
+/**
+ * 起動時に現在のアクティブタブIDを取得して初期化する
+ */
+async function initializeActiveTabId(): Promise<void> {
+  try {
+    const tabs = await browser.tabs.query({ active: true, lastFocusedWindow: true });
+    if (tabs.length > 0 && tabs[0].id !== undefined) {
+      currentActiveTabId = tabs[0].id;
+    }
+  } catch (error) {
+    console.warn('[tabEvents] アクティブタブの初期取得に失敗しました:', error);
   }
 }
 
