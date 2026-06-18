@@ -158,16 +158,45 @@ browser.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-// ブラウザ起動時（Service Worker復帰時）の初期化
+// ブラウザ起動時の初期化
 browser.runtime.onStartup.addListener(async () => {
   console.log('[onStartup] TabBurrow が起動しました');
   await initializeAll();
 });
 
-// Service Worker 再起動時のためにトップレベルでも初期化をスケジュール
-// (ただし、onInstalled や onStartup と重複しないよう配慮が必要な場合もあるが、
-//  各機能の init がべき等であれば問題ない)
-initializeAll().catch(err => {
+/**
+ * 起動方法を判定して初期化を適切に制御する
+ */
+async function checkStartupAndInitialize(): Promise<void> {
+  // 1. storage.session が利用できない環境（古いブラウザやテスト環境など）へのフォールバック
+  if (!browser.storage.session) {
+    console.log('[Background] storage.session が未サポートのため、常に初期化を実行します');
+    await initializeAll();
+    return;
+  }
+
+  try {
+    const result = await browser.storage.session.get('session_active');
+    
+    if (result.session_active) {
+      // 2. セッションが既にアクティブ ＝ Service Workerのサスペンドからの復帰
+      console.log('[Background] Service Workerのサスペンド復帰を検出しました。初期化を実行します。');
+      await initializeAll();
+    } else {
+      // 3. セッションがアクティブではない ＝ ブラウザ起動時
+      // この場合は browser.runtime.onStartup / onInstalled リスナーが発火して初期化が行われるため、
+      // ここでの初期化はスキップし、セッションアクティブフラグだけを立てる。
+      console.log('[Background] ブラウザ起動を検出しました。起動イベント（onStartup/onInstalled）での初期化を待機します。');
+      await browser.storage.session.set({ session_active: true });
+    }
+  } catch (error) {
+    console.warn('[Background] 起動判定中にエラーが発生したため、安全のため初期化を実行します:', error);
+    await initializeAll();
+  }
+}
+
+// Service Worker 起動/復旧時の初期化スケジュール
+checkStartupAndInitialize().catch(err => {
   console.error('[Background] Top-level initialization failed:', err);
 });
 
