@@ -9,6 +9,7 @@ import { setScreenshot, deleteScreenshot } from '../screenshotCache';
 import { captureTab, resizeScreenshot } from './screenshot';
 import { tabLastActiveTime, updateTabLastActiveTime, removeTabLastActiveTime } from './autoClose';
 import { updateContextMenuVisibility } from './contextMenu';
+import { savedTabUrlsCache } from './tabCache';
 
 // 現在のアクティブタブを追跡（タブ切替時に前のタブをキャッシュするため）
 let currentActiveTabId: number | null = null;
@@ -35,6 +36,44 @@ export function setupTabEventListeners(): void {
 
   // 起動時に現在のアクティブタブIDを初期化
   initializeActiveTabId();
+}
+
+/**
+ * アクセスされたURLが保存済みの場合、最終アクセス時間を更新する
+ */
+export async function checkAndUpdateLastAccessed(url: string | undefined): Promise<void> {
+  if (!url) return;
+
+  try {
+    const { getSettings } = await import('../settings.js');
+    const settings = await getSettings();
+    
+    const { applyUrlNormalization } = await import('../utils/url.js');
+    const canonicalUrl = settings.urlNormalizationEnabled 
+      ? applyUrlNormalization(url, settings.urlNormalizationRules || [])
+      : url;
+
+    // キャッシュ判定 (Set)
+    if (savedTabUrlsCache.has(url) || savedTabUrlsCache.has(canonicalUrl)) {
+      console.log(`[AccessTracker] 保存済みURLへのアクセスを検知しました: ${url}`);
+      
+      const { findTabByCanonicalUrl, updateTab } = await import('../storage/index.js');
+      const existingTab = await findTabByCanonicalUrl(canonicalUrl);
+      if (existingTab) {
+        const now = Date.now();
+        // 5秒以内の連続更新は防止
+        if (now - existingTab.lastAccessed > 5000) {
+          await updateTab(existingTab.id, { lastAccessed: now });
+          console.log(`[AccessTracker] タブ ${existingTab.id} の最終アクセス日時を更新しました`);
+          
+          // UI側（タブ管理画面）へ変更を通知
+          browser.runtime.sendMessage({ type: 'tabs-changed' }).catch(() => {});
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[AccessTracker] 最終アクセス時間の更新に失敗しました:', error);
+  }
 }
 
 /**
@@ -65,6 +104,8 @@ export async function handleTabActivated(activeInfo: Tabs.OnActivatedActiveInfoT
   // コンテキストメニューの表示/非表示を更新
   if (currentTab) {
     updateContextMenuVisibility(currentTab);
+    // アクセス検知と最終アクセス時間更新
+    checkAndUpdateLastAccessed(currentTab.url);
   }
 
   // スクリーンショット取得（すでにロード完了している場合のみ）
@@ -124,6 +165,11 @@ async function handleTabUpdated(
   // URLが変更された場合、コンテキストメニューを更新
   if (changeInfo.url && tab.active) {
     updateContextMenuVisibility(tab);
+  }
+
+  // URL変更またはロード完了時にアクセス検知と更新を試みる
+  if (changeInfo.url || changeInfo.status === 'complete') {
+    checkAndUpdateLastAccessed(tab.url);
   }
   
   // 読み込み完了かつアクティブなタブの場合のみキャプチャ

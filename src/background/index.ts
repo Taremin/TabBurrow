@@ -19,6 +19,7 @@ import { checkLinks, cancelLinkCheck, isLinkCheckRunning, type LinkCheckProgress
 import { initAutoBackup, handleBackupAlarm, triggerBackup } from './backup';
 import { listBackups, restoreFromBackup, deleteBackup } from '../backupStorage';
 import { initTrashCleanup, handleTrashCleanupAlarm } from './trash';
+import { updateSavedTabUrlsCache } from './tabCache';
 
 // 初期化状態を管理
 let isInitialized = false;
@@ -101,6 +102,9 @@ browser.action.onClicked.addListener(handleActionClick);
 async function initializeAll(): Promise<void> {
   console.log('[Background] initializeAll() 開始');
   try {
+    // キャッシュを初期化
+    await updateSavedTabUrlsCache();
+    
     // 設定を読み込んで言語を初期化
     const settings = await getSettings();
     applyLocaleSetting(settings.locale);
@@ -306,7 +310,12 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
         return Promise.resolve({ success: false, error: 'backupId and mode are required' });
       }
       return restoreFromBackup(message.backupId, message.mode)
-        .then(result => ({ success: true, ...result }));
+        .then(result => {
+          if (result.success) {
+            updateSavedTabUrlsCache();
+          }
+          return { success: true, ...result };
+        });
 
     case 'backup-delete':
       if (!message.backupId) {
@@ -324,6 +333,12 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
         const backup = await getBackup(message.backupId!);
         return { success: true, jsonData, createdAt: backup?.createdAt };
       })();
+
+    case 'tabs-changed':
+    case 'trash-changed':
+      updateSavedTabUrlsCache();
+      return Promise.resolve({ success: true });
+
     default:
       return false;
   }
