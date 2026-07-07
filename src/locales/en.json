@@ -370,7 +370,10 @@
             "deleteMenuLabel": "Action Menu",
             "removeFromGroup": "Remove from Group",
             "deleteTab": "Delete Tab",
-            "setCustomSortKey": "Set Custom Sort Key"
+            "setCustomSortKey": "Set Custom Sort Key",
+            "mute": "Mute on Restore",
+            "unmute": "Unmute on Restore",
+            "mutedStatus": "This tab will be opened muted"
         },
         "group": {
             "openButton": "Open Group",
@@ -380,6 +383,11 @@
             "expandButton": "Expand",
             "pinButton": "Pin",
             "unpinButton": "Unpin"
+        },
+        "groupHeader": {
+            "mute": "Mute Group on Restore",
+            "unmute": "Unmute Group on Restore",
+            "mutedStatus": "Tabs in this group will be opened muted"
         },
         "confirmDialog": {
             "deleteGroupTitle": "Delete Group",

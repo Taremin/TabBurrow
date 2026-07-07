@@ -499,6 +499,15 @@
   color: var(--danger-color);
 }
 
+/* ミュートボタンの状態スタイル */
+.group-mute.active {
+  color: var(--danger-color);
+}
+
+.group-mute.active:hover {
+  background: var(--danger-light);
+}
+
 /* ピン留めアイコン（グループ名の横に表示） */
 .group-pin-icon {
   display: flex;
@@ -732,6 +741,30 @@
 .tab-rename:hover {
   background: var(--accent-light);
   color: var(--accent-color);
+}
+
+/* ミュートボタン */
+.tab-mute {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.tab-mute:hover {
+  background: var(--accent-light);
+  color: var(--accent-color);
+}
+
+.tab-mute.active {
+  color: var(--danger-color);
+}
+
+.tab-mute.active:hover {
+  background: var(--danger-light);
 }
 
 /* 元タイトル（displayNameがある場合に表示） */

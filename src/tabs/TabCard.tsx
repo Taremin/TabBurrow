@@ -12,18 +12,19 @@ import { useTranslation } from '../common/i18nContext';
 import { useClickOutside } from '../common/hooks/useClickOutside';
 import { usePopupPosition } from '../common/hooks/usePopupPosition';
 import { ScreenshotPopup } from './ScreenshotPopup';
-import { Globe, Camera, Pencil, Folder, Trash2, Calendar, Save, Tag, Check, X, ArrowUpDown } from 'lucide-react';
+import { Globe, Camera, Pencil, Folder, Trash2, Calendar, Save, Tag, Check, X, ArrowUpDown, Volume2, VolumeX } from 'lucide-react';
 
 interface TabCardProps {
   tab: SavedTab;
   customGroups: CustomGroupMeta[];
   onDelete: (id: string) => void | Promise<void>;
-  onOpen: (url: string) => void;
-  onMiddleClick?: (url: string) => void; // ホイールクリック（中クリック）
+  onOpen: (tab: SavedTab) => void;
+  onMiddleClick?: (tab: SavedTab) => void; // ホイールクリック（中クリック）
   onMoveToGroup: (tabId: string, groupName: string) => void;
   onRemoveFromGroup: (tabId: string, groupName?: string) => void;
   onRequestMoveToNewGroup: (tabId: string) => void; // 新規グループ作成して移動
   onEditTab?: (id: string) => void; // タブの編集（表示名・ソートキー）
+  onToggleMute?: (id: string, muted: boolean) => void; // ミュート設定のトグル
   // コンテキスト情報
   currentGroupName?: string;
   currentGroupType?: 'domain' | 'custom';
@@ -54,6 +55,7 @@ export const TabCard = memo(function TabCard({
   onRemoveFromGroup,
   onRequestMoveToNewGroup,
   onEditTab,
+  onToggleMute,
   currentGroupName,
   currentGroupType,
   isCompact = false,
@@ -104,14 +106,14 @@ export const TabCard = memo(function TabCard({
   // タブを開くまたは選択をトグル
   const handleClick = useCallback((e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('.tab-delete') || target.closest('.tab-group-action') || target.closest('.tab-checkbox')) return;
+    if (target.closest('.tab-delete') || target.closest('.tab-group-action') || target.closest('.tab-checkbox') || target.closest('.tab-mute')) return;
     
     if (isSelectionMode && onToggleSelection) {
       onToggleSelection(tab.id);
     } else {
-      onOpen(tab.url);
+      onOpen(tab);
     }
-  }, [onOpen, tab.url, tab.id, isSelectionMode, onToggleSelection]);
+  }, [onOpen, tab, isSelectionMode, onToggleSelection]);
 
   // ホイールクリック（中クリック）でタブを開く（画面は維持）
   const handleAuxClick = useCallback((e: React.MouseEvent) => {
@@ -119,15 +121,15 @@ export const TabCard = memo(function TabCard({
     if (e.button !== 1) return;
     
     const target = e.target as HTMLElement;
-    if (target.closest('.tab-delete') || target.closest('.tab-group-action') || target.closest('.tab-checkbox')) return;
+    if (target.closest('.tab-delete') || target.closest('.tab-group-action') || target.closest('.tab-checkbox') || target.closest('.tab-mute')) return;
     
     e.preventDefault();
     e.stopPropagation();
     
     if (onMiddleClick) {
-      onMiddleClick(tab.url);
+      onMiddleClick(tab);
     }
-  }, [onMiddleClick, tab.url]);
+  }, [onMiddleClick, tab]);
 
   // 中クリック時のブラウザデフォルト動作（自動スクロール）を防止
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -312,6 +314,11 @@ export const TabCard = memo(function TabCard({
               />
             )}
             <span data-testid="tab-title">{tab.displayName || tab.title}</span>
+            {tab.muted && (
+              <span className="tab-mute-indicator" title={t('tabManager.tabCard.mutedStatus')} style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '4px', color: 'var(--danger-color)' }} data-testid="tab-mute-indicator">
+                <VolumeX size={14} />
+              </span>
+            )}
             {/* コンパクト表示時: displayNameがあれば編集済みアイコン（タイトル末尾に表示） */}
             {isCompact && tab.displayName && (
               <span className="tab-displayname-indicator"><Pencil size={12} /></span>
@@ -374,6 +381,19 @@ export const TabCard = memo(function TabCard({
           )}
         </div>
         <div className="tab-actions">
+          {onToggleMute && (
+            <button 
+              className={`tab-action-btn tab-mute ${tab.muted ? 'active' : ''}`}
+              title={tab.muted ? t('tabManager.tabCard.unmute') : t('tabManager.tabCard.mute')}
+              data-testid="tab-mute-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleMute(tab.id, !tab.muted);
+              }}
+            >
+              {tab.muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
+          )}
           {onEditTab && (
             <button 
               className="tab-rename" 

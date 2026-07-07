@@ -165,6 +165,9 @@ export interface Settings {
 
   // タブ操作設定
   returnFocusToTabManager: boolean;          // 管理画面から開いたタブを閉じた後に管理画面に戻るか
+
+  // ミュート設定
+  mutedDomains?: string[];                   // ミュート対象のドメイン
 }
 
 // デフォルト設定
@@ -214,6 +217,7 @@ const DEFAULT_SETTINGS: Settings = {
   screenshotUpdateIntervalMinutes: 5, // デフォルト5分
   trashRetentionDays: 7,             // デフォルト7日
   returnFocusToTabManager: false,     // デフォルトはオフ
+  mutedDomains: [],                   // デフォルトは空配列
 };
 
 const STORAGE_KEY = 'settings';

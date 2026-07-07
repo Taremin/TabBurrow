@@ -136,6 +136,7 @@ export async function createTestTabData(page: Page, tabData: {
   savedAt?: number; // 保存日時
   lastAccessed?: number; // 最終アクセス日時
   sortKey?: string; // 手動ソート用キー
+  muted?: boolean; // 復元時にミュートにするかどうか
 }): Promise<void> {
   // IndexedDBに直接テストデータを挿入
   await page.evaluate(async ({ data, dbConfig }) => {
@@ -242,6 +243,7 @@ export async function createTestTabData(page: Page, tabData: {
       savedAt: data.savedAt || Date.now(),
       canonicalUrl: data.url, // デフォルトはURLそのまま
       sortKey: data.sortKey, // sortKeyを追加
+      muted: data.muted || false, // ミュート設定を追加
     };
     
     // displayNameが指定されている場合のみ追加
@@ -424,6 +426,7 @@ export async function clearTestData(page: Page): Promise<void> {
 export async function createCustomGroupData(page: Page, groups: {
   name: string;
   sortOrder?: number;
+  muted?: boolean;
 }[]): Promise<void> {
   await page.evaluate(async ({ groups, dbConfig }) => {
     const { DB_NAME, DB_VERSION, CUSTOM_GROUPS_STORE_NAME } = dbConfig;
@@ -449,6 +452,7 @@ export async function createCustomGroupData(page: Page, groups: {
           createdAt: now - (groups.length - index) * 1000,
           updatedAt: now,
           sortOrder: group.sortOrder ?? index,
+          muted: group.muted || false,
         };
         store.add(groupData);
       });

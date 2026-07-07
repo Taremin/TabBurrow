@@ -50,6 +50,7 @@ export interface SavedTab {
   lastAccessed: number; // 最終アクセス日時（タブから取得）
   savedAt: number;      // 保存日時（タイムスタンプ）
   sortKey?: string;     // 手動ソート用のキー
+  muted?: boolean;      // 復元時にミュートにするかどうか
 }
 
 /**
@@ -63,6 +64,7 @@ export interface CustomGroupMeta {
   color?: string;     // グループ色（HEX形式、例: "#3b82f6"）
   itemSort?: string;  // グループ個別のアイテムソート順 (ItemSortType)
   customSortKeyOrder?: string; // カスタムソートキーの並び順 ('asc' | 'desc')
+  muted?: boolean;    // グループ内のタブを復元時にミュートにするかどうか
 }
 
 /**

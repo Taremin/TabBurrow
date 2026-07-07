@@ -62,6 +62,9 @@ interface TabListProps {
   // カスタムソートキーの並び順
   customSortKeyOrder: 'asc' | 'desc';
   onUpdateGroupCustomSortKeyOrder?: (groupName: string, groupType: 'domain' | 'custom', order: 'asc' | 'desc' | undefined) => void;
+  mutedDomains?: string[];
+  onToggleTabMute?: (id: string, muted: boolean) => void;
+  onToggleGroupMute?: (groupName: string, groupType: 'domain' | 'custom', muted: boolean) => void;
 }
 
 /**
@@ -203,6 +206,9 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
   onUpdateGroupItemSort,
   customSortKeyOrder,
   onUpdateGroupCustomSortKeyOrder,
+  mutedDomains = [],
+  onToggleTabMute,
+  onToggleGroupMute,
 }, ref) {
   const isCompact = displayDensity === 'compact';
   const virtuosoRef = useRef<GroupedVirtuosoHandle>(null);
@@ -328,6 +334,10 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
     const groupMeta = isCustomGroup ? customGroups.find(g => g.name === group.name) : undefined;
     const pinnedGroup = !isCustomGroup ? pinnedDomainGroups.find(p => p.domain === group.name) : undefined;
     
+    const isMuted = group.groupType === 'custom'
+      ? !!groupMeta?.muted
+      : !!mutedDomains.includes(group.name);
+
     return (
       <GroupHeader
         name={group.name}
@@ -359,9 +369,11 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         onItemSortChange={(sort) => onUpdateGroupItemSort?.(group.name, group.groupType, sort)}
         customSortKeyOrder={isCustomGroup ? (groupMeta?.customSortKeyOrder as 'asc' | 'desc') : pinnedGroup?.customSortKeyOrder}
         onCustomSortKeyOrderChange={(order) => onUpdateGroupCustomSortKeyOrder?.(group.name, group.groupType, order)}
+        isMuted={isMuted}
+        onToggleMute={onToggleGroupMute}
       />
     );
-  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort, onUpdateGroupCustomSortKeyOrder]);
+  }, [groups, customGroups, onDeleteGroup, onOpenGroup, onOpenGroupAsTabGroup, onRequestRename, groupFilters, onGroupFilterChange, isSelectionMode, selectedTabIds, onSelectGroup, onDeselectGroup, isCompact, collapsedGroups, onToggleCollapse, domainGroupAliases, pinnedDomainGroups, onTogglePin, onCustomGroupColorChange, onPinnedDomainGroupColorChange, onUpdateGroupItemSort, onUpdateGroupCustomSortKeyOrder, mutedDomains, onToggleGroupMute]);
 
   // 展開待ちのスクロールを処理
   useEffect(() => {
@@ -424,9 +436,10 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         onToggleSelection={onToggleSelection}
         isCompact={isCompact}
         onNavigateToGroup={handleNavigateToGroup}
+        onToggleMute={onToggleTabMute}
       />
     );
-  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onEditTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, handleNavigateToGroup]);
+  }, [flatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onEditTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, handleNavigateToGroup, onToggleTabMute]);
 
   // フラット表示用のソート済みタブリスト
   const sortedFlatTabs = useMemo(() => {
@@ -452,9 +465,10 @@ export const TabList = forwardRef<TabListHandle, TabListProps>(function TabList(
         isSelected={selectedTabIds.has(tab.id)}
         onToggleSelection={onToggleSelection}
         isCompact={isCompact}
+        onToggleMute={onToggleTabMute}
       />
     );
-  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onEditTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact]);
+  }, [sortedFlatTabs, customGroups, onDeleteTab, onOpenTab, onMiddleClickTab, onMoveToGroup, onRemoveFromGroup, onRequestMoveToNewGroup, onEditTab, isSelectionMode, selectedTabIds, onToggleSelection, isCompact, onToggleTabMute]);
 
   if (tabs.length === 0) {
     return null;

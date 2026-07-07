@@ -474,3 +474,33 @@ export async function updatePinnedDomainGroupCustomSortKeyOrder(domain: string, 
   await saveSettings({ pinnedDomainGroups: pinnedGroups });
   browser.runtime.sendMessage({ type: 'settings-changed' }).catch(() => {});
 }
+
+/**
+ * カスタムグループのミュート状態を更新
+ */
+export async function updateCustomGroupMuted(groupName: string, muted: boolean): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction(CUSTOM_GROUPS_STORE, 'readwrite');
+    const store = transaction.objectStore(CUSTOM_GROUPS_STORE);
+    const getRequest = store.get(groupName);
+
+    getRequest.onsuccess = () => {
+      const group = getRequest.result as CustomGroupMeta | undefined;
+      if (group) {
+        group.muted = muted;
+        group.updatedAt = Date.now();
+        store.put(group);
+      } else {
+        reject(new Error(`グループ "${groupName}" が見つかりません`));
+      }
+    };
+
+    transaction.oncomplete = () => {
+      browser.runtime.sendMessage({ type: 'custom-groups-changed' }).catch(() => {});
+      resolve();
+    };
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+

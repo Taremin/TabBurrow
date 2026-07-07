@@ -134,6 +134,7 @@ export function App() {
   const [pinnedDomainGroups, setPinnedDomainGroups] = useState<PinnedDomainGroup[]>([]);
   const [maximizeWidth, setMaximizeWidth] = useState(false);
   const [returnFocusToTabManager, setReturnFocusToTabManager] = useState(false);
+  const [mutedDomains, setMutedDomains] = useState<string[]>([]);
 
   const [groupFilters, setGroupFilters] = useState<GroupFilter>({});
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
@@ -164,6 +165,7 @@ export function App() {
       setPinnedDomainGroups(settings.pinnedDomainGroups || []);
       setMaximizeWidth(settings.maximizeWidth || false);
       setReturnFocusToTabManager(settings.returnFocusToTabManager || false);
+      setMutedDomains(settings.mutedDomains || []);
     } catch (error) {
       console.error('設定の読み込みに失敗:', error);
     }
@@ -308,28 +310,66 @@ export function App() {
     hideEditTabDialog();
   }, [editTabDialog.tabId, updateTabData, hideEditTabDialog]);
 
-  // Actions Wrapper
-  const handleOpenTab = useCallback(async (url: string) => {
-    const options: Tabs.CreateCreatePropertiesType = { url };
-    if (returnFocusToTabManager) {
-      const currentTab = await browser.tabs.getCurrent();
-      if (currentTab?.id) {
-        options.openerTabId = currentTab.id;
-      }
-    }
-    browser.tabs.create(options);
-  }, [returnFocusToTabManager]);
+  // ミュート状態を判定するヘルパー
+  const getTabMuteState = useCallback((tab: SavedTab): boolean => {
+    if (tab.muted) return true;
+    
+    // ドメイングループのミュート判定
+    if (mutedDomains.includes(tab.domain)) return true;
+    
+    // カスタムグループのミュート判定
+    const isCustomGroupMuted = tab.customGroups?.some(cgName => {
+      const cg = customGroups.find(g => g.name === cgName);
+      return cg?.muted;
+    });
+    if (isCustomGroupMuted) return true;
 
-  const handleMiddleClickTab = useCallback(async (url: string) => {
-    const options: browser.Tabs.CreateCreatePropertiesType = { url, active: false };
+    if (tab.groupType === 'custom') {
+      const cg = customGroups.find(g => g.name === tab.group);
+      if (cg?.muted) return true;
+    }
+    
+    return false;
+  }, [mutedDomains, customGroups]);
+
+  // Actions Wrapper
+  const handleOpenTab = useCallback(async (tab: SavedTab) => {
+    const isMuted = getTabMuteState(tab);
+    const options: Tabs.CreateCreatePropertiesType = { url: tab.url };
     if (returnFocusToTabManager) {
       const currentTab = await browser.tabs.getCurrent();
       if (currentTab?.id) {
         options.openerTabId = currentTab.id;
       }
     }
-    browser.tabs.create(options);
-  }, [returnFocusToTabManager]);
+    const newTab = await browser.tabs.create(options);
+    if (newTab?.id && isMuted) {
+      try {
+        await browser.tabs.update(newTab.id, { muted: true });
+      } catch (e) {
+        console.warn('ミュート適用失敗:', e);
+      }
+    }
+  }, [returnFocusToTabManager, getTabMuteState]);
+
+  const handleMiddleClickTab = useCallback(async (tab: SavedTab) => {
+    const isMuted = getTabMuteState(tab);
+    const options: browser.Tabs.CreateCreatePropertiesType = { url: tab.url, active: false };
+    if (returnFocusToTabManager) {
+      const currentTab = await browser.tabs.getCurrent();
+      if (currentTab?.id) {
+        options.openerTabId = currentTab.id;
+      }
+    }
+    const newTab = await browser.tabs.create(options);
+    if (newTab?.id && isMuted) {
+      try {
+        await browser.tabs.update(newTab.id, { muted: true });
+      } catch (e) {
+        console.warn('ミュート適用失敗:', e);
+      }
+    }
+  }, [returnFocusToTabManager, getTabMuteState]);
 
   const getGroupTabs = useCallback((groupName: string, groupType: 'domain' | 'custom') => {
     return filteredTabs.filter(t => {
@@ -371,11 +411,19 @@ export function App() {
     }
   }, [getGroupTabs, deleteDomainGroup, deleteCustomGroupByName, t, showConfirmDialog, hideConfirmDialog, refreshTrashCount]);
 
-  const openTabsWithRestoreMode = useCallback(async (urls: string[]) => {
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
+  const openTabsWithRestoreMode = useCallback(async (tabsToOpen: { url: string; muted: boolean }[]) => {
+    for (let i = 0; i < tabsToOpen.length; i++) {
+      const { url, muted } = tabsToOpen[i];
       const tab = await browser.tabs.create({ url, active: false });
       
+      if (tab.id && muted) {
+        try {
+          await browser.tabs.update(tab.id, { muted: true });
+        } catch (e) {
+          console.warn('ミュート適用失敗:', e);
+        }
+      }
+
       if (restoreMode === 'immediate' || restoreMode === 'lazy') {
         if (tab.id) {
           await waitForTabStatus(tab.id, restoreMode === 'immediate' ? 'loading' : 'complete');
@@ -387,7 +435,7 @@ export function App() {
         }
       }
       
-      if (restoreIntervalMs > 0 && i < urls.length - 1) {
+      if (restoreIntervalMs > 0 && i < tabsToOpen.length - 1) {
         await sleep(restoreIntervalMs);
       }
     }
@@ -404,9 +452,18 @@ export function App() {
     
     // 表示順と同じ順序でソートしてから開く
     const sortedTabs = sortTabsInGroup(groupTabs, effectiveItemSort, effectiveCustomSortKeyOrder);
-    const urls = sortedTabs.map(tab => tab.url);
-    await openTabsWithRestoreMode(urls);
-  }, [getGroupTabs, openTabsWithRestoreMode, customGroups, pinnedDomainGroups, itemSort, customSortKeyOrder]);
+    
+    // グループ自体のミュート設定
+    const isGroupMuted = groupType === 'custom'
+      ? !!customGroup?.muted
+      : !!mutedDomains.includes(groupName);
+
+    const tabsToOpen = sortedTabs.map(tab => ({
+      url: tab.url,
+      muted: isGroupMuted || !!tab.muted
+    }));
+    await openTabsWithRestoreMode(tabsToOpen);
+  }, [getGroupTabs, openTabsWithRestoreMode, customGroups, pinnedDomainGroups, itemSort, customSortKeyOrder, mutedDomains]);
 
   const handleOpenGroupAsTabGroup = useCallback(async (groupName: string, groupType: 'domain' | 'custom') => {
     const groupTabs_ = getGroupTabs(groupName, groupType);
@@ -423,9 +480,22 @@ export function App() {
     
     try {
       const tabIds: number[] = [];
+      const isGroupMuted = groupType === 'custom'
+        ? !!customGroup?.muted
+        : !!mutedDomains.includes(groupName);
+
       for (const tab of sortedTabs) {
         const newTab = await browser.tabs.create({ url: tab.url, active: false });
-        if (newTab.id) tabIds.push(newTab.id);
+        if (newTab.id) {
+          tabIds.push(newTab.id);
+          if (isGroupMuted || !!tab.muted) {
+            try {
+              await browser.tabs.update(newTab.id, { muted: true });
+            } catch (e) {
+              console.warn('ミュート適用失敗:', e);
+            }
+          }
+        }
       }
       
       if (tabIds.length > 0) {
@@ -435,7 +505,7 @@ export function App() {
     } catch (error) {
       console.error('タブグループの作成に失敗:', error);
     }
-  }, [getGroupTabs, customGroups, pinnedDomainGroups, itemSort, customSortKeyOrder]);
+  }, [getGroupTabs, customGroups, pinnedDomainGroups, itemSort, customSortKeyOrder, mutedDomains]);
 
   const handleBulkOpenAsTabGroup = useCallback(async () => {
     if (selectedTabIds.size === 0) return;
@@ -447,7 +517,16 @@ export function App() {
       const tabIds: number[] = [];
       for (const tab of sortedTabs) {
         const newTab = await browser.tabs.create({ url: tab.url, active: false });
-        if (newTab.id) tabIds.push(newTab.id);
+        if (newTab.id) {
+          tabIds.push(newTab.id);
+          if (getTabMuteState(tab)) {
+            try {
+              await browser.tabs.update(newTab.id, { muted: true });
+            } catch (e) {
+              console.warn('ミュート適用失敗:', e);
+            }
+          }
+        }
       }
       
       if (tabIds.length > 0) {
@@ -456,11 +535,54 @@ export function App() {
       }
       
       setSelectedTabIds(new Set());
-      // setIsSelectionMode(false); (Hook logic handles selection state)
     } catch (error) {
       console.error('タブグループの作成に失敗:', error);
     }
-  }, [selectedTabIds, filteredTabs, setSelectedTabIds, itemSort, customSortKeyOrder]);
+  }, [selectedTabIds, filteredTabs, setSelectedTabIds, itemSort, customSortKeyOrder, getTabMuteState]);
+
+  // タブ個別のミュートトグル
+  const handleToggleTabMute = useCallback(async (tabId: string, muted: boolean) => {
+    await updateTabData(tabId, { muted });
+  }, [updateTabData]);
+
+  // カスタムグループのミュートトグル
+  const handleToggleCustomGroupMute = useCallback(async (groupName: string, muted: boolean) => {
+    const { updateCustomGroupMuted } = await import('../storage');
+    try {
+      await updateCustomGroupMuted(groupName, muted);
+      await loadTabs();
+    } catch (error) {
+      console.error('カスタムグループのミュート設定更新に失敗:', error);
+    }
+  }, [loadTabs]);
+
+  // ドメイングループのミュートトグル
+  const handleToggleDomainGroupMute = useCallback(async (domain: string, muted: boolean) => {
+    const currentMuted = mutedDomains;
+    let updated: string[];
+    if (muted) {
+      updated = [...new Set([...currentMuted, domain])];
+    } else {
+      updated = currentMuted.filter(d => d !== domain);
+    }
+    setMutedDomains(updated);
+    try {
+      const settings = await getSettings();
+      await saveSettings({ ...settings, mutedDomains: updated });
+      notifySettingsChanged();
+    } catch (error) {
+      console.error('ドメイングループのミュート設定の保存に失敗:', error);
+    }
+  }, [mutedDomains]);
+
+  // グループのミュートトグル一括ハンドラ
+  const handleToggleGroupMute = useCallback(async (groupName: string, groupType: 'domain' | 'custom', muted: boolean) => {
+    if (groupType === 'custom') {
+      await handleToggleCustomGroupMute(groupName, muted);
+    } else {
+      await handleToggleDomainGroupMute(groupName, muted);
+    }
+  }, [handleToggleCustomGroupMute, handleToggleDomainGroupMute]);
 
   // Rename Logic
   const handleRequestRename = useCallback((currentName: string, groupType: 'domain' | 'custom') => {
@@ -632,8 +754,11 @@ export function App() {
       onConfirm: async () => {
         // グローバルソート設定でソートしてから開く
         const sortedTabs = sortTabsInGroup(filteredTabs, itemSort, customSortKeyOrder);
-        const urls = sortedTabs.map(tab => tab.url);
-        await openTabsWithRestoreMode(urls);
+        const tabsToOpen = sortedTabs.map(tab => ({
+          url: tab.url,
+          muted: getTabMuteState(tab)
+        }));
+        await openTabsWithRestoreMode(tabsToOpen);
         hideConfirmDialog();
       },
     });
@@ -759,6 +884,9 @@ export function App() {
             onUpdateGroupItemSort={handleUpdateGroupItemSort}
             customSortKeyOrder={customSortKeyOrder}
             onUpdateGroupCustomSortKeyOrder={handleUpdateGroupCustomSortKeyOrder}
+            mutedDomains={mutedDomains}
+            onToggleTabMute={handleToggleTabMute}
+            onToggleGroupMute={handleToggleGroupMute}
           />
         )}
 

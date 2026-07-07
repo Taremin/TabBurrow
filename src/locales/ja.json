@@ -370,7 +370,10 @@
             "deleteMenuLabel": "アクションメニュー",
             "removeFromGroup": "グループから外す",
             "deleteTab": "タブを削除",
-            "setCustomSortKey": "カスタムソートキーを設定"
+            "setCustomSortKey": "カスタムソートキーを設定",
+            "mute": "復元時にミュートで開く",
+            "unmute": "復元時のミュートを解除",
+            "mutedStatus": "このタブは復元時にミュートで開かれます"
         },
         "group": {
             "openButton": "グループを開く",
@@ -380,6 +383,11 @@
             "expandButton": "展開する",
             "pinButton": "ピン留め",
             "unpinButton": "ピン留め解除"
+        },
+        "groupHeader": {
+            "mute": "このグループを復元時にミュートで開く",
+            "unmute": "このグループの復元時ミュートを解除",
+            "mutedStatus": "このグループのタブは復元時にミュートで開かれます"
         },
         "confirmDialog": {
             "deleteGroupTitle": "グループを削除",

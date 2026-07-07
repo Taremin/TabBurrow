@@ -6,7 +6,7 @@
 import { memo, useCallback, useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from '../common/i18nContext';
-import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin, SortAsc, Check, ExternalLink, Layers, Trash2 } from 'lucide-react';
+import { Bookmark, Folder, Search, AlertTriangle, Pencil, ChevronDown, Pin, SortAsc, Check, ExternalLink, Layers, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { ColorPicker } from '../common/ColorPicker';
 import { useClickOutside } from '../common/hooks/useClickOutside';
 import type { ItemSortType, CustomSortKeyOrder } from './types';
@@ -20,6 +20,8 @@ interface GroupHeaderProps {
   onOpenGroupAsTabGroup?: (name: string, groupType: 'domain' | 'custom') => void;
   // リネームリクエスト（親でPromptDialogを表示）
   onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
+  isMuted?: boolean;
+  onToggleMute?: (name: string, groupType: 'domain' | 'custom', muted: boolean) => void;
   // グループ内フィルタ
   filterPattern?: string;
   onFilterChange?: (pattern: string) => void;
@@ -80,6 +82,8 @@ export const GroupHeader = memo(function GroupHeader({
   onItemSortChange,
   customSortKeyOrder,
   onCustomSortKeyOrderChange,
+  isMuted = false,
+  onToggleMute,
 }: GroupHeaderProps) {
   const { t } = useTranslation();
   const [showFilter, setShowFilter] = useState(false);
@@ -269,6 +273,11 @@ export const GroupHeader = memo(function GroupHeader({
           <span className="group-original-domain">{name}</span>
         )}
         <span className="group-count">({tabCount})</span>
+        {isMuted && (
+          <span className="group-mute-indicator" title={t('tabManager.groupHeader.mutedStatus')} style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '6px', color: 'var(--danger-color)' }} data-testid="group-mute-indicator">
+            <VolumeX size={14} />
+          </span>
+        )}
       </div>
       <div className="group-actions">
         {/* ピン留めボタン（ドメイングループのみ、左端に配置） */}
@@ -408,6 +417,19 @@ export const GroupHeader = memo(function GroupHeader({
             data-testid="group-rename-button"
           >
             <Pencil size={16} />
+          </button>
+        )}
+        {onToggleMute && (
+          <button 
+            className={`group-header-btn group-mute ${isMuted ? 'active' : ''}`}
+            title={isMuted ? t('tabManager.groupHeader.unmute') : t('tabManager.groupHeader.mute')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleMute(name, groupType, !isMuted);
+            }}
+            data-testid="group-mute-button"
+          >
+            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
         )}
         {/* 垂直セパレータ */}
