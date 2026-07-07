@@ -31,11 +31,12 @@ export const NormalizationResultDialog = memo(function NormalizationResultDialog
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
+      dataTestId="result-dialog"
       title={t('settings.urlNormalization.resultDialog.title')}
       icon={<CheckCircle className="alert-icon-success" />}
       width="560px"
       actions={
-        <button type="button" className="btn btn-primary" onClick={onClose}>
+        <button type="button" className="btn btn-primary" onClick={onClose} data-testid="result-dialog-close-button">
           {t('common.close')}
         </button>
       }

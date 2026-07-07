@@ -82,6 +82,7 @@ export function CreateNormalizationRuleDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
+      dataTestId="create-rule-dialog"
       title={t('tabManager.selection.createNormalizationRule')}
       icon={<NormalizationRuleIcon />}
       width="480px"
@@ -95,6 +96,7 @@ export function CreateNormalizationRuleDialog({
             className="btn btn-primary"
             onClick={handleSave}
             disabled={!name || !pattern}
+            data-testid="save-normalization-rule-button"
           >
             {t('common.save')}
           </button>

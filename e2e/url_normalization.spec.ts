@@ -44,7 +44,7 @@ test.describe('URL正規化機能', () => {
     await createRuleButton.click();
     
     // ダイアログが表示されることを確認
-    const dialog = page.locator('.dialog');
+    const dialog = page.getByTestId('create-rule-dialog');
     await expect(dialog).toBeVisible();
     await expect(dialog).toContainText(/Normalization/i);
     
@@ -55,17 +55,15 @@ test.describe('URL正規化機能', () => {
     expect(patternValue).toContain('\\d+');
     
     // 保存ボタンをクリック（「既存データに適用」はデフォルトでチェックされている想定）
-    const saveButton = page.locator('.dialog button.btn-primary');
+    const saveButton = page.getByTestId('save-normalization-rule-button');
     await saveButton.click();
     
     // 適用結果ダイアログが表示されるのを待つ (NormalizationResultDialog)
-    // タイトルで特定する ('settings.urlNormalization.resultDialog.title' の翻訳が "URL正規化の結果" などの場合)
-    // 確実なのは .dialog セレクターと内容を確認すること
-    const resultDialog = page.locator('.dialog');
+    const resultDialog = page.getByTestId('result-dialog');
     await expect(resultDialog).toBeVisible();
     
-    // 閉じるボタン（.btn-primary）をクリックしてダイアログを閉じる
-    await resultDialog.locator('button.btn-primary').click();
+    // 閉じるボタンをクリックしてダイアログを閉じる
+    await resultDialog.getByTestId('result-dialog-close-button').click();
     await expect(resultDialog).not.toBeVisible();
     
     // タブが1つに統合されたことを確認

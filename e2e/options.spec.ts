@@ -208,6 +208,7 @@ test.describe('設定画面', () => {
     await leaveButton.click();
     
     // タブ管理画面に遷移することを確認
+    await page.waitForURL('**/tabs.html');
     await waitForPageLoad(page);
     expect(page.url()).toContain('tabs.html');
   });
@@ -241,6 +242,7 @@ test.describe('設定画面', () => {
     await saveButton.click();
     
     // タブ管理画面に遷移することを確認
+    await page.waitForURL('**/tabs.html');
     await waitForPageLoad(page);
     expect(page.url()).toContain('tabs.html');
   });

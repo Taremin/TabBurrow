@@ -14,6 +14,7 @@ interface DialogProps {
   children: ReactNode;
   actions?: ReactNode;
   width?: string | number;
+  dataTestId?: string;
 }
 
 export const Dialog = memo(function Dialog({
@@ -24,10 +25,11 @@ export const Dialog = memo(function Dialog({
   children,
   actions,
   width,
+  dataTestId,
 }: DialogProps) {
   return (
     <DialogOverlay isOpen={isOpen} onClose={onClose}>
-      <div className="dialog" style={width ? { maxWidth: width, width: '90%' } : undefined}>
+      <div className="dialog" data-testid={dataTestId} style={width ? { maxWidth: width, width: '90%' } : undefined}>
         {(title || icon) && (
           <div className="dialog-header">
             {icon && <span className="dialog-icon">{icon}</span>}

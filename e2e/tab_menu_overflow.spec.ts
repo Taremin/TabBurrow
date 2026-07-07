@@ -20,10 +20,14 @@ test.describe('Tab Menu Overflow', () => {
     
     // 最下部のタブまで移動
     await lastTab.scrollIntoViewIfNeeded();
+    
+    // ホバーして操作ボタンを表示させる
+    await lastTab.hover();
 
-    // 「カスタムグループに移動」ボタンをクリック
+    // 「カスタムグループに移動」ボタンをクリック（ホバー外れによるフリッカーを防ぐため直接クリック）
     const groupButton = lastTab.locator(tabsPageSelectors.tabGroupButton);
-    await groupButton.click();
+    await expect(groupButton).toBeVisible();
+    await groupButton.evaluate(el => (el as HTMLButtonElement).click());
 
     // メニュー位置とビューポート、ボタン位置を取得
     const menu = page.locator('.group-menu-portal');

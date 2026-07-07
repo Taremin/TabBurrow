@@ -20,13 +20,15 @@ test.describe('Tab Sorting', () => {
     const tabs = page.locator(selectors.tabCard);
     
     // Hover to reveal buttons
-    await tabs.nth(0).hover();
-    await tabs.nth(0).locator('[data-testid="tab-edit-button"]').click();
+    const betaTab = tabs.filter({ hasText: 'Beta Tab' });
+    await betaTab.hover();
+    await betaTab.locator('[data-testid="tab-edit-button"]').click();
     await page.fill('[data-testid="edit-tab-sort-key"]', 'Z');
     await page.click('[data-testid="confirm-edit-tab"]');
 
-    await tabs.nth(1).hover();
-    await tabs.nth(1).locator('[data-testid="tab-edit-button"]').click();
+    const alphaTab = tabs.filter({ hasText: 'Alpha Tab' });
+    await alphaTab.hover();
+    await alphaTab.locator('[data-testid="tab-edit-button"]').click();
     await page.fill('[data-testid="edit-tab-sort-key"]', 'A');
     await page.click('[data-testid="confirm-edit-tab"]');
 

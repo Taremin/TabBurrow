@@ -3,10 +3,13 @@
  */
 import { test, expect, getExtensionUrl } from './fixtures';
 import { waitForPageLoad, createCustomGroupData, clearTestData, optionsPageSelectors } from './helpers';
+import type { Page } from '@playwright/test';
 
 test.describe('カラーピッカー', () => {
+  let page: Page;
+
   test.beforeEach(async ({ context, extensionId }) => {
-    const page = await context.newPage();
+    page = await context.newPage();
     await page.goto(getExtensionUrl(extensionId, 'options.html'));
     await waitForPageLoad(page);
     await clearTestData(page);
@@ -17,14 +20,15 @@ test.describe('カラーピッカー', () => {
     ]);
     await page.reload();
     await waitForPageLoad(page);
-    await page.close();
   });
 
-  test('カラーピッカーが表示される', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test.afterEach(async () => {
+    if (page) {
+      await page.close();
+    }
+  });
+
+  test('カラーピッカーが表示される', async () => {
     // カスタムグループセクションを探す
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
@@ -43,11 +47,7 @@ test.describe('カラーピッカー', () => {
     await expect(presetColors).toHaveCount(10); // 9色 + 色なし
   });
 
-  test('プリセットカラーを選択できる', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test('プリセットカラーを選択できる', async () => {
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
@@ -65,11 +65,7 @@ test.describe('カラーピッカー', () => {
     await expect(colorPreview).toBeVisible();
   });
 
-  test('カスタム色を選択できる', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test('カスタム色を選択できる', async () => {
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
@@ -92,11 +88,7 @@ test.describe('カラーピッカー', () => {
     await expect(hexInput).toBeVisible();
   });
 
-  test('HEX入力欄でテキスト選択のためのドラッグが可能', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test('HEX入力欄でテキスト選択のためのドラッグが可能', async () => {
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     // スクロールしてカスタムグループセクションを表示
@@ -139,11 +131,7 @@ test.describe('カラーピッカー', () => {
     await expect(popover).toBeVisible();
   });
 
-  test('HEX入力で色が変更される', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test('HEX入力で色が変更される', async () => {
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
@@ -165,11 +153,7 @@ test.describe('カラーピッカー', () => {
     await expect(hexInput).toHaveValue('00ff00');
   });
 
-  test('色なしを選択できる', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test('色なしを選択できる', async () => {
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
@@ -191,11 +175,7 @@ test.describe('カラーピッカー', () => {
     await expect(colorPickerTrigger.locator('.color-preview')).not.toBeVisible();
   });
 
-  test('外部クリックでポップオーバーが閉じる', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-    await page.goto(getExtensionUrl(extensionId, 'options.html'));
-    await waitForPageLoad(page);
-    
+  test('外部クリックでポップオーバーが閉じる', async () => {
     const customGroupSection = page.locator(optionsPageSelectors.customGroupsSection);
     
     const colorPickerTrigger = customGroupSection.locator('.color-picker-trigger').first();
@@ -205,7 +185,7 @@ test.describe('カラーピッカー', () => {
     await expect(page.locator('.color-picker-popover')).toBeVisible();
     
     // 外部をクリック
-    await page.locator('body').click({ position: { x: 10, y: 10 } });
+    await page.locator(optionsPageSelectors.header).click();
     
     // ポップオーバーが閉じる
     await expect(page.locator('.color-picker-popover')).not.toBeVisible();

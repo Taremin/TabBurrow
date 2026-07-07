@@ -260,8 +260,14 @@ export async function createTestTabData(page: Page, tabData: {
       const transaction = db.transaction([TABS_STORE_NAME], 'readwrite');
       const store = transaction.objectStore(TABS_STORE_NAME);
       store.add(tab);
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
+      transaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      transaction.onerror = () => {
+        db.close();
+        reject(transaction.error);
+      };
     });
   }, { 
     data: tabData, 
@@ -361,8 +367,14 @@ export async function createBulkTestTabData(page: Page, count: number, options: 
         store.add(tab);
       }
       
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
+      transaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      transaction.onerror = () => {
+        db.close();
+        reject(transaction.error);
+      };
     });
   }, { 
     count, 
@@ -457,8 +469,14 @@ export async function createCustomGroupData(page: Page, groups: {
         store.add(groupData);
       });
       
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
+      transaction.oncomplete = () => {
+        db.close();
+        resolve();
+      };
+      transaction.onerror = () => {
+        db.close();
+        reject(transaction.error);
+      };
     });
   }, { 
     groups, 
