@@ -61,7 +61,6 @@ describe('tabEvents', () => {
 
       // タブがアクティブになったイベントを発火 (ID: 20 がアクティブになった)
       // ※ currentActiveTabId が null のため、前のタブ(10)は更新されない
-      // @ts-ignore
       await handleTabActivated({ tabId: nextTabId, windowId: 1 });
 
       // 以前アクティブだったタブ(10)の時刻が更新されていない（1000のまま）ことを検証
@@ -83,7 +82,6 @@ describe('tabEvents', () => {
       await initializeActiveTabId(); 
 
       // タブがアクティブになったイベントを発火 (ID: 20 がアクティブになった)
-      // @ts-ignore
       await handleTabActivated({ tabId: nextTabId, windowId: 1 });
 
       // 以前アクティブだったタブ(10)の時刻が現在時刻（1000より大きい）に更新されていることを検証

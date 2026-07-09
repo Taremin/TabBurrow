@@ -762,7 +762,7 @@ export function App() {
         hideConfirmDialog();
       },
     });
-  }, [filteredTabs, openTabsWithRestoreMode, t, showConfirmDialog, hideConfirmDialog, itemSort, customSortKeyOrder]);
+  }, [filteredTabs, openTabsWithRestoreMode, t, showConfirmDialog, hideConfirmDialog, itemSort, customSortKeyOrder, getTabMuteState]);
 
   const handleDeleteAllConfirm = useCallback(() => {
     showConfirmDialog({

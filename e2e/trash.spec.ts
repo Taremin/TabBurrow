@@ -199,11 +199,12 @@ test.describe('ゴミ箱機能', () => {
     
     // 3つのタブを削除
     for (let i = 0; i < 3; i++) {
+      const initialCount = await page.locator('[data-testid="tab-card"]').count();
       const tabCard = page.locator('[data-testid="tab-card"]').first();
       await tabCard.hover();
       await tabCard.locator('[data-testid="tab-delete-button"]').click();
-      // 少し待機
-      await page.waitForTimeout(200);
+      // タブ数が1つ減るまで待機
+      await expect(page.locator('[data-testid="tab-card"]')).toHaveCount(initialCount - 1);
     }
     
     // バッジに「3」と表示されることを確認

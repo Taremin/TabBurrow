@@ -1,5 +1,5 @@
 import { test, expect, getExtensionUrl } from './fixtures';
-import { waitForPageLoad, createTestTabData, clearTestData } from './helpers';
+import { waitForPageLoad, createTestTabData } from './helpers';
 
 test.describe('Mute on Restore Tests', () => {
 
@@ -47,7 +47,7 @@ test.describe('Mute on Restore Tests', () => {
     await newPage.waitForLoadState();
 
     // 8. 新しいページのミュート状態をチェック
-    const muted = await page.evaluate(async (targetUrl) => {
+    const muted = await page.evaluate(async (targetUrl: string) => {
       // chrome.tabs API を利用してタブ情報を取得
       const tabs = await chrome.tabs.query({ url: targetUrl });
       return tabs.length > 0 ? tabs[0].mutedInfo?.muted : null;
@@ -70,14 +70,14 @@ test.describe('Mute on Restore Tests', () => {
     const newPage2 = await pagePromise2;
     await newPage2.waitForLoadState();
 
-    const muted2 = await page.evaluate(async (targetUrl) => {
+    const muted2 = await page.evaluate(async (targetUrl: string) => {
       const tabs = await chrome.tabs.query({ url: targetUrl });
       return tabs.length > 0 ? tabs[0].mutedInfo?.muted : null;
     }, url);
     expect(muted2).toBe(false);
   });
 
-  test('グループ（ドメイン）をミュートに設定し、開いたときにミュートになること', async ({ context, extensionId, page }) => {
+  test('グループ（ドメイン）をミュートに設定し、開いたときにミュートになること', async ({ extensionId, page }) => {
     await page.goto(getExtensionUrl(extensionId, 'tabs.html'));
     await waitForPageLoad(page);
 
@@ -89,7 +89,7 @@ test.describe('Mute on Restore Tests', () => {
     // restoreModeを'normal'に設定して、Playwrightとdiscardの競合を防ぐ
     await page.evaluate(async () => {
       const result = await chrome.storage.local.get('settings');
-      const settings = result.settings || {};
+      const settings = (result.settings || {}) as import('../src/settings').Settings;
       settings.restoreMode = 'normal';
       await chrome.storage.local.set({ settings });
     });
@@ -125,7 +125,7 @@ test.describe('Mute on Restore Tests', () => {
       return tabs.map(t => ({ url: t.url, muted: t.mutedInfo?.muted }));
     });
 
-    const targetTabs = mutedStates.filter(t => t.url && t.url.includes('domain-mute-test.com'));
+    const targetTabs = mutedStates.filter((t: { url?: string; muted?: boolean }) => t.url && t.url.includes('domain-mute-test.com'));
     expect(targetTabs.length).toBe(2);
     expect(targetTabs[0].muted).toBe(true);
     expect(targetTabs[1].muted).toBe(true);

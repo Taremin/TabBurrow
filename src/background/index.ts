@@ -311,9 +311,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
       }
       return restoreFromBackup(message.backupId, message.mode)
         .then(result => {
-          if (result.success) {
-            updateSavedTabUrlsCache();
-          }
+          updateSavedTabUrlsCache();
           return { success: true, ...result };
         });
 

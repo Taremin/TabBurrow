@@ -28,8 +28,8 @@ interface TabListProps {
   onDeleteGroup: (groupName: string, groupType: 'domain' | 'custom') => void;
   onOpenGroup: (groupName: string, groupType: 'domain' | 'custom') => void;
   onOpenGroupAsTabGroup?: (groupName: string, groupType: 'domain' | 'custom') => void;
-  onOpenTab: (url: string) => void;
-  onMiddleClickTab?: (url: string) => void; // ホイールクリックでタブを開く
+  onOpenTab: (tab: SavedTab) => void;
+  onMiddleClickTab?: (tab: SavedTab) => void; // ホイールクリックでタブを開く
   onRenameGroup?: (oldName: string, newName: string) => void;
   onRequestRename?: (currentName: string, groupType: 'domain' | 'custom') => void;
   domainGroupAliases?: Record<string, string>;

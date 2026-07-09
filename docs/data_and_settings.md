@@ -2,7 +2,7 @@
 
 ## IndexedDB (`storage.ts`, `dbSchema.ts`)
 
-`TabBurrowDB` (Version 7) を使用。
+`TabBurrowDB` (Version 8) を使用。
 
 ### `tabs` ストア
 保存されたタブのメインデータ。
@@ -18,6 +18,7 @@
 *   **lastAccessed**: 最終アクセス日時（タブから取得）
 *   **savedAt**: 保存日時 (timestamp)
 *   **customGroups**: 所属するカスタムグループ名の配列 (`string[]`, Version 4で追加)
+*   **muted**: 復元時にミュートにするかどうか (`boolean`, Version 8で追加)
 
 ### `customGroups` ストア
 ユーザー定義のカスタムグループ情報。
@@ -26,6 +27,7 @@
 *   **updatedAt**: 更新日時
 *   **sortOrder**: 表示順序（昇順で表示、Version 5で追加）
 *   **color**: グループ色（HEX形式、例: "#3b82f6"、オプショナル）
+*   **muted**: グループ内のタブを復元時にミュートにするかどうか (`boolean`, Version 8で追加)
 
 ### `backups` ストア (Version 3で追加)
 自動バックアップデータ。
@@ -96,6 +98,9 @@
 *   **autoBackupIntervalPreset**: プリセット選択 (`'off' | '1h' | '6h' | '12h' | '24h' | 'custom'`)
 *   **autoBackupIntervalMinutes**: カスタム間隔（分）
 *   **autoBackupKeepCount**: 保持する世代数
+
+#### ミュート設定
+*   **mutedDomains**: 復元時に自動的にミュート状態（消音）にするドメインのリスト (`string[]`, Version 8で追加)
 
 ## 設定の同期
 *   UI (`options/` や `tabs/App.tsx`) で設定を変更すると `saveSettings()` で保存し、`notifySettingsChanged()` でメッセージを送信。
